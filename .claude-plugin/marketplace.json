@@ -11,7 +11,7 @@
       "name": "tech-stack",
       "source": "./tech-stack",
       "description": "透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/tech-stack.md",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "productivity"
     }
   ]

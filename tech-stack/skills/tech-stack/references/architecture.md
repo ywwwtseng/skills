@@ -6,10 +6,10 @@
 
 | 選項 | description |
 |---|---|
-| 讓 skill 推薦 | 依平台數、語言、團隊規模決定 |
+| 讓 skill 推薦 | 依平台數、語言、規模決定 |
 | Monorepo | 前後端、App、共用套件同一 repo，統一工具鏈與版本 |
 | 單一應用 | 一個全端框架一個 repo（如 Next.js 全包），最少設定 |
-| Polyrepo | 前後端分開 repo，各自 CI/CD 與部署，團隊邊界清楚 |
+| Polyrepo | 前後端分開 repo，各自 CI/CD 與部署、獨立版本 |
 
 ## Repo 結構：情境 → 推薦
 
@@ -20,9 +20,9 @@
 | 前後端不同語言（如 Next.js + FastAPI） | Monorepo（pnpm workspace + uv workspace，Turborepo 只管 TS 部分） | Polyrepo | — |
 | 純 Go 後端 + 獨立前端 | Monorepo（Go workspace + pnpm workspace） | Polyrepo | — |
 | Rust 後端 + TS 前端 | Monorepo（cargo workspace + pnpm workspace，Turborepo 只管 TS） | Polyrepo | — |
-| 多團隊、各自 release 節奏 | Polyrepo | Monorepo + CODEOWNERS | — |
+| 各服務需各自 release 節奏 | Polyrepo | Monorepo + CODEOWNERS | — |
 | 純 API 無 UI | 單一 repo | — | Monorepo（過度設計） |
-| 大型・企業級治理 + 5 人以上 | Monorepo（Nx，需 affected graph） | Turborepo | Polyrepo 散落 |
+| 大型・企業級治理 | Monorepo（Nx，需 affected graph） | Turborepo | Polyrepo 散落 |
 
 ## Monorepo 工具選擇
 
@@ -59,9 +59,9 @@
 | 個人・小型 / 團隊・內部 | 單體 | 一個部署單元，最低維運 |
 | 中型商業應用 | 模組化單體 | 單一部署，但程式碼依 domain 分模組；背景任務拆成 worker |
 | 大型 + 高流量 | 模組化單體 + 獨立 worker / 讀寫分離 | 先水平擴展單體，不急著微服務 |
-| 大型 + 企業級治理 或 超大規模 | 微服務或依 domain 拆分 | 需要有 infra 團隊；文件中標注前提 |
+| 大型 + 企業級治理 或 超大規模 | 微服務或依 domain 拆分 | 維運複雜度高；文件中標注拆分前提 |
 
-原則：**預設模組化單體**，只有多團隊各自部署或超大規模才推微服務，並在文件中寫明拆分的前提條件。
+原則：**預設模組化單體**（AI agent 在單一 codebase 內最容易掌握全貌與跨模組修改），只有各服務需獨立部署或超大規模才推微服務，並在文件中寫明拆分的前提條件。
 
 ## 額外判斷
 

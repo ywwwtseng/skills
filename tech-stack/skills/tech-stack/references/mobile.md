@@ -14,20 +14,19 @@
 
 | 情境 | 首選 | 替代 | 避免 |
 |---|---|---|---|
-| Web + App、團隊熟 TypeScript / React | Expo | Capacitor（若 App 只是 Web 的延伸） | Flutter（兩套技術棧） |
-| 只做 App、iOS + Android、小團隊 | Expo | Flutter | 原生雙寫 |
+| Web + App（Web 用 React） | Expo | Capacitor（若 App 只是 Web 的延伸） | Flutter（兩套技術棧） |
+| 只做 App、iOS + Android、無特殊 UI 需求 | Expo | Flutter | 原生雙寫 |
 | 只做 App、UI 高度客製 / 動畫重 | Flutter | Expo + Reanimated | Capacitor |
 | 只做單一平台（如只有 iOS） | SwiftUI 原生 | Expo | Flutter |
-| 需要深度原生功能 + 團隊 ≥ 2 人且有 Swift / Kotlin 能力 | 原生雙寫 | Expo + custom native module | Capacitor / PWA |
-| 需要深度原生功能 + 1 人 或 純 TS 團隊 | Expo + Expo Modules API（custom native module） | — | 原生雙寫（維護量超出） |
+| 需要深度原生功能 | Expo + Expo Modules API（custom native module） | 原生雙寫（原生功能是產品核心、或指定 Swift / Kotlin 時） | Capacitor / PWA |
 | 已有 Web app、想最快上架 | Capacitor | Expo 重寫 | — |
 | 不需上架、內部工具 | PWA | Capacitor | 任何原生方案 |
 | 需要離線 | Expo + SQLite（expo-sqlite）或 WatermelonDB | Flutter + Drift | 純 PWA（iOS 儲存限制） |
-| 1 人 side project | Expo | — | 原生雙寫 |
+| 個人・小型 | Expo | — | 原生雙寫 |
 
 ## 額外判斷
 
-- **優先順序**：團隊規模與語言限制 > 原生功能需求。1 人或純 TS 團隊一律 Expo，原生功能需求轉為「風險」與「未決事項」（逐一查 Expo SDK 是否已有 module）。
+- **優先順序**：語言限制 > 單一 codebase > 原生功能需求。無語言限制或含 TS 時一律 Expo（一套程式碼、與 Web 共用型別，維護面最小），原生功能需求轉為「風險」與「未決事項」（逐一查 Expo SDK 是否已有 module）；原生雙寫只在原生功能是產品核心時推薦，並標注兩套 codebase 的同步成本。
 
 - **與 Web 共用**：選 Expo 且 Web 用 React 時，建議 monorepo（Turborepo / pnpm workspace），共用 `packages/api-client`、`packages/types`、`packages/validation`；UI 層不強求共用。
 - **推播**：Expo → Expo Push（底層 FCM / APNs）；Flutter / 原生 → Firebase Cloud Messaging；backend 只需一個 push 發送端點。

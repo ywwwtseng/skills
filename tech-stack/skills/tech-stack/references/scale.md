@@ -39,6 +39,5 @@
 | 衝突 | 原則 |
 |---|---|
 | 規模 ≥ 中型 但預算極低 | 以免費層 managed 服務起步（Supabase / Neon / Upstash / Cloudflare），但只選有明確付費升級路徑者；不選 SQLite 等日後需搬遷的方案。文件「需求回顧」寫明「規模目標為 X，預算限制下先以免費層起步」，「Infra」段列預估月費與升級時機 |
-| 規模 ≥ 中型 但團隊 1 人 | 監控、備份、CI/CD、staging 仍列為必須，但選平台內建或零維運方案（Sentry、平台自動備份、GitHub Actions）；不推需要專人維運的東西（K8s、自架 observability） |
-| 團隊 1 人 但需要原生雙寫 / 微服務 | 排除，改用單一技術棧方案並在「風險」標注功能受限 |
+| 規模 ≥ 中型 但未指定自架 | 監控、備份、CI/CD、staging 仍列為必須，優先平台內建或零維運方案（Sentry、平台自動備份、GitHub Actions）；只有規模檔位明確要求時才推需要持續維運的元件（K8s、自架 observability） |
 | 規模「大型」但無雲偏好 | 預設 AWS 或 GCP（依分析需求：有 BigQuery 需求 → GCP），不推 PaaS |
