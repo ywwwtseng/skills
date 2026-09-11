@@ -1,0 +1,18 @@
+{
+  "name": "skills",
+  "owner": {
+    "name": "ywwwtseng"
+  },
+  "metadata": {
+    "description": "ywwwtseng's personal Claude Code plugins: reusable skills for project setup and decision-making."
+  },
+  "plugins": [
+    {
+      "name": "tech-stack",
+      "source": "./tech-stack",
+      "description": "透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/tech-stack.md",
+      "version": "0.1.0",
+      "category": "productivity"
+    }
+  ]
+}
