@@ -1,0 +1,13 @@
+{
+  "name": "commit",
+  "description": "檢視變更、只 stage 屬於同一邏輯變更的檔案，建立一個 Conventional Commit 格式的 commit，不推送",
+  "version": "0.1.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "conventional-commits"
+  ]
+}

@@ -4,7 +4,7 @@
     "name": "ywwwtseng"
   },
   "metadata": {
-    "description": "ywwwtseng's personal Claude Code plugins: reusable skills for project setup, decision-making, and UI styling."
+    "description": "ywwwtseng's personal Claude Code plugins: reusable skills for project setup, decision-making, UI styling, and git workflow."
   },
   "plugins": [
     {
@@ -20,6 +20,13 @@
       "description": "不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）：design token、元件規則與交件前檢查清單",
       "version": "0.1.0",
       "category": "design"
+    },
+    {
+      "name": "commit",
+      "source": "./commit",
+      "description": "檢視變更、只 stage 同一邏輯變更的檔案，建立一個 Conventional Commit 格式的 commit，不推送",
+      "version": "0.1.0",
+      "category": "productivity"
     }
   ]
 }
