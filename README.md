@@ -9,6 +9,7 @@ ywwwtseng 的個人 Claude Code plugins。
 ```
 /plugin marketplace add ywwwtseng/skills
 /plugin install tech-stack@skills
+/plugin install tonal-ui@skills
 ```
 
 本機開發時可直接用路徑：
@@ -22,6 +23,7 @@ ywwwtseng 的個人 Claude Code plugins。
 | Plugin | 指令 | 說明 |
 |---|---|---|
 | tech-stack | `/tech-stack` | 多輪問答選型 frontend / mobile / backend / database / infra 與架構模式，輸出 `docs/tech-stack.md` |
+| tonal-ui | 自動載入 | 不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）。做新畫面、新元件、改版或 design review 時套用；token 在 `tonal-ui/skills/tonal-ui/references/tokens.css` |
 
 ## 結構
 

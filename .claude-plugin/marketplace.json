@@ -4,7 +4,7 @@
     "name": "ywwwtseng"
   },
   "metadata": {
-    "description": "ywwwtseng's personal Claude Code plugins: reusable skills for project setup and decision-making."
+    "description": "ywwwtseng's personal Claude Code plugins: reusable skills for project setup, decision-making, and UI styling."
   },
   "plugins": [
     {
@@ -13,6 +13,13 @@
       "description": "透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/tech-stack.md",
       "version": "0.2.0",
       "category": "productivity"
+    },
+    {
+      "name": "tonal-ui",
+      "source": "./tonal-ui",
+      "description": "不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）：design token、元件規則與交件前檢查清單",
+      "version": "0.1.0",
+      "category": "design"
     }
   ]
 }

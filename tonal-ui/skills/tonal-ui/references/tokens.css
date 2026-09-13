@@ -1,0 +1,118 @@
+/*
+ * Tonal UI 的 design token。直接貼進全域樣式的 :root。
+ * 規則與用途見 ../SKILL.md；這裡只放值。
+ *
+ * 動它之前先讀 SKILL.md 的「顏色怎麼選」：底色階梯是中性灰、不帶藍，
+ * 顏色留給狀態、chip 與導覽 icon。
+ */
+
+:root {
+  /* 底色分層：頂端列（白）→ 左側導覽（幾乎白）→ 頁面（最淺的灰）→ 面板（白）
+     → 面板裡的區塊（填色）。三個區域兩兩相鄰處都有色差，不必畫線。
+     這幾層都是中性灰（只留一點點冷調），畫面上唯一帶顏色的色塊是下面的「選中」，
+     它才會是一眼就看到的那一塊；底色也跟著藍就變成整片都在搶注意力 */
+  --color-background-layout: #f5f6f7;
+  --color-background-container: #ffffff;
+  --color-background-nav: #fafafa;
+  --color-background-nav-hover: #ebedef;
+  /* 填色區塊：輸入框、次要按鈕、標籤、程式碼。白色面板上用它就分得出來，不必畫框 */
+  --color-background-surface: #f1f3f4;
+  --color-background-surface-hover: #e6e8ea;
+  /* 清單裡的一個項目：跟卡片表頭同色（也就是卡片本身的白），整張卡片是一片乾淨的白，
+     一列一列靠 hover 分辨；hover 因此要夠深，壓在白底上一眼看得出來 */
+  --color-background-item: var(--color-background-container);
+  --color-background-item-hover: #e8eaed;
+  /* 選中：導覽項目、分頁。整個畫面就這一塊是藍的 */
+  --color-background-selected: #d3e3fd;
+  /* 行內 code 與程式碼區塊。比 surface 再深一點點，壓在白底或磚塊上都看得出來 */
+  --color-background-code: #e9ebed;
+
+  --color-text-body: #1f1f1f;
+  --color-text-heading: #1f1f1f;
+  --color-text-secondary: #5f6368;
+  --color-text-label: #444746;
+  --color-text-link: #0b57d0;
+  --color-text-link-hover: #0842a0;
+  --color-text-selected: #041e49;
+  --color-text-inverted: #ffffff;
+  --color-text-status-success: #0b8043;
+  --color-text-status-info: #0b57d0;
+  --color-text-status-warning: #b06000;
+  --color-text-status-danger: #b3261e;
+  --color-text-status-inactive: #5f6368;
+
+  /* 狀態色塊：alert 與 danger 按鈕的底色，全部只有底色沒有框 */
+  --color-background-status-info: #e8f0fe;
+  --color-background-status-warning: #fef7e0;
+  --color-background-status-danger: #fce8e6;
+  --color-background-status-danger-hover: #f7d7d3;
+  --color-background-status-success: #e6f4ea;
+
+  /* 左側導覽的 icon 各有各的顏色，像 Google 那套產品圖示一樣繽紛一點；
+     每個項目一個色，位置與顏色綁在一起，掃一眼就認得出是哪一項。
+     名稱照你的導覽項目改（projects／api／key 只是範例），色相從 chip 那四組挑 */
+  --color-icon-nav-projects: #1e8e3e;
+  --color-icon-nav-api: #e8710a;
+  --color-icon-nav-key: #9334e6;
+
+  /* chip 的四個色調，跟導覽 icon 同一組色相：淡底配同色系的深字，壓在白卡片上看得出來
+     又不會吵。用在標籤、HTTP method 徽章這種小色塊；紅色那一階直接用下面的 status-danger */
+  --color-chip-blue-background: #e8f0fe;
+  --color-chip-blue-text: #1967d2;
+  --color-chip-green-background: #e6f4ea;
+  --color-chip-green-text: #137333;
+  --color-chip-orange-background: #feefe3;
+  --color-chip-orange-text: #b06000;
+  --color-chip-purple-background: #f3e8fd;
+  --color-chip-purple-text: #7627bb;
+
+  /* app 切換器裡每個 app 的「產品圖示」：圓角方塊的漸層底，上面壓白色圖形。
+     兩個端點是同一個色相的淺、深各一階，色相沿用導覽 icon 那組（名稱照你的 app 改） */
+  --color-app-dashboard-from: #5b9dff;
+  --color-app-dashboard-to: #1a73e8;
+  --color-app-console-from: #3ec46d;
+  --color-app-console-to: #1e8e3e;
+
+  --border-radius-container: 16px;
+  --border-radius-block: 12px;
+  --border-radius-badge: 6px;
+  /* 按鈕、標籤、導覽項目的膠囊形 */
+  --border-radius-pill: 999px;
+
+  /* 浮起來的東西（選單、modal、toast）才有陰影，平鋪的區塊一律不畫框也不打陰影 */
+  --shadow-panel: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
+
+  /* 頂端導覽列的高度。app shell 與登入頁都要用 100vh 扣掉它，
+     所以寫成變數，改一個地方就好，不會有人忘了同步。 */
+  --top-nav-height: 56px;
+  /* 清單裡一個項目的列高。頁面上所有的清單共用同一個值，
+     幾份清單並排看起來才是同一套東西 */
+  --list-item-height: 54px;
+
+  --font-family-base: 'Open Sans', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei',
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family-mono: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* 字級。名字講的是「用在哪一層」而不是尺寸，換算表在 ../SKILL.md 的「字級與粗細」。
+     頁面 CSS 一律用這些 token，不要再寫 px——多一個 15px 就多一種沒人說得出理由的大小。 */
+  --font-size-page-title: 24px;
+  /* 子系統名稱、登入卡片標題：一頁一個，比頁面標題小但比區塊標題大 */
+  --font-size-brand: 20px;
+  /* 卡片表頭、modal 標題、選單標題 */
+  --font-size-section-title: 18px;
+  /* 比內文大一階，用在需要先被讀到的一行（使用者選單裡的姓名） */
+  --font-size-lead: 15px;
+  /* 內文：表格、按鈕、輸入框、清單、alert，畫面上大多數的字 */
+  --font-size-body: 14px;
+  /* 內文的次一階：選單項目、清單裡的說明、程式碼區塊 */
+  --font-size-compact: 13px;
+  /* 說明文字、標籤、分區標題 */
+  --font-size-caption: 12px;
+  /* 最小的一階，只給徽章這種短到不能再短的東西（GET、POST…） */
+  --font-size-micro: 11px;
+
+  /* 粗細只有三階。中間那階（600）留給標題型的東西，內文要強調一律用 700 */
+  --font-weight-normal: 400;
+  --font-weight-medium: 600;
+  --font-weight-bold: 700;
+}
