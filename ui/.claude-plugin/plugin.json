@@ -1,0 +1,16 @@
+{
+  "name": "ui",
+  "description": "UI 風格：tonal-ui 不畫框線、用底色色塊分層（Gmail / Material 3 tonal surface）：design token、元件規則與交件前檢查清單",
+  "version": "0.2.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "ui",
+    "design-system",
+    "design-tokens",
+    "material",
+    "tonal",
+    "borderless"
+  ]
+}

@@ -160,7 +160,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 
 「約束與慣例」除了技術規則，也要寫明給 AI agent 遵守的驗證要求：型別檢查、lint、測試指令，以及 schema / API 契約的單一來源（zod、OpenAPI、Prisma schema 等）。
 
-輸出後在對話中簡短摘要，並建議使用者把「約束與慣例」段落複製到 `CLAUDE.md`（若專案有的話）；可再呼叫 `/tech-stack` 重跑某一層。
+輸出後在對話中簡短摘要，並建議使用者把「約束與慣例」段落複製到 `CLAUDE.md`（若專案有的話）；可再呼叫 `/architecture:tech-stack` 重跑某一層。
 
 ## 判斷準則
 

@@ -1,0 +1,14 @@
+{
+  "name": "architecture",
+  "description": "架構決策：tech-stack 透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/tech-stack.md 決策文件",
+  "version": "0.4.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "architecture",
+    "tech-stack",
+    "scaffolding",
+    "decision"
+  ]
+}
