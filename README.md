@@ -27,16 +27,22 @@ ywwwtseng 的個人 Claude Code plugins。
 |---|---|---|
 | tech-stack | `/tech-stack` | 多輪問答選型 frontend / mobile / backend / database / infra 與架構模式，輸出 `docs/tech-stack.md` |
 | commit | `/commit` | 檢視 `git status` / `git diff`，只 stage 屬於同一邏輯變更的檔案（絕不 `git add -A` / `.` / `-u`，排除 `node_modules`、`dist`、`.env`、secrets），建立一個 Conventional Commit 格式的 commit，不 push |
-| business-rules | 自動載入 | 只要描述「要解決什麼問題」與「想要什麼功能」，就推導出逐條可驗證的 business rules（定義 / 約束 / 計算 / 狀態流轉 / 權限 / 時間 / 觸發 / 例外），先推導再提問（一次只問一題，每個選項附上對規則的影響），輸出 `docs/domain/<主題>.md`；類別 checklist 與邊界條件在 `business-rules/skills/business-rules/references/` |
-| model | 自動載入 | 把 `docs/domain/<主題>.md` 的 business rules 轉成概念層 domain model（實體 / 值物件 / 列舉 / 不變量 / 關聯 / 狀態機 / 命令 / 領域事件），每個元素追溯到規則 ID，輸出 `docs/domain/<主題>-model.md`；只做領域概念、不做 table / 欄位 / 索引等 DB schema；對應細則在 `model/skills/model/references/mapping.md` |
-| tonal-ui | 自動載入 | 不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）。做新畫面、新元件、改版或 design review 時套用；token 在 `tonal-ui/skills/tonal-ui/references/tokens.css` |
+| business-rules | 自動載入 | 只要描述「要解決什麼問題」與「想要什麼功能」，就推導出逐條可驗證的 business rules（定義 / 約束 / 計算 / 狀態流轉 / 權限 / 時間 / 觸發 / 例外），先推導再提問（一次只問一題，每個選項附上對規則的影響），輸出 `docs/domain/<主題>.md`；類別 checklist 與邊界條件在 `domain/business-rules/skills/business-rules/references/` |
+| model | 自動載入 | 把 `docs/domain/<主題>.md` 的 business rules 轉成概念層 domain model（實體 / 值物件 / 列舉 / 不變量 / 關聯 / 狀態機 / 命令 / 領域事件），每個元素追溯到規則 ID，輸出 `docs/domain/<主題>-model.md`；只做領域概念、不做 table / 欄位 / 索引等 DB schema；對應細則在 `domain/model/skills/model/references/mapping.md` |
+| tonal-ui | 自動載入 | 不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）。做新畫面、新元件、改版或 design review 時套用；token 在 `ui/tonal-ui/skills/tonal-ui/references/tokens.css` |
 
 ## 結構
 
+Plugin 依用途分類放在資料夾裡；分類只影響 repo 結構，安裝與呼叫時仍用 plugin 名稱（`/plugin install model@skills`）。
+
 ```
 .
-├── .claude-plugin/marketplace.json   # 列出所有 plugin
-└── <plugin-name>/
+├── .claude-plugin/marketplace.json   # 列出所有 plugin，source 指向分類資料夾下的路徑
+├── domain/                           # 領域建模：business-rules、model
+├── architecture/                     # 架構決策：tech-stack
+├── ui/                               # UI 風格：tonal-ui
+├── git/                              # git 工作流：commit
+└── <category>/<plugin-name>/
     ├── .claude-plugin/plugin.json    # plugin 名稱、版本
     ├── commands/<command>.md         # slash command（可選）
     ├── skills/<skill-name>/SKILL.md  # skill 本體（可選）
@@ -45,8 +51,8 @@ ywwwtseng 的個人 Claude Code plugins。
 
 ## 新增 plugin
 
-1. 建立 `<plugin-name>/.claude-plugin/plugin.json`，再加 `commands/<command>.md`（slash command）或 `skills/<skill-name>/SKILL.md`（skill）
-2. 在 `.claude-plugin/marketplace.json` 的 `plugins` 陣列加入一筆
+1. 選一個分類資料夾（沒有合適的就新增一個），建立 `<category>/<plugin-name>/.claude-plugin/plugin.json`，再加 `commands/<command>.md`（slash command）或 `skills/<skill-name>/SKILL.md`（skill）
+2. 在 `.claude-plugin/marketplace.json` 的 `plugins` 陣列加入一筆，`source` 寫 `./<category>/<plugin-name>`
 3. 更新 `version`，執行 `/plugin update` 即可取得
 
 ## 更新 skill 與本地安裝
@@ -55,8 +61,8 @@ ywwwtseng 的個人 Claude Code plugins。
 
 每次改 skill 的固定流程：
 
-1. 改 `<plugin>/skills/<skill>/SKILL.md`（或 `references/`、`commands/`）
-2. 升版：`<plugin>/.claude-plugin/plugin.json` 與 `.claude-plugin/marketplace.json` **兩處**的 `version` 都要改
+1. 改 `<category>/<plugin>/skills/<skill>/SKILL.md`（或 `references/`、`commands/`）
+2. 升版：`<category>/<plugin>/.claude-plugin/plugin.json` 與 `.claude-plugin/marketplace.json` **兩處**的 `version` 都要改
 3. `/commit` → `git push origin main`
 4. 在 Claude Code 更新 marketplace 索引與 plugin：
 
@@ -96,4 +102,4 @@ ywwwtseng 的個人 Claude Code plugins。
 
 ## 更新 tech-stack 的選型準則
 
-候選技術與情境對應表在 `tech-stack/skills/tech-stack/references/`，每層一個檔案（`frontend.md`、`mobile.md`、`backend.md`、`database.md`、`infra.md`、`architecture.md`、`scale.md`）。改完後升 `plugin.json` 與 `marketplace.json` 的 `version`。
+候選技術與情境對應表在 `architecture/tech-stack/skills/tech-stack/references/`，每層一個檔案（`frontend.md`、`mobile.md`、`backend.md`、`database.md`、`infra.md`、`architecture.md`、`scale.md`）。改完後升 `plugin.json` 與 `marketplace.json` 的 `version`。

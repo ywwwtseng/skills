@@ -9,35 +9,35 @@
   "plugins": [
     {
       "name": "tech-stack",
-      "source": "./tech-stack",
+      "source": "./architecture/tech-stack",
       "description": "透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/tech-stack.md",
       "version": "0.2.0",
       "category": "productivity"
     },
     {
       "name": "tonal-ui",
-      "source": "./tonal-ui",
+      "source": "./ui/tonal-ui",
       "description": "不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）：design token、元件規則與交件前檢查清單",
       "version": "0.1.0",
       "category": "design"
     },
     {
       "name": "commit",
-      "source": "./commit",
+      "source": "./git/commit",
       "description": "檢視變更、只 stage 同一邏輯變更的檔案，建立一個 Conventional Commit 格式的 commit，不推送",
       "version": "0.1.0",
       "category": "productivity"
     },
     {
       "name": "business-rules",
-      "source": "./business-rules",
+      "source": "./domain/business-rules",
       "description": "只要描述要解決的問題與想要的功能，就推導出逐條可驗證的 business rules（定義 / 約束 / 計算 / 狀態 / 權限 / 時間 / 觸發 / 例外），輸出 docs/domain/<主題>.md",
       "version": "0.3.0",
       "category": "productivity"
     },
     {
       "name": "model",
-      "source": "./model",
+      "source": "./domain/model",
       "description": "把 docs/domain/<主題>.md 的 business rules 轉成概念層 domain model（實體 / 值物件 / 列舉 / 不變量 / 關聯 / 狀態機 / 命令 / 事件），每個元素追溯到規則 ID，輸出 docs/domain/<主題>-model.md；不是 DB schema",
       "version": "0.1.0",
       "category": "productivity"
