@@ -1,0 +1,16 @@
+{
+  "name": "model",
+  "description": "把 docs/domain/<主題>.md 的 business rules 轉成概念層 domain model（實體、值物件、列舉、不變量、關聯、狀態機、命令、事件），每個元素都追溯到規則 ID，輸出 docs/domain/<主題>-model.md；不是資料庫 schema",
+  "version": "0.1.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "model",
+    "business-rules",
+    "ddd",
+    "entities",
+    "value-objects",
+    "aggregates"
+  ]
+}

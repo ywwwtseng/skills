@@ -34,6 +34,13 @@
       "description": "只要描述要解決的問題與想要的功能，就推導出逐條可驗證的 business rules（定義 / 約束 / 計算 / 狀態 / 權限 / 時間 / 觸發 / 例外），輸出 docs/domain/<主題>.md",
       "version": "0.3.0",
       "category": "productivity"
+    },
+    {
+      "name": "model",
+      "source": "./model",
+      "description": "把 docs/domain/<主題>.md 的 business rules 轉成概念層 domain model（實體 / 值物件 / 列舉 / 不變量 / 關聯 / 狀態機 / 命令 / 事件），每個元素追溯到規則 ID，輸出 docs/domain/<主題>-model.md；不是 DB schema",
+      "version": "0.1.0",
+      "category": "productivity"
     }
   ]
 }

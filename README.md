@@ -12,6 +12,7 @@ ywwwtseng 的個人 Claude Code plugins。
 /plugin install tonal-ui@skills
 /plugin install commit@skills
 /plugin install business-rules@skills
+/plugin install model@skills
 ```
 
 本機開發時可直接用路徑：
@@ -27,6 +28,7 @@ ywwwtseng 的個人 Claude Code plugins。
 | tech-stack | `/tech-stack` | 多輪問答選型 frontend / mobile / backend / database / infra 與架構模式，輸出 `docs/tech-stack.md` |
 | commit | `/commit` | 檢視 `git status` / `git diff`，只 stage 屬於同一邏輯變更的檔案（絕不 `git add -A` / `.` / `-u`，排除 `node_modules`、`dist`、`.env`、secrets），建立一個 Conventional Commit 格式的 commit，不 push |
 | business-rules | 自動載入 | 只要描述「要解決什麼問題」與「想要什麼功能」，就推導出逐條可驗證的 business rules（定義 / 約束 / 計算 / 狀態流轉 / 權限 / 時間 / 觸發 / 例外），先推導再提問（一次只問一題，每個選項附上對規則的影響），輸出 `docs/domain/<主題>.md`；類別 checklist 與邊界條件在 `business-rules/skills/business-rules/references/` |
+| model | 自動載入 | 把 `docs/domain/<主題>.md` 的 business rules 轉成概念層 domain model（實體 / 值物件 / 列舉 / 不變量 / 關聯 / 狀態機 / 命令 / 領域事件），每個元素追溯到規則 ID，輸出 `docs/domain/<主題>-model.md`；只做領域概念、不做 table / 欄位 / 索引等 DB schema；對應細則在 `model/skills/model/references/mapping.md` |
 | tonal-ui | 自動載入 | 不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）。做新畫面、新元件、改版或 design review 時套用；token 在 `tonal-ui/skills/tonal-ui/references/tokens.css` |
 
 ## 結構
