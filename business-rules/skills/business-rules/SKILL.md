@@ -1,6 +1,6 @@
 ---
 name: business-rules
-description: 使用者只需描述「要解決什麼問題」與「想要什麼功能」，本 skill 負責推導完整的 business rules（定義、約束、計算、狀態流轉、權限、時間、副作用、例外），補齊邊界條件，並輸出可直接拿來實作與寫測試的 docs/business-rules/<主題>.md。當使用者要規劃新功能的規則、釐清需求、寫 spec / acceptance criteria、或問「這個功能該有哪些規則」時使用。
+description: 使用者只需描述「要解決什麼問題」與「想要什麼功能」，本 skill 負責推導完整的 business rules（定義、約束、計算、狀態流轉、權限、時間、副作用、例外），補齊邊界條件，並輸出可直接拿來實作與寫測試的 docs/domain/<主題>.md。當使用者要規劃新功能的規則、釐清需求、寫 spec / acceptance criteria、或問「這個功能該有哪些規則」時使用。
 ---
 
 # Business Rules
@@ -28,7 +28,7 @@ description: 使用者只需描述「要解決什麼問題」與「想要什麼�
 4. **規則不含實作細節。** 不寫 table 名、API 路徑、框架；寫「訂單」不寫 `orders` table。實作對應放在文件最後的「實作提示」段，與規則分開。
 5. **一條規則只講一件事。** 「A 且 B 時不可 C，但 D 例外」要拆成主規則 + 例外規則，各自有 ID。
 6. **每條規則標注來源**：`需求`（使用者明說）/ `推導`（由需求邏輯必然推出）/ `假設`（你補的預設，使用者可改）。假設要集中列一次，方便使用者一眼掃過。
-7. **對齊專案既有詞彙。** 若 repo 已有 `docs/business-rules/`、`docs/tech-stack.md`、schema（Prisma / Drizzle / SQL / zod / OpenAPI）或 domain model，先讀取，沿用既有實體與狀態名稱，不另創同義詞；與既有規則衝突時在「與既有規則的關係」段寫明。
+7. **對齊專案既有詞彙。** 若 repo 已有 `docs/domain/`、`docs/tech-stack.md`、schema（Prisma / Drizzle / SQL / zod / OpenAPI）或 domain model，先讀取，沿用既有實體與狀態名稱，不另創同義詞；與既有規則衝突時在「與既有規則的關係」段寫明。
 8. **規則之間的衝突要有優先序。** 兩條規則可能同時適用而結論不同時，明確寫出誰優先，並補一個同時觸發的範例。
 
 ## 流程
@@ -98,7 +98,7 @@ options:
 
 ### Step 4：輸出文件
 
-寫入 `docs/business-rules/<slug>.md`，格式見 `references/template.md`。
+寫入 `docs/domain/<slug>.md`，格式見 `references/template.md`。
 
 若檔案已存在，用 `AskUserQuestion` 單獨問一題（同樣每個選項要寫影響）：「合併：新增與修改規則，保留其餘 (Recommended)」/「覆蓋」/「另存為 `<slug>-YYYY-MM-DD.md`」。合併時保留既有 ID，新規則接續編號，被修改的規則在「變更紀錄」列出。
 

@@ -1,6 +1,6 @@
 # 輸出文件模板
 
-寫入 `docs/business-rules/<slug>.md`。段落順序固定；沒有內容的段落寫「無」而不是刪掉，讓讀者知道是確認過而非遺漏。
+寫入 `docs/domain/<slug>.md`。段落順序固定；沒有內容的段落寫「無」而不是刪掉，讓讀者知道是確認過而非遺漏。
 
 ```markdown
 # Business Rules — <功能名>
@@ -88,7 +88,7 @@ stateDiagram-v2
 文件寫完後，在對話中輸出：
 
 ```
-已寫入 docs/business-rules/<slug>.md
+已寫入 docs/domain/<slug>.md
 規則 N 條：定義 a ／ 約束 b ／ 計算 c ／ 狀態 d ／ 權限 e ／ 時間 f ／ 觸發 g ／ 例外 h
 假設 M 條，最值得確認的三個：
 1. BR-XXX-nnn …

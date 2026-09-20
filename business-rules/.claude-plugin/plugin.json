@@ -1,7 +1,7 @@
 {
   "name": "business-rules",
-  "description": "只要描述要解決的問題與想要的功能，就產出可驗證的 business rules 文件（docs/business-rules/<主題>.md）：實體與狀態、逐條規則、驗證範例、假設與未決事項",
-  "version": "0.2.0",
+  "description": "只要描述要解決的問題與想要的功能，就產出可驗證的 business rules 文件（docs/domain/<主題>.md）：實體與狀態、逐條規則、驗證範例、假設與未決事項",
+  "version": "0.3.0",
   "author": {
     "name": "ywwwtseng"
   },
