@@ -25,7 +25,7 @@
 
 ## 額外判斷
 
-- 語言限制為純 Python / Go / Rust 但需要 UI：仍推薦 TypeScript 框架（不計學習成本）；若 UI 極簡可提 HTMX + 後端模板（非標準候選）。
+- 語言限制為純 Python / Go 但需要 UI：仍推薦 TypeScript 框架（不計學習成本）；若 UI 極簡可提 HTMX + 後端模板（非標準候選）。
 - 無框架偏好時預設 React 系（Next.js / Vite + React）：生態與範例最多，AI agent 友善度最高；Vue / Svelte 只在使用者指定或有明確效能需求時推薦。
 - 大量表單 / CRUD 後台：推薦搭配 UI library（shadcn/ui 或 MUI），寫在「注意事項」。
 - 需要 real-time UI：任一框架皆可，關鍵在 backend 是否支援 WebSocket。

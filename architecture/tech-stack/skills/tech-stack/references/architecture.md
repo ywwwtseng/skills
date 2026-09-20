@@ -19,7 +19,6 @@
 | Web + App + TS | Monorepo（Turborepo + pnpm workspace） | Nx | Polyrepo（型別無法共用） |
 | 前後端不同語言（如 Next.js + FastAPI） | Monorepo（pnpm workspace + uv workspace，Turborepo 只管 TS 部分） | Polyrepo | — |
 | 純 Go 後端 + 獨立前端 | Monorepo（Go workspace + pnpm workspace） | Polyrepo | — |
-| Rust 後端 + TS 前端 | Monorepo（cargo workspace + pnpm workspace，Turborepo 只管 TS） | Polyrepo | — |
 | 各服務需各自 release 節奏 | Polyrepo | Monorepo + CODEOWNERS | — |
 | 純 API 無 UI | 單一 repo | — | Monorepo（過度設計） |
 | 大型・企業級治理 | Monorepo（Nx，需 affected graph） | Turborepo | Polyrepo 散落 |
@@ -33,7 +32,6 @@
 | 需要 code generator、依賴圖分析、多語言 plugin | Nx |
 | Python 為主 | uv workspace |
 | Go 為主 | Go workspace（go.work） |
-| Rust 為主 | cargo workspace（`[workspace]` in root Cargo.toml） |
 
 ## Monorepo 標準骨架（Turborepo）
 
@@ -42,7 +40,7 @@
 ├── apps/
 │   ├── web/          # Next.js / Vite
 │   ├── mobile/       # Expo（有 App 時）
-│   └── api/          # Hono / NestJS / FastAPI / Axum（若與前端分開）
+│   └── api/          # Hono / NestJS / FastAPI / Go（若與前端分開）
 ├── packages/
 │   ├── types/        # 共用型別、zod schema
 │   ├── api-client/   # 由 OpenAPI 或 tRPC 產生

@@ -64,7 +64,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 
 | 主題 | 選項方向 |
 |---|---|
-| 語言限制（多選） | 無限制、讓 skill 推薦 / TypeScript / Python / Go / Rust（Java・Kotlin 由 Other 填入） |
+| 語言限制（多選） | 無限制、讓 skill 推薦 / TypeScript / Python / Go（Java・Kotlin 由 Other 填入） |
 | Backend 語言（僅勾選 ≥ 2 個非 TS 語言時） | 從勾選的非 TS 語言中擇一 |
 | TypeScript runtime（僅語言含 TS 或無限制時；雲平台指定 Cloudflare 時跳過，runtime 固定為 Workers） | 讓 skill 推薦 / Node.js / Bun |
 | 雲平台或部署限制 | 無偏好 / AWS / GCP / Vercel・Cloudflare 類 PaaS / 必須自架 or 地端 |

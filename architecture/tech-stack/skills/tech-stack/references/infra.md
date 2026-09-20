@@ -22,7 +22,7 @@
 | Backend runtime 選 Bun | Fly.io 或 Railway（Dockerfile `oven/bun`） | Cloud Run | Vercel functions / Cloudflare Workers（runtime 非 Bun） |
 | Hono / Astro / edge 導向 | Cloudflare | Vercel | — |
 | 需要長連線（WebSocket）、背景 worker | Fly.io | Railway；Cloudflare Durable Objects + Queues（已在 Cloudflare 時） | Vercel（serverless 限制） |
-| Go / Rust / Python 容器化服務、中型以下 | Fly.io 或 Railway | Cloud Run | Kubernetes |
+| Go / Python 容器化服務、中型以下 | Fly.io 或 Railway | Cloud Run | Kubernetes |
 | 指定 AWS | ECS Fargate + RDS | Lambda（若純 API 且冷啟動可接受） | 自建 EC2 集群 |
 | 指定 GCP | Cloud Run + Cloud SQL | GKE Autopilot | — |
 | 預算極低、可接受自己運維 | VPS + Docker Compose（Hetzner 約 €4 / 月） | Fly.io | 任何 managed K8s |
@@ -66,7 +66,7 @@
 
 ## 額外判斷
 
-- CI/CD：預設 GitHub Actions，寫在「注意事項」；Bun 專案用 `oven-sh/setup-bun` action；Rust 用 multi-stage Dockerfile（`rust:slim` build → `debian:slim` 或 `distroless` runtime）並開 cargo cache，否則 CI 時間很長。
+- CI/CD：預設 GitHub Actions，寫在「注意事項」；Bun 專案用 `oven-sh/setup-bun` action。
 - 選 Bun 且前端為 Next.js 部署在 Vercel：Vercel 可用 Bun 安裝套件，但 serverless functions 仍跑 Node；backend 若要 Bun runtime 必須拆到容器平台。
 - Object storage：AWS → S3；GCP → GCS；其他 → Cloudflare R2（無 egress 費）。
 - Cloudflare 資源全部宣告在 `wrangler.toml`（bindings），這就是 IaC，不另用 Terraform；D1 migrations 用 `wrangler d1 migrations` 或 Drizzle Kit。

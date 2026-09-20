@@ -11,7 +11,6 @@
 | FastAPI | Python | 高效能 async API，AI/ML 生態 |
 | Django | Python | 全功能，內建 admin/ORM/auth |
 | Go（net/http + chi 或 Gin） | Go | 高併發、低資源、單一 binary 部署 |
-| Axum | Rust | 高效能、記憶體安全、單一 binary；tokio 生態，適合高併發與重運算 |
 | Spring Boot | Java/Kotlin | 企業級（使用者以 Other 指定時） |
 
 ## 情境 → 推薦
@@ -25,11 +24,9 @@
 | Python + AI 推論 / ML 整合 | FastAPI | Django + DRF | — |
 | Python + 大量 CRUD、需要 admin 後台 | Django | FastAPI + SQLAdmin | — |
 | 高併發、real-time、資源受限 | Go | NestJS + ws | Django |
-| 指定 Rust | Axum | Actix-web（非標準候選） | — |
-| Rust + 需要快速迭代 CRUD | 警告：Rust 編譯與迭代週期較長，若無效能或安全硬需求建議改 TS / Python | Axum | — |
-| 高併發 + 重運算（如即時處理、加密、媒體轉檔） | Rust（Axum） | Go | Python |
+| 高併發 + 重運算（如即時處理、加密、媒體轉檔） | Go | Python（重運算交給原生擴充） | — |
 | 指定 Java/Kotlin（Other） | Spring Boot | — | — |
-| 重背景任務 / 排程 | 依語言：BullMQ（TS）/ Celery（Py）/ asynq（Go）/ apalis（Rust） | — | 自己寫 cron loop |
+| 重背景任務 / 排程 | 依語言：BullMQ（TS）/ Celery（Py）/ asynq（Go） | — | 自己寫 cron loop |
 
 ## TypeScript runtime：Node.js / Bun / Cloudflare Workers
 
@@ -56,8 +53,8 @@
 
 ## 額外判斷
 
-- Real-time：TS 用 Socket.IO 或原生 ws；Go 用 gorilla/websocket 或 nhooyr；Python 用 FastAPI WebSocket；Rust 用 axum 內建 ws（tokio-tungstenite）。
-- 多語言（如 TS + Rust）：backend 用非 TS 語言時，`packages/api-client` 由 OpenAPI spec 產生（utoipa for Rust、FastAPI 內建、swag for Go），不能用 tRPC。
+- Real-time：TS 用 Socket.IO 或原生 ws；Go 用 gorilla/websocket 或 nhooyr；Python 用 FastAPI WebSocket。
+- 多語言（如 TS + Go）：backend 用非 TS 語言時，`packages/api-client` 由 OpenAPI spec 產生（FastAPI 內建、swag for Go），不能用 tRPC。
 - 檔案上傳：一律建議直傳 object storage（presigned URL），不經過 backend。
 - 勾選 ≥ 2 個非 TS 語言：問一題確認 backend 用哪個，不自行猜測。
 - 無語言限制時的預設：與 frontend 同為 TS（Hono / Next.js Route Handlers），單一語言讓型別與 schema 可跨層共用；只有 AI/ML、高併發、重運算等需求才切換語言。
