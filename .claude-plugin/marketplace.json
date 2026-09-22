@@ -31,8 +31,8 @@
     {
       "name": "impl",
       "source": "./impl",
-      "description": "實作執行：/impl:plan 把一個 feature 的 business rules、domain model 與 db schema 切成可獨立驗證、可續跑的 task 清單，輸出 docs/impl/<feature>/plan.md（追溯 ID、動到的檔案、前置依賴、驗收指令、狀態、自帶執行協議）；/impl:feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit",
-      "version": "0.2.0",
+      "description": "實作執行：plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單（docs/impl/<feature>/plan.md）；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit，作為 long-running 實作的執行器；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍，輸出 docs/impl/<feature>/verification.md 並把缺口寫回 plan",
+      "version": "0.3.0",
       "category": "productivity"
     },
     {
@@ -45,8 +45,8 @@
     {
       "name": "git",
       "source": "./git",
-      "description": "git 工作流：/git:commit 檢視變更、只 stage 同一邏輯變更的檔案，建立一個 Conventional Commit 格式的 commit，不推送",
-      "version": "0.2.0",
+      "description": "git 工作流：commit 檢視變更、把待提交內容切成多個邏輯變更，逐一建立 Conventional Commit 格式的 commit 直到沒有可提交的檔案，不推送；pr 把 feature 的 commit 移到分支、跑驗證閘門、push 並開帶追溯表的 pull request，不合併",
+      "version": "0.4.0",
       "category": "productivity"
     }
   ]
