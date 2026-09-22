@@ -1,7 +1,7 @@
 {
   "name": "impl",
-  "description": "實作執行：plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單（docs/impl/<feature>/plan.md）；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit，作為 long-running 實作的執行器；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍，輸出 docs/impl/<feature>/verification.md 並把缺口寫回 plan",
-  "version": "0.3.0",
+  "description": "實作執行：plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單（docs/impl/<feature>/plan.md）；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit，作為 long-running 實作的執行器；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍，輸出 docs/impl/<feature>/verification.md 並把缺口寫回 plan；fix 是 plan 之外的修復迴路，先分流是實作問題還是規則缺漏，再用 regression test 釘住 bug 並修 root cause",
+  "version": "0.4.0",
   "author": {
     "name": "ywwwtseng"
   },
@@ -18,6 +18,10 @@
     "verify",
     "audit",
     "coverage",
-    "quality-gate"
+    "quality-gate",
+    "fix",
+    "bug",
+    "regression",
+    "root-cause"
   ]
 }

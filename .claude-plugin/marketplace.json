@@ -10,8 +10,8 @@
     {
       "name": "domain",
       "source": "./domain",
-      "description": "領域建模：/domain:business-rules 從問題與功能描述推導逐條可驗證的 business rules（docs/domain/business-rules/<主題>.md）；/domain:model 把規則累積成概念層 domain model，依聚合分檔輸出 docs/domain/model/<聚合>.md，不是 DB schema",
-      "version": "0.4.2",
+      "description": "領域建模：business-rules 從問題與功能描述推導可驗證的 business rules（docs/domain/business-rules/<主題>.md）；model 把規則累積成概念層 domain model，依聚合分檔輸出 docs/domain/model/<聚合>.md；feedback 收齊實作階段累積的上游回饋，分類後路由回對應 skill 修正，並追 BR → model → schema → task 的漣漪",
+      "version": "0.5.0",
       "category": "productivity"
     },
     {
@@ -31,8 +31,8 @@
     {
       "name": "impl",
       "source": "./impl",
-      "description": "實作執行：plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單（docs/impl/<feature>/plan.md）；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit，作為 long-running 實作的執行器；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍，輸出 docs/impl/<feature>/verification.md 並把缺口寫回 plan",
-      "version": "0.3.0",
+      "description": "實作執行：plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單（docs/impl/<feature>/plan.md）；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit，作為 long-running 實作的執行器；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍，輸出 docs/impl/<feature>/verification.md 並把缺口寫回 plan；fix 是 plan 之外的修復迴路，先分流是實作問題還是規則缺漏，再用 regression test 釘住 bug 並修 root cause",
+      "version": "0.4.0",
       "category": "productivity"
     },
     {
