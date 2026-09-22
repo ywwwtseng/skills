@@ -1,0 +1,17 @@
+{
+  "name": "db",
+  "description": "資料庫設計：schema 把 docs/domain/model/ 的概念層 domain model 轉成可實作的資料庫 schema，輸出 docs/db/schema.md（table、欄位型別、鍵、索引、約束、不變量落點、遷移順序）",
+  "version": "0.1.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "database",
+    "schema",
+    "table",
+    "index",
+    "migration",
+    "sql",
+    "erd"
+  ]
+}

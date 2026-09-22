@@ -285,5 +285,5 @@ classDiagram
 1. <元素>：… （<slug>/BR-XXX-nnn）
 2. …
 3. …
-下一步：依模型建 type / class 與測試；schema 設計以本模型為依據。
+下一步：依模型建 type / class 與測試；資料庫 schema 用 /db:schema 依本模型產出。
 ```
