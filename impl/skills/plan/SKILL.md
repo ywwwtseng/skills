@@ -111,7 +111,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 3. 覆蓋率：feature 的 BR 共 N 條，被 task 覆蓋 M 條，未覆蓋 K 條（逐條列出原因）
 4. 列出最值得確認的 3 個切法假設
 5. 列出「上游回饋」（規則 / 模型 / schema 的矛盾或缺口，若有），建議回對應 skill 處理
-6. 下一步：`/impl:feature` 從 `T-001` 開始執行；要讓它自己連續跑，用 `/loop`（不給 interval，讓它自己抓節奏），每個 task 結束由 `/git:commit` 建立還原點
+6. 下一步：`/impl:feature` 從 `T-001` 開始執行；要讓它自己連續跑，用 `/loop`（不給 interval，讓它自己抓節奏），每個 task 結束由 `/git:commit` 建立還原點；全部 task 做完由 `/impl:verify` 稽核、`/git:pr` 開 PR
 
 ## 與 /impl:feature 的協議
 

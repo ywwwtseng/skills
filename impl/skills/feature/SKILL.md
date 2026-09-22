@@ -108,7 +108,7 @@ commit 完成，這個 task 才算結束。
 
 預設一路做下去，直到以下任一情況才停：
 
-- 全部 task `done` → 進收尾
+- 全部 task `done` → 進收尾，並建議跑 `/impl:verify`（每個 task 只驗了自己那一塊，整個 feature 的規則覆蓋沒有人檢查過）
 - 出現 `blocked` → 停下來問
 - 需要使用者決策 → 問完再繼續
 - 使用者喊停
@@ -127,7 +127,7 @@ commit 完成，這個 task 才算結束。
 4. plan 進度：`done N / 總數 M`，下一個是哪個 task
 5. `blocked` 的 task 與卡點（若有）
 6. 「上游回饋」（若有），建議回 `/domain:business-rules`、`/domain:model` 或 `/db:schema` 處理
-7. 沒有 push；要繼續就再跑一次 `/impl:feature`
+7. 下一步：還有 task 未完成 → 再跑一次 `/impl:feature`；全部 `done` → 跑 `/impl:verify` 做規則覆蓋與品質稽核，過了再由 `/git:pr` 開 PR。本 skill 不 push
 
 ## 常見失敗模式
 
