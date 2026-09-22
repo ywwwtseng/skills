@@ -1,6 +1,6 @@
 ---
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git diff --cached:*), Bash(git add:*), Bash(git commit:*), Bash(git log:*), Bash(git branch:*)
-description: Stage relevant changes and create one focused Conventional Commit
+description: Commit all pending changes as a series of focused Conventional Commits
 ---
 
 ## Context
@@ -16,9 +16,11 @@ Recent commits:
 
 ## Task
 
-Create exactly one focused git commit for the current logical change.
+Commit every pending change, one focused commit per logical change.
 
-Do not push the commit.
+Repeat the cycle below until no committable changes remain.
+
+Do not push any commit.
 
 ### 1. Inspect the changes
 
@@ -30,19 +32,26 @@ Run:
 
 If there are no staged or unstaged changes, report that there is nothing to commit and stop.
 
-### 2. Decide what belongs in this commit
+### 2. Group the changes into logical changes
 
-Commit only changes that belong to the same logical change.
+Before committing anything, group all pending changes into logical changes, and decide the order to commit them in.
 
-- Preserve anything already staged by the user.
-- If relevant unstaged changes belong to the same logical change, stage them explicitly by path.
-- Do not stage unrelated changes.
+- Each commit contains exactly one logical change.
+- Commit foundational changes before the changes that depend on them.
+- If a single file contains changes belonging to several logical changes, keep that file in one commit and describe it by its primary purpose. Do not use interactive or partial staging.
+
+### 3. Stage one logical change
+
+Stage only the files belonging to the logical change being committed in this round.
+
+- Preserve anything already staged by the user, and commit it first.
+- Stage files explicitly by path using `git add <path> ...`.
+- Do not stage files belonging to a different logical change.
 - Never use:
   - `git add -A`
   - `git add .`
   - `git add -u`
   - interactive staging
-- Stage files explicitly by path using `git add <path> ...`.
 - Never stage or commit:
   - `node_modules/`
   - `dist/`
@@ -57,15 +66,9 @@ Commit only changes that belong to the same logical change.
   - files that appear to contain secrets
   - other generated or temporary files that are not part of the intended change
 
-If staged and unstaged changes clearly represent different logical changes:
+Do not modify, revert, discard, or reset any user change.
 
-- Preserve the user's existing staged changes.
-- Commit only one logical change.
-- Leave unrelated unstaged changes untouched.
-
-Do not modify, revert, discard, or reset unrelated user changes.
-
-### 3. Verify the staged changes
+### 4. Verify the staged changes
 
 After staging, run:
 
@@ -81,7 +84,7 @@ Before committing, verify that:
 
 If the staged diff contains unrelated or unsafe changes, do not commit them. Correct the staging selection first.
 
-### 4. Create the commit
+### 5. Create the commit
 
 Write a concise 1–2 sentence commit message focused on WHY the change was made.
 
@@ -145,12 +148,21 @@ EOF
 )"
 ```
 
-### 5. Report
+### 6. Continue until nothing is left
 
-After committing, run `git log --oneline -1` and report:
+After each commit, run `git status` again.
 
-- The commit hash and message.
-- Which files were included.
-- Any unstaged or unrelated changes that were intentionally left out.
+- If committable changes remain, go back to step 3 and commit the next logical change.
+- Treat files that must never be committed, and files ignored by git, as not committable. They never keep the loop running.
+- Stop when only such files remain, or when the working tree is clean.
+- If a round cannot stage anything new, stop instead of repeating the same round.
+
+### 7. Report
+
+After the last commit, run `git log --oneline -<number of commits created>` and report:
+
+- Each commit hash and message, in the order they were created.
+- Which files were included in each commit.
+- Any changes that were intentionally left uncommitted, and why.
 
 Do not push. Do not amend previous commits.

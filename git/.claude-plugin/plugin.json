@@ -1,7 +1,7 @@
 {
   "name": "git",
-  "description": "git 工作流：commit 檢視變更、只 stage 屬於同一邏輯變更的檔案，建立一個 Conventional Commit 格式的 commit，不推送",
-  "version": "0.2.0",
+  "description": "git 工作流：commit 檢視變更、把待提交內容切成多個邏輯變更，逐一建立 Conventional Commit 格式的 commit 直到沒有可提交的檔案，不推送",
+  "version": "0.3.0",
   "author": {
     "name": "ywwwtseng"
   },

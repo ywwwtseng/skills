@@ -30,7 +30,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | domain | model | `/domain:model`（也會自動載入） | 把 `docs/domain/business-rules/` 的 business rules 累積成一套概念層 domain model（實體 / 值物件 / 列舉 / 不變量 / 關聯 / 狀態機 / 命令 / 領域事件），每個元素追溯到規則 ID；規則依功能分檔、模型依聚合分檔，輸出 `docs/domain/model/<聚合>.md` + `shared.md` + `README.md`；只做領域概念、不做 table / 欄位 / 索引等 DB schema；對應細則在 `domain/skills/model/references/mapping.md` |
 | architecture | tech-stack | `/architecture:tech-stack` | 多輪問答選型 frontend / mobile / backend / database / infra 與架構模式，輸出 `docs/tech-stack.md` |
 | ui | tonal-ui | `/ui:tonal-ui`（也會自動載入） | 不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）。做新畫面、新元件、改版或 design review 時套用；token 在 `ui/skills/tonal-ui/references/tokens.css` |
-| git | commit | `/git:commit` | 檢視 `git status` / `git diff`，只 stage 屬於同一邏輯變更的檔案（絕不 `git add -A` / `.` / `-u`，排除 `node_modules`、`dist`、`.env`、secrets），建立一個 Conventional Commit 格式的 commit，不 push |
+| git | commit | `/git:commit` | 檢視 `git status` / `git diff`，把待提交內容切成多個邏輯變更，逐一 stage（絕不 `git add -A` / `.` / `-u`，排除 `node_modules`、`dist`、`.env`、secrets）並建立 Conventional Commit 格式的 commit，直到沒有可提交的檔案，不 push |
 
 ## 結構
 
