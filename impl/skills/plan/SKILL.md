@@ -24,7 +24,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 5. **垂直切片優先於水平分層。** 不要排成「先做完所有 model → 再做完所有 API → 最後做 UI」；那種順序中間每一刻系統都是壞的，中斷就等於全毀。改成每個 task 完成後**系統仍可跑、既有測試仍全綠**。第一個 task 固定是最小可跑的貫穿切片（walking skeleton）：一條路徑從入口到資料庫走通，其餘規則後續 task 補。
 6. **依賴顯式，執行序線性。** 每個 task 寫 `前置`，形成 DAG；輸出時要另外給一份**線性執行序**（拓撲排序後的順序），因為 long-running 的 agent 需要的是「下一個做哪個」而不是一張圖。可平行的 task 標出來，但預設序列執行。
 7. **追溯不中斷。** 每個 task 的「來源」指回 `BR-ID`、模型元素（`order.md#Order.status`）或 schema table，沿用上游的 ID 格式。反過來，feature 的每條 BR 都要能在某個 task 的來源裡找到；找不到的列進「未覆蓋規則」並寫原因，不默默略過。
-8. **不改上游文件。** 拆 task 時發現規則有矛盾、模型缺概念、schema 少欄位，寫進「上游回饋」段並在摘要提出，建議回 `/domain:business-rules`、`/domain:model` 或 `/db:schema` 處理。不要在 plan 裡自己補一條規則，那條規則不會有人知道。
+8. **不改上游文件。** 拆 task 時發現規則有矛盾、模型缺概念、schema 少欄位，照「上游回饋」表的格式新增一列（狀態 `待處理`）並在摘要提出，交給 `/domain:feedback` 分類與路由。不要在 plan 裡自己補一條規則，那條規則不會有人知道。
 9. **驗證指令來自專案，不是憑空寫。** 從 `docs/architecture/tech-stack.md` 的「約束與慣例」、`package.json` scripts、CI workflow 抓實際存在的指令。抓不到就在 Step 0 問，不要寫一個跑不起來的 `npm test`。
 10. **提問必須用 `AskUserQuestion`，一次只問一題。** 只問「不同答案會產生不同 task 切法或不同順序」的問題（要不要先做 happy path 再補例外、某段要不要獨立成一個 task）。命名、檔案放哪這類實作時再決定就好的事不要問，標「假設」直接寫。
 
@@ -110,7 +110,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 2. 摘要：task 總數、線性執行序、預估會動到的檔案數、風險最高的 task 是哪個
 3. 覆蓋率：feature 的 BR 共 N 條，被 task 覆蓋 M 條，未覆蓋 K 條（逐條列出原因）
 4. 列出最值得確認的 3 個切法假設
-5. 列出「上游回饋」（規則 / 模型 / schema 的矛盾或缺口，若有），建議回對應 skill 處理
+5. 列出「上游回饋」（規則 / 模型 / schema 的矛盾或缺口，若有），建議跑 `/domain:feedback` 處理
 6. 下一步：`/impl:feature` 從 `T-001` 開始執行；要讓它自己連續跑，用 `/loop`（不給 interval，讓它自己抓節奏），每個 task 結束由 `/git:commit` 建立還原點；全部 task 做完由 `/impl:verify` 稽核、`/git:pr` 開 PR
 
 ## 與 /impl:feature 的協議
@@ -200,7 +200,11 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 
 ## 上游回饋
 
-<規則 / 模型 / schema 的矛盾或缺口；沒有就寫「無」。不要在這裡自行補規則。>
+| # | 類型 | 問題 | 發現於 | 狀態 | 處理結果 |
+|---|---|---|---|---|---|
+| F-001 | <規則矛盾 / 規則缺漏 / 模型缺概念 / schema 缺欄位或落點錯 / 誤報> | <一句話> | <T-00X> | 待處理 | |
+
+<沒有就整張表留空。只新增「待處理」的列，不要在這裡自行補規則；狀態與處理結果由 `/domain:feedback` 維護。>
 
 ## 變更紀錄
 

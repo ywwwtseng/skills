@@ -1,7 +1,7 @@
 {
   "name": "domain",
-  "description": "領域建模：business-rules 從問題與功能描述推導可驗證的 business rules（docs/domain/business-rules/<主題>.md）；model 把規則累積成概念層 domain model，依聚合分檔輸出 docs/domain/model/<聚合>.md",
-  "version": "0.4.2",
+  "description": "領域建模：business-rules 從問題與功能描述推導可驗證的 business rules（docs/domain/business-rules/<主題>.md）；model 把規則累積成概念層 domain model，依聚合分檔輸出 docs/domain/model/<聚合>.md；feedback 收齊實作階段累積的上游回饋，分類後路由回對應 skill 修正，並追 BR → model → schema → task 的漣漪",
+  "version": "0.5.0",
   "author": {
     "name": "ywwwtseng"
   },
@@ -13,6 +13,9 @@
     "ddd",
     "model",
     "entities",
-    "aggregates"
+    "aggregates",
+    "feedback",
+    "traceability",
+    "sync"
   ]
 }
