@@ -29,6 +29,13 @@
       "category": "productivity"
     },
     {
+      "name": "impl",
+      "source": "./impl",
+      "description": "實作執行：/impl:plan 把一個 feature 的 business rules、domain model 與 db schema 切成可獨立驗證、可續跑的 task 清單，輸出 docs/impl/<feature>/plan.md（追溯 ID、動到的檔案、前置依賴、驗收指令、狀態、自帶執行協議），作為 long-running 實作的唯一狀態來源",
+      "version": "0.1.0",
+      "category": "productivity"
+    },
+    {
       "name": "ui",
       "source": "./ui",
       "description": "UI 風格：/ui:tonal-ui 不畫框線、用底色色塊分層（Gmail / Material 3 tonal surface）：design token、元件規則與交件前檢查清單",

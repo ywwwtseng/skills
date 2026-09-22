@@ -1,0 +1,17 @@
+{
+  "name": "impl",
+  "description": "實作執行：plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單，輸出 docs/impl/<feature>/plan.md，作為 long-running 實作的唯一狀態來源",
+  "version": "0.1.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "implementation",
+    "plan",
+    "task",
+    "breakdown",
+    "long-running",
+    "resume",
+    "checklist"
+  ]
+}

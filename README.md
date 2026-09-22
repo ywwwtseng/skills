@@ -11,6 +11,7 @@ ywwwtseng 的個人 Claude Code plugins。
 /plugin install domain@skills
 /plugin install architecture@skills
 /plugin install db@skills
+/plugin install impl@skills
 /plugin install ui@skills
 /plugin install git@skills
 ```
@@ -32,6 +33,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | architecture | tech-stack | `/architecture:tech-stack` | 多輪問答選型 frontend / mobile / backend / database / infra 與架構模式，輸出 `docs/architecture/tech-stack.md` |
 | architecture | init | `/architecture:init` | 讀 `docs/architecture/tech-stack.md`，把專案實際建起來：repo 骨架、官方 scaffold 指令、lint / test / 型別檢查、`.env.example`、CI、`CLAUDE.md` 約束段落，最後跑一次 typecheck / lint / test / build 驗證；不 commit、不建雲端資源、不寫 secrets；scaffold 指令表在 `architecture/skills/init/references/scaffold.md` |
 | db | schema | `/db:schema` | 讀 `docs/domain/model/` 的概念層模型，輸出單一份 `docs/db/schema.md`：table / collection、欄位與型別、主鍵外鍵、唯一約束、CHECK、索引、列舉落地、每條不變量的執行落點（DB 約束 or 應用層）、並行策略、遷移順序與破壞性變更；每張表與欄位都追溯回模型元素與規則 ID，模型缺漏回報而不在 schema 層補；只產設計文件，不寫 migration / ORM 檔；對應細則在 `db/skills/schema/references/`（`mapping.md`、`conventions.md`、`dialects.md`、`template.md`） |
+| impl | plan | `/impl:plan` | 把一個 feature 的 `docs/domain/business-rules/`、`docs/domain/model/`、`docs/db/schema.md` 切成可獨立驗證、可續跑的 task 清單，輸出 `docs/impl/<feature>/plan.md`：每個 task 帶追溯 ID、預估動到的檔案、前置依賴、驗收指令與狀態，檔案開頭自帶「執行協議」，讓被壓縮或跨 session 的 agent 只讀這份檔案就能接手；垂直切片優先（每個 task 做完系統仍可跑）、一個 task 一個 context window 一個 commit；不寫產品程式碼，實作由 `/impl:feature` 逐個 task 執行，每個 task 結束由 `/git:commit` 建還原點 |
 | ui | tonal-ui | `/ui:tonal-ui`（也會自動載入） | 不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）。做新畫面、新元件、改版或 design review 時套用；token 在 `ui/skills/tonal-ui/references/tokens.css` |
 | git | commit | `/git:commit` | 檢視 `git status` / `git diff`，把待提交內容切成多個邏輯變更，逐一 stage（絕不 `git add -A` / `.` / `-u`，排除 `node_modules`、`dist`、`.env`、secrets）並建立 Conventional Commit 格式的 commit，直到沒有可提交的檔案，不 push |
 
@@ -45,6 +47,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ├── domain/                           # 領域建模：business-rules、model
 ├── architecture/                     # 架構決策：tech-stack、init
 ├── db/                               # 資料庫設計：schema
+├── impl/                             # 實作執行：plan
 ├── ui/                               # UI 風格：tonal-ui
 ├── git/                              # git 工作流：commit
 └── <plugin>/
