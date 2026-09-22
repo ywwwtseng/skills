@@ -1,11 +1,11 @@
 ---
 name: init
-description: 讀 docs/architecture/tech-stack.md 的技術選型決策，把專案實際建起來：repo 骨架、官方 scaffold 指令、lint / format / test / tsconfig、.env.example、CLAUDE.md 約束段落，最後跑一次驗證確認能 build。當使用者說「初始化專案」「建專案骨架」「照 tech-stack 把專案建起來」「scaffold 專案」，或剛跑完 /architecture:tech-stack 要開工時使用。
+description: 讀 docs/architecture/tech-stack.md 的技術選型決策，把專案實際建起來：repo 骨架、官方 scaffold 指令、lint / format / test / tsconfig、.env.example、CLAUDE.md 約束段落，最後跑一次驗證確認能 build。當使用者說「初始化專案」「建專案骨架」「照 tech-stack 把專案建起來」「scaffold 專案」，或剛跑完 /arch:tech-stack 要開工時使用。
 ---
 
 # Init
 
-把 `/architecture:tech-stack` 產出的決策文件變成可以跑的專案骨架。本 skill 只建骨架與設定，**不實作業務功能**。
+把 `/arch:tech-stack` 產出的決策文件變成可以跑的專案骨架。本 skill 只建骨架與設定，**不實作業務功能**。
 
 ## 核心規則
 
@@ -24,7 +24,7 @@ description: 讀 docs/architecture/tech-stack.md 的技術選型決策，把專�
 1. 讀 `docs/architecture/tech-stack.md`，抓出：架構模式、各層選擇、「專案架構」的目錄骨架、「約束與慣例」、「未決事項」。
 2. 盤點當前目錄：是否已有 `package.json` / `go.mod` / `pyproject.toml`、是否是 git repo、是否已有 `apps/`、`src/`。
 3. 決策文件不存在時，用 `AskUserQuestion` 問：
-   - 先跑 `/architecture:tech-stack`（推薦）
+   - 先跑 `/arch:tech-stack`（推薦）
    - 我直接口述技術棧（收到後仍先寫出 `docs/architecture/tech-stack.md` 再繼續）
 
 ### Step 1：確認執行範圍（1–2 題）
