@@ -117,12 +117,12 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 
 這段定義 plan.md 被**消費**的方式，必須原樣寫進每份 plan.md 的「執行協議」段（核心規則 2）：
 
-1. **接手**：讀 plan.md → 找執行序上第一個非 `done` 的 task。有 `blocked` 擋在前面且未解，先處理它，不要跳過去做後面的。
+1. **接手**：讀 plan.md → 找執行序上第一個非 `done` 的 task。有 `blocked` 擋在前面且未解，先處理它，不要跳過去做後面的。狀態是 `doing` 表示上一輪被中斷：先看 `git status` 有沒有未提交的產出，據此判斷接續還是重來；判斷不出來就問使用者，不要自行丟棄。
 2. **開工**：把狀態改成 `doing` 並存檔，再開始寫程式。這樣中途被中斷，下一個 session 知道這個 task 做到一半。
 3. **只做這一個 task**。看到順手可以改的其他東西，寫進備註或新增 task，不要順手改——順手改會讓這次 commit 不可回溯。
 4. **驗收**：跑該 task 的驗收指令，**外加**既有測試不能壞。沒過就修；修不掉改成 `blocked`，在備註寫「卡在哪、試過什麼、需要什麼才能解」，然後停下來問使用者，不要硬幹也不要跳下一個。
 5. **標記**：驗收過了才改成 `done`。「動到」與預估不符時在備註更正，這是給後續 task 的情報。
-6. **commit**：呼叫 `/git:commit`，commit message 的 scope 或 body 帶上 task ID（`feat(order): 加入狀態轉換 (T-003)`）。commit 完才算這個 task 結束，才可以開始下一個。
+6. **commit**：呼叫 `/git:commit`，commit message 的 scope 或 body 帶上 task ID（`feat(order): 加入狀態轉換 (T-003)`）。程式碼與 plan.md 的狀態更新放在**同一個 commit**，狀態與產出要一起前進。commit 完才算這個 task 結束，才可以開始下一個。
 7. **不改 plan 以外的規劃決策**：發現整個切法錯了，停下來說明並建議重跑 `/impl:plan`，不要邊做邊改執行序。
 
 ## 輸出模板
