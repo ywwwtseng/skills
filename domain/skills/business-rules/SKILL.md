@@ -28,7 +28,7 @@ description: 使用者只需描述「要解決什麼問題」與「想要什麼�
 4. **規則不含實作細節。** 不寫 table 名、API 路徑、框架；寫「訂單」不寫 `orders` table。實作對應放在文件最後的「實作提示」段，與規則分開。
 5. **一條規則只講一件事。** 「A 且 B 時不可 C，但 D 例外」要拆成主規則 + 例外規則，各自有 ID。
 6. **每條規則標注來源**：`需求`（使用者明說）/ `推導`（由需求邏輯必然推出）/ `假設`（你補的預設，使用者可改）。假設要集中列一次，方便使用者一眼掃過。
-7. **對齊專案既有詞彙。** 若 repo 已有 `docs/domain/business-rules/`、`docs/domain/model/`、`docs/tech-stack.md`、schema（Prisma / Drizzle / SQL / zod / OpenAPI）或 domain model，先讀取，沿用既有實體與狀態名稱，不另創同義詞；與既有規則衝突時在「與既有規則的關係」段寫明。
+7. **對齊專案既有詞彙。** 若 repo 已有 `docs/domain/business-rules/`、`docs/domain/model/`、`docs/architecture/tech-stack.md`、schema（Prisma / Drizzle / SQL / zod / OpenAPI）或 domain model，先讀取，沿用既有實體與狀態名稱，不另創同義詞；與既有規則衝突時在「與既有規則的關係」段寫明。
 8. **規則之間的衝突要有優先序。** 兩條規則可能同時適用而結論不同時，明確寫出誰優先，並補一個同時觸發的範例。
 
 ## 流程

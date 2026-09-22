@@ -28,7 +28,8 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 |---|---|---|---|
 | domain | business-rules | `/domain:business-rules`（也會自動載入） | 只要描述「要解決什麼問題」與「想要什麼功能」，就推導出逐條可驗證的 business rules（定義 / 約束 / 計算 / 狀態流轉 / 權限 / 時間 / 觸發 / 例外），先推導再提問（一次只問一題，每個選項附上對規則的影響），輸出 `docs/domain/business-rules/<主題>.md`；類別 checklist 與邊界條件在 `domain/skills/business-rules/references/` |
 | domain | model | `/domain:model`（也會自動載入） | 把 `docs/domain/business-rules/` 的 business rules 累積成一套概念層 domain model（實體 / 值物件 / 列舉 / 不變量 / 關聯 / 狀態機 / 命令 / 領域事件），每個元素追溯到規則 ID；規則依功能分檔、模型依聚合分檔，輸出 `docs/domain/model/<聚合>.md` + `shared.md` + `README.md`；只做領域概念、不做 table / 欄位 / 索引等 DB schema；對應細則在 `domain/skills/model/references/mapping.md` |
-| architecture | tech-stack | `/architecture:tech-stack` | 多輪問答選型 frontend / mobile / backend / database / infra 與架構模式，輸出 `docs/tech-stack.md` |
+| architecture | tech-stack | `/architecture:tech-stack` | 多輪問答選型 frontend / mobile / backend / database / infra 與架構模式，輸出 `docs/architecture/tech-stack.md` |
+| architecture | init | `/architecture:init` | 讀 `docs/architecture/tech-stack.md`，把專案實際建起來：repo 骨架、官方 scaffold 指令、lint / test / 型別檢查、`.env.example`、CI、`CLAUDE.md` 約束段落，最後跑一次 typecheck / lint / test / build 驗證；不 commit、不建雲端資源、不寫 secrets；scaffold 指令表在 `architecture/skills/init/references/scaffold.md` |
 | ui | tonal-ui | `/ui:tonal-ui`（也會自動載入） | 不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）。做新畫面、新元件、改版或 design review 時套用；token 在 `ui/skills/tonal-ui/references/tokens.css` |
 | git | commit | `/git:commit` | 檢視 `git status` / `git diff`，把待提交內容切成多個邏輯變更，逐一 stage（絕不 `git add -A` / `.` / `-u`，排除 `node_modules`、`dist`、`.env`、secrets）並建立 Conventional Commit 格式的 commit，直到沒有可提交的檔案，不 push |
 
@@ -40,7 +41,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 .
 ├── .claude-plugin/marketplace.json   # 列出所有 plugin，source 指向分類資料夾
 ├── domain/                           # 領域建模：business-rules、model
-├── architecture/                     # 架構決策：tech-stack
+├── architecture/                     # 架構決策：tech-stack、init
 ├── ui/                               # UI 風格：tonal-ui
 ├── git/                              # git 工作流：commit
 └── <plugin>/

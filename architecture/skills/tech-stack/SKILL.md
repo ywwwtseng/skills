@@ -1,6 +1,6 @@
 ---
 name: tech-stack
-description: 透過多輪問答協助使用者為新專案選型 frontend、mobile app、backend、database、infra 與專案架構模式（monorepo 等），並輸出 docs/tech-stack.md 決策文件。當使用者要開新專案不知道用什麼技術、想比較技術方案、或明確要求技術選型時使用。
+description: 透過多輪問答協助使用者為新專案選型 frontend、mobile app、backend、database、infra 與專案架構模式（monorepo 等），並輸出 docs/architecture/tech-stack.md 決策文件。當使用者要開新專案不知道用什麼技術、想比較技術方案、或明確要求技術選型時使用。
 ---
 
 # Tech Stack
@@ -93,7 +93,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 
 ### Step 5：輸出文件
 
-寫入 `docs/tech-stack.md`。若檔案已存在，先用 `AskUserQuestion` 確認「覆蓋 / 另存為 `docs/tech-stack-YYYY-MM-DD.md`」。
+寫入 `docs/architecture/tech-stack.md`。若檔案已存在，先用 `AskUserQuestion` 確認「覆蓋 / 另存為 `docs/architecture/tech-stack-YYYY-MM-DD.md`」。
 
 文件格式：
 
@@ -160,7 +160,11 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 
 「約束與慣例」除了技術規則，也要寫明給 AI agent 遵守的驗證要求：型別檢查、lint、測試指令，以及 schema / API 契約的單一來源（zod、OpenAPI、Prisma schema 等）。
 
-輸出後在對話中簡短摘要，並建議使用者把「約束與慣例」段落複製到 `CLAUDE.md`（若專案有的話）；可再呼叫 `/architecture:tech-stack` 重跑某一層。
+輸出後在對話中簡短摘要，並建議使用者把「約束與慣例」段落複製到 `CLAUDE.md`（若專案有的話）；要改某一層可再呼叫 `/architecture:tech-stack` 重跑。
+
+### Step 6：交棒給初始化
+
+文件寫完後，在摘要末尾告訴使用者：**接著可以呼叫 `/architecture:init` 依這份文件建立專案骨架**（目錄結構、scaffold 指令、lint / test 設定、`.env.example`）。本 skill 只負責決策與文件，不動專案檔案。
 
 ## 判斷準則
 
