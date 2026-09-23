@@ -1,7 +1,7 @@
 {
   "name": "db",
-  "description": "資料庫設計：schema 把 docs/domain/model/ 的概念層 domain model 轉成可實作的資料庫 schema，輸出 docs/db/schema.md（table、欄位型別、鍵、索引、約束、不變量落點、遷移順序）",
-  "version": "0.1.0",
+  "description": "資料庫設計：schema 把 docs/domain/model/ 的概念層 domain model 轉成可實作的資料庫 schema，輸出 docs/db/schema.md（table、欄位型別、鍵、索引、約束、不變量落點、遷移順序）；migrate 依該文件算出與現況的 diff、產生可回滾的 migration 與 ORM schema、只對本機或開發資料庫套用並驗證，破壞性變更拆成 expand-migrate-contract 並只產檔不執行",
+  "version": "0.2.0",
   "author": {
     "name": "ywwwtseng"
   },
@@ -12,6 +12,10 @@
     "index",
     "migration",
     "sql",
-    "erd"
+    "erd",
+    "migrate",
+    "ddl",
+    "rollback",
+    "backfill"
   ]
 }

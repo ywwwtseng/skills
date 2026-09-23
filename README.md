@@ -34,6 +34,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | arch | tech-stack | `/arch:tech-stack` | 多輪問答選型 frontend / mobile / backend / database / infra 與架構模式，輸出 `docs/architecture/tech-stack.md` |
 | arch | init | `/arch:init` | 讀 `docs/architecture/tech-stack.md`，把專案實際建起來：repo 骨架、官方 scaffold 指令、lint / test / 型別檢查、`.env.example`、CI、`CLAUDE.md` 約束段落，最後跑一次 typecheck / lint / test / build 驗證；不 commit、不建雲端資源、不寫 secrets；scaffold 指令表在 `arch/skills/init/references/scaffold.md` |
 | db | schema | `/db:schema` | 讀 `docs/domain/model/` 的概念層模型，輸出單一份 `docs/db/schema.md`：table / collection、欄位與型別、主鍵外鍵、唯一約束、CHECK、索引、列舉落地、每條不變量的執行落點（DB 約束 or 應用層）、並行策略、遷移順序與破壞性變更；每張表與欄位都追溯回模型元素與規則 ID，模型缺漏回報而不在 schema 層補；只產設計文件，不寫 migration / ORM 檔；對應細則在 `db/skills/schema/references/`（`mapping.md`、`conventions.md`、`dialects.md`、`template.md`） |
+| db | migrate | `/db:migrate` | 把 `docs/db/schema.md` 變成真的 migration：先 introspect 現況算出與目標的 **diff**（不憑文件重建整份 CREATE TABLE）、把變更分成安全 / 需回填 / 破壞性三類、一個 migration 一件事且都寫得出 down（寫不出的標不可逆、單獨成檔）、同步 ORM schema 並用原生 SQL 補回 ORM 表達不出的 CHECK 與部分索引、**只對本機或開發資料庫套用**（連線判斷不出來就停）並用 `up → introspect 比對 → down → up` 驗證可回滾；破壞性變更依 expand-migrate-contract 拆階段，contract 只產檔不執行並附 runbook；工具指令在 `db/skills/migrate/references/tools.md`、各類變更配方在 `destructive.md` |
 | impl | plan | `/impl:plan` | 把一個 feature 的 `docs/domain/business-rules/`、`docs/domain/model/`、`docs/db/schema.md` 切成可獨立驗證、可續跑的 task 清單，輸出 `docs/impl/<feature>/plan.md`：每個 task 帶追溯 ID、預估動到的檔案、前置依賴、驗收指令與狀態，檔案開頭自帶「執行協議」，讓被壓縮或跨 session 的 agent 只讀這份檔案就能接手；垂直切片優先（每個 task 做完系統仍可跑）、一個 task 一個 context window 一個 commit；不寫產品程式碼，實作由 `/impl:feature` 逐個 task 執行，每個 task 結束由 `/git:commit` 建還原點 |
 | impl | feature | `/impl:feature` | 依 `docs/impl/<feature>/plan.md` 逐個 task 實作：找出執行序上第一個未完成的 task、只載入它「來源」與「動到」指到的上下文、寫程式與測試（案例取自 BR 的「輸入 → 預期結果」）、跑驗收指令（該 task 的 + 既有測試不能紅）、回寫狀態到 plan.md、呼叫 `/git:commit` 帶 task ID 建還原點，然後才進下一個；驗收沒過不標 done、卡住三次改 `blocked` 停下來問、不擴張範圍也不改切法（要改回 `/impl:plan`）；不 push |
 | impl | verify | `/impl:verify` | 開 PR 前的品質閘門：逐條走 `docs/domain/business-rules/` 的 BR，確認每條都有測試在驗（帶行號證據，分 `完整覆蓋` / `部分覆蓋` / `有實作無測試` / `未覆蓋`）、`docs/db/schema.md` 的不變量落點是否真的落地、全套驗證指令實跑一次、抽查測試有沒有被動手腳（`.skip` / 恆真斷言 / 既有預期值被改 / 上游文件被改）、diff 有沒有洩出 plan 的「不做」範圍；輸出 `docs/impl/<feature>/verification.md` 並給 `pass` / `pass with findings` / `fail`，每個缺口回寫成 plan.md 末尾的新 task 讓 `/impl:feature` 自動去補；只稽核不修、不下 git 指令 |
@@ -51,7 +52,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ├── .claude-plugin/marketplace.json   # 列出所有 plugin，source 指向分類資料夾
 ├── domain/                           # 領域建模：business-rules、model、feedback
 ├── arch/                             # 架構決策：tech-stack、init
-├── db/                               # 資料庫設計：schema
+├── db/                               # 資料庫設計：schema、migrate
 ├── impl/                             # 實作執行：plan、feature、verify、fix
 ├── ui/                               # UI 風格：tonal-ui
 ├── git/                              # git 工作流：commit、pr

@@ -11,7 +11,7 @@ description: 把 docs/domain/model/ 的概念層 domain model 轉成可直接寫
 
 - **輸入**：`docs/domain/model/`（`README.md` 的追溯表與聚合表、各聚合檔、`shared.md`）。模型是唯一的內容來源；規則文件只在需要確認某條規則的原文時回頭查。
 - **輸出**：單一檔案 `docs/db/schema.md`。模型依聚合分檔，schema 不分檔——schema 的價值在於一次看見所有 table、外鍵與索引。
-- **不做**：實際的 migration 檔、ORM 程式碼（Prisma / Drizzle schema）、API 型別、查詢執行計畫調校。本 skill 只產出設計文件，檔案生成由後續實作或 `/arch:init` 負責。
+- **不做**：實際的 migration 檔、ORM 程式碼（Prisma / Drizzle schema）、API 型別、查詢執行計畫調校。本 skill 只產出設計文件，migration 與 ORM 檔案由 `/db:migrate` 產生並套用。
 
 模型回答「領域裡有哪些東西、守哪些規則」；schema 回答「這些東西怎麼存、規則由誰執行」。分開的意義是：模型變了才動 schema，schema 為了效能做的取捨不反過來改模型。
 
@@ -110,7 +110,7 @@ options:
 3. 不變量落點統計：DB 擋 N 條 / 應用層 M 條 / 未落地 K 條
 4. 列出最值得確認的 3 個設計假設，以及破壞性變更（若有）
 5. 列出「模型回饋」（模型的矛盾或缺口，若有），建議回 `/domain:model` 處理
-6. 下一步：依本文件寫 migration 與 ORM schema；模型改了就重跑 `/db:schema` 增量更新，不要直接改 migration 反推
+6. 下一步：`/db:migrate` 依本文件產生 migration 與 ORM schema 並套用到本機驗證；模型改了就重跑 `/db:schema` 增量更新，不要直接改 migration 反推
 
 ## 判斷準則
 

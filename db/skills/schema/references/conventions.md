@@ -80,4 +80,4 @@ table 與欄位名取自模型的英文識別名（`Order` → `orders`、`unitP
 - 破壞性變更（改型別、改主鍵、刪欄位、既有表加 NOT NULL、加唯一約束）另列一段，每條寫：影響的表、是否需要回填、是否需要停機、回滾方式。
 - 加 NOT NULL 的標準三步：先加可空欄位 → 回填 → 再加約束。
 - 大表加索引寫明用非阻塞方式（PostgreSQL `CREATE INDEX CONCURRENTLY`）。
-- 本 skill 不產 migration 檔；這段是給後續實作照著寫的順序清單。
+- 本 skill 不產 migration 檔；這段是給 `/db:migrate` 照著走的順序清單。
