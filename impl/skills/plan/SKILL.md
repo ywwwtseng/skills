@@ -33,10 +33,16 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 ### Step 0：確認範圍、讀上游、盤點現況
 
 1. **確認是哪個 feature。** 使用者沒指定時，列出 `docs/domain/business-rules/` 下的檔案讓他選（`AskUserQuestion`）。一次只規劃一個 feature。
-2. **檢查續跑。** `docs/impl/<feature>/plan.md` 已存在 → 進入 Step 6 的續跑模式，不要重寫整份。
-3. **讀上游，缺什麼就停。** 沒有 `docs/domain/business-rules/<feature>.md` 時不要憑一句話排 task——說明需要先有規則，建議先跑 `/domain:business-rules`，然後停止。模型或 schema 缺席時可以繼續（有些 feature 不碰資料庫），但要在 plan 的「上游狀態」記明是在缺什麼的情況下排的。
-4. **抓驗證指令**（核心規則 9）：typecheck、lint、test（含只跑單一檔案的寫法）、build、dev。記下來，Step 3 每個 task 都要從這組指令挑。
-5. **盤點既有程式碼**：目錄結構、既有相似 feature 怎麼分層、測試放哪裡怎麼命名、有沒有現成可複用的東西。plan 的 task 要長得像這個 repo 既有的樣子，不是像教科書。
+2. **檢查續跑。** `docs/impl/<feature>/plan.md` 已存在 → 進入 Step 6 的續跑模式，不要重寫整份（跳過下一步，你應該已經在這個 feature 的分支上）。
+3. **確認起點分支**（只有全新 feature 才做）。規劃一個新 feature 前，工作區要乾淨、而且要站在 base branch 上：
+   - 當前在別的 feature 分支上，**且**那個 feature 已經開過 PR（`gh pr view` 查得到）→ `git switch <base>` 並 `git pull --ff-only`，從乾淨的起點開始。
+   - 當前在別的 feature 分支上，但**還沒開 PR**（上一個 feature 做到一半被打斷）→ 停下來問要先做完它還是擱置，不要默默切走。
+   - 工作區有未提交的變更 → 停下來，建議先跑 `/git:commit`。
+
+   漏掉這一步，新 feature 的 commit 會疊在上一個 feature 的分支上，最後被捲進上一個 PR。無人看守時沒有人會發現。
+4. **讀上游，缺什麼就停。** 沒有 `docs/domain/business-rules/<feature>.md` 時不要憑一句話排 task——說明需要先有規則，建議先跑 `/domain:business-rules`，然後停止。模型或 schema 缺席時可以繼續（有些 feature 不碰資料庫），但要在 plan 的「上游狀態」記明是在缺什麼的情況下排的。
+5. **抓驗證指令**（核心規則 9）：typecheck、lint、test（含只跑單一檔案的寫法）、build、dev。記下來，Step 3 每個 task 都要從這組指令挑。
+6. **盤點既有程式碼**：目錄結構、既有相似 feature 怎麼分層、測試放哪裡怎麼命名、有沒有現成可複用的東西。plan 的 task 要長得像這個 repo 既有的樣子，不是像教科書。
 
 ### Step 1：切片策略
 
