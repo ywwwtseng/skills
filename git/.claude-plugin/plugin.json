@@ -1,7 +1,7 @@
 {
   "name": "git",
-  "description": "git 工作流：commit 檢視變更、把待提交內容切成多個邏輯變更，逐一建立 Conventional Commit 格式的 commit 直到沒有可提交的檔案，不推送；pr 把 feature 的 commit 移到分支、跑驗證閘門、push 並開帶追溯表的 pull request，不合併",
-  "version": "0.4.0",
+  "description": "git 工作流：commit 檢視變更、把待提交內容切成多個邏輯變更，逐一建立 Conventional Commit 格式的 commit 直到沒有可提交的檔案，不推送；pr 把 feature 的 commit 移到分支、跑驗證閘門、push 並開帶追溯表的 pull request，加 --merge 時在 CI 綠且 verdict 為 pass 後以 rebase 合併並切回 base branch",
+  "version": "0.5.0",
   "author": {
     "name": "ywwwtseng"
   },
@@ -12,6 +12,8 @@
     "pull-request",
     "pr",
     "branch",
-    "push"
+    "push",
+    "merge",
+    "auto-merge"
   ]
 }

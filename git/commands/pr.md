@@ -1,6 +1,7 @@
 ---
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git switch:*), Bash(git checkout:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(git remote:*), Bash(git fetch:*), Bash(git push:*), Bash(gh:*), Bash(pnpm:*), Bash(npm:*), Bash(yarn:*), Bash(bun:*), Bash(cargo:*), Bash(uv:*), Bash(make:*), Read, Grep, Glob, AskUserQuestion
-description: Move the current feature branch's commits to a reviewable pull request, with traceability back to the plan and business rules
+argument-hint: [--merge] [base-branch]
+description: Move the current feature branch's commits to a reviewable pull request, with traceability back to the plan and business rules; with --merge, land it and return to the base branch
 ---
 
 ## Context
@@ -23,7 +24,12 @@ Take the commits produced by this feature's implementation and turn them into on
 
 This is the exit of the pipeline: `/domain:business-rules` → `/domain:model` → `/db:schema` → `/impl:plan` → `/impl:feature` → `/git:commit` → **`/git:pr`**. Every earlier step refuses to push, so nothing leaves the machine until this command runs.
 
-Do not merge the pull request. Do not push to the default branch.
+Arguments (`$ARGUMENTS`):
+
+- **`--merge`** — after the pull request is green, land it and return to the base branch (steps 8 and 9). This is the unattended solo mode: no other person is going to review it, so `/impl:verify` is the gate. Without this flag, stop after opening the pull request and leave merging to a human.
+- **A branch name** — use it as the base branch instead of the repository default.
+
+Never merge without `--merge`. Never push to the default branch.
 
 ### 1. Check preconditions
 
@@ -163,21 +169,56 @@ Fill every section from files, not from memory. Omit a section only when the sou
 
 Do not invent coverage, test names, or results. A rule with no test is listed as `未覆蓋`, not omitted.
 
-### 7. Report CI
+### 7. Wait for CI
 
 Run `gh pr checks --watch` with a bounded wait (stop waiting after a few minutes or when checks settle).
 
-- All green → report it.
-- Red → report which check failed and the failing output. Do not attempt to fix it in this command; hand back to `/impl:fix`.
-- No checks configured → say so.
+- All green → continue.
+- Red → report which check failed and the failing output. Do not attempt to fix it here; hand back to `/impl:fix`. **Never merge on red.**
+- No checks configured → say so, and treat step 3's verification evidence as the only gate.
 
-### 8. Report
+### 8. Merge (only with `--merge`)
+
+Merging is not reversible for the people who already pulled, so every one of these must hold. If any fails, leave the pull request open, say which check stopped it, and skip to step 10.
+
+- `--merge` was passed
+- The pull request is **not** a draft
+- The verification verdict was `pass` — not `pass with findings`, not absent
+- CI is green, or there are no checks
+- `gh pr view --json mergeable,mergeStateStatus` reports no conflicts
+- `gh pr view --json reviewDecision` is not `CHANGES_REQUESTED`
+- There are no unresolved comment threads asking for changes
+
+Then:
+
+```sh
+gh pr merge --rebase --delete-branch
+```
+
+Use `--rebase`, not `--squash`: every task commit is a restore point that `/impl:feature` deliberately created, and squashing collapses a whole feature into one commit that cannot be bisected. Use `--squash` only when the user asked for one commit per feature.
+
+If the merge is rejected, report the reason and stop. Do not retry with `--admin`, do not force anything, and do not close the pull request.
+
+### 9. Return to the base branch (only after a successful merge)
+
+```sh
+git switch <base>
+git pull --ff-only origin <base>
+```
+
+Then confirm the working tree is clean and the merged commits are present in the base branch. This is what lets the next feature start from a clean base instead of stacking on top of this one — without it, the next feature's commits land on this branch and end up inside this pull request.
+
+If `git pull --ff-only` fails, report it and stop; do not merge or rebase to force it through.
+
+### 10. Report
 
 - The pull request URL and whether it was created or updated, and whether it is a draft
 - The branch that was pushed, and whether commits were moved off the base branch in step 2
 - The commits included, oldest first
 - Verification evidence used: the report file, or the commands run and their results
-- Anything that blocked or was deliberately left out, and which skill should handle it
 - CI status
+- **Whether it was merged**, and if not, which condition in step 8 stopped it
+- The branch you are on now, and whether the working tree is clean
+- Anything that blocked or was deliberately left out, and which skill should handle it
 
-Do not merge. Do not delete branches. Do not amend or rewrite commits.
+Do not amend or rewrite commits. Do not merge without `--merge`.
