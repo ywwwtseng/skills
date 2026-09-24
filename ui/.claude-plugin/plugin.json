@@ -1,7 +1,7 @@
 {
   "name": "ui",
-  "description": "UI 風格：tonal-ui 不畫框線、用底色色塊分層（Gmail / Material 3 tonal surface）：design token、元件規則與交件前檢查清單",
-  "version": "0.2.0",
+  "description": "UI：screens 把規則、模型與契約轉成畫面規格（畫面地圖、顯示什麼、可觸發哪些命令、每種狀態下看到什麼、每個錯誤碼的畫面行為），依畫面分檔輸出 docs/ui/screens/；tonal-ui 是視覺語言：不畫框線、用底色色塊分層（Gmail / Material 3 tonal surface），含 design token 與元件規則",
+  "version": "0.3.0",
   "author": {
     "name": "ywwwtseng"
   },
@@ -11,6 +11,10 @@
     "design-tokens",
     "material",
     "tonal",
-    "borderless"
+    "borderless",
+    "screens",
+    "flows",
+    "states",
+    "spec"
   ]
 }
