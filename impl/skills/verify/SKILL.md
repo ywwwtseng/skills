@@ -11,7 +11,7 @@ description: 在開 PR 之前把一個 feature 的實作從頭核對一遍——
 
 ## 定位：實作與 PR 之間的閘門
 
-- **輸入**：`docs/impl/<feature>/plan.md`（task 狀態、規則覆蓋表、備註、上游回饋）、`docs/domain/business-rules/<feature>.md`（每條 BR 的輸入 → 預期結果）、`docs/domain/model/`（不變量、狀態機）、`docs/api/contract.md`（端點與錯誤碼，存在的話）、`docs/db/schema.md`（不變量落點表）、以及**實際的程式碼、測試與 git 紀錄**。
+- **輸入**：`docs/impl/<feature>/plan.md`（task 狀態、規則覆蓋表、備註、上游回饋）、`docs/domain/business-rules/<feature>.md`（每條 BR 的輸入 → 預期結果）、`docs/domain/model/`（不變量、狀態機）、`docs/api/contract.md`（端點與錯誤碼，存在的話）、`docs/ui/screens/`（畫面狀態與錯誤行為，存在的話）、`docs/db/schema.md`（不變量落點表）、以及**實際的程式碼、測試與 git 紀錄**。
 - **輸出**：`docs/impl/<feature>/verification.md`（一份有明確 verdict 的稽核報告）、回寫 `plan.md`（把缺口變成新 task）。
 - **不做**：改產品程式碼、改測試、改上游文件、下 git 指令、開 PR。發現問題就記錄並轉成 task，修補交給 `/impl:feature`（缺工作）或 `/impl:fix`（有缺陷）。
 
@@ -71,6 +71,8 @@ plan 的規則覆蓋表寫「未覆蓋 — <原因>」的，確認那個原因�
 `docs/domain/model/` 裡的狀態機：每個**非法轉換**是否有測試驗它被拒絕。只測合法路徑不算覆蓋。
 
 有 `docs/api/contract.md` 時再走一次錯誤碼：契約上每個錯誤碼，程式碼裡真的會在那個情境回出來嗎、有沒有測試驗它？以及反過來——每條 BR 的失敗情境是否都能對到一個實際會被回出來的錯誤碼。契約寫了、程式沒回，客戶端會收到一個它沒有處理分支的錯誤。
+
+有 `docs/ui/screens/` 時走畫面狀態：規格寫明的每個狀態（空、錯誤、權限不足、離線、送出失敗）在程式碼裡真的有對應分支嗎。只實作 happy path 的畫面，在 demo 時看起來是好的。
 
 ### Step 4：跑全套驗證
 
@@ -169,6 +171,8 @@ plan 的規則覆蓋表寫「未覆蓋 — <原因>」的，確認那個原因�
 | 1 | high | <一句話> | `<path>:<line>` / `<commit>` | 已新增 T-0XX / 建議 `/impl:fix` |
 
 嚴重度：`high`（規則沒被實現、測試被動過手腳、驗證紅）／`medium`（有實作無測試、不變量沒落地）／`low`（重複實作、debug 殘留、文件不同步）
+
+`low` 的處理方式一律是「交給 `/impl:refactor`」而不是新增 task——它們不影響這個 feature 是否做完，不該擋住 PR。
 
 ## 範圍
 

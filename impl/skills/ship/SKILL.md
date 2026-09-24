@@ -13,7 +13,7 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 
 - **輸入**：`docs/impl/backlog.md`（feature 佇列與狀態）、各 feature 的 `plan.md` 與 `verification.md`、`docs/domain/business-rules/` 下還沒排進佇列的規則文件。
 - **輸出**：回寫後的 `backlog.md`，以及被推進的 feature（由下游 skill 實際產出程式碼、PR、merge）。
-- **不做**：寫程式碼、開 PR、下 git 指令、改上游文件、部署。全部委派：`/impl:plan`、`/impl:feature`、`/impl:verify`、`/git:pr`、`/domain:feedback`、`/impl:fix`。
+- **不做**：寫程式碼、開 PR、下 git 指令、改上游文件、部署。全部委派：`/impl:plan`、`/impl:feature`、`/impl:verify`、`/git:pr`、`/domain:feedback`、`/impl:fix`。技術債清理（`/impl:refactor`）**不在迴圈裡**——重構的價值判斷需要人，讓它在無人看守時自動去改已經能正常運作的程式碼，風險大於收益；由使用者在 feature 之間手動跑。
 
 `plan.md` 回答「這個 feature 的下一個 task 是什麼」；`backlog.md` 回答「這個專案的下一個 feature 是什麼」。兩份都是檔案，所以兩層都能被壓縮、被中斷、跨 session 續跑。
 

@@ -1,7 +1,7 @@
 {
   "name": "impl",
-  "description": "實作執行：ship 是外層總調度，維護 docs/impl/backlog.md 的 feature 佇列並一輪推進一步（判斷階段 → 呼叫一個 skill → 回寫狀態）；plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍；fix 是 plan 之外的修復迴路，先分流是實作問題還是規則缺漏，再用 regression test 釘住 bug 並修 root cause",
-  "version": "0.6.0",
+  "description": "實作執行：ship 是外層總調度，維護 docs/impl/backlog.md 的 feature 佇列並一輪推進一步（判斷階段 → 呼叫一個 skill → 回寫狀態）；plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍；fix 是 plan 之外的修復迴路，先分流是實作問題還是規則缺漏，再用 regression test 釘住 bug 並修 root cause；refactor 收齊被禁止順手改的技術債（plan 備註、verify 的 low findings、fix 發現但沒修的），在測試保護下做行為不變的改善，不准改測試",
+  "version": "0.7.0",
   "author": {
     "name": "ywwwtseng"
   },
@@ -26,6 +26,8 @@
     "ship",
     "backlog",
     "orchestration",
-    "unattended"
+    "unattended",
+    "refactor",
+    "tech-debt"
   ]
 }
