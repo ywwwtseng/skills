@@ -55,6 +55,7 @@ C3 不是硬性阻塞——第一個 feature 的 T-001 本來就該是貫穿切�
 |---|---|---|---|---|
 | D1 | 資料表是否已建立 | 本機 / 開發資料庫的 schema 與 `docs/db/schema.md` 一致 | 第一個 feature 寫完程式才發現沒有資料表 | `/db:migrate` |
 | D2 | UI 風格是否已宣告 | `CLAUDE.md` 或 `tech-stack.md` 寫明 `tonal-ui` / `calm-ui` / 既有設計系統 | 兩套視覺語言都會被觸發，產出互相矛盾的元件 | 在 `CLAUDE.md` 加一行 |
+| D3 | **有 App 時**：模擬器跑得起來 | 開發指令（預設 iOS，如 `npx expo start --ios`）實際跑過一次、模擬器開得起來 | 每個 UI task 的驗收都卡在「開不起來」，而那要到第一個畫面做完才發現 | 裝 Xcode / 開好模擬器，指令寫進 `CLAUDE.md` |
 
 **D1 特別注意**：`/impl:ship` 的階段表只有 `plan → feature → verify → pr`，**不包含 `/db:migrate`**。所以資料庫的落地是起飛前的一次性動作。schema 之後再變動（feature 做到一半發現要加欄位），ship 不會自己去跑 migrate——那會變成一條上游回饋或一個 `blocked` task 停下來等人。
 

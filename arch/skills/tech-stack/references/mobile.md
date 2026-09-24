@@ -29,6 +29,15 @@
 - **優先順序**：語言限制 > 單一 codebase > 原生功能需求。無語言限制或含 TS 時一律 Expo（一套程式碼、與 Web 共用型別，維護面最小），原生功能需求轉為「風險」與「未決事項」（逐一查 Expo SDK 是否已有 module）；原生雙寫只在原生功能是產品核心時推薦，並標注兩套 codebase 的同步成本。
 
 - **與 Web 共用**：選 Expo 且 Web 用 React 時，建議 monorepo（Turborepo / pnpm workspace），共用 `packages/api-client`、`packages/types`、`packages/validation`；UI 層不強求共用。
+- **本機開發平台**：**預設 iOS 模擬器**。理由是啟動最快、不需要先開 Android Studio 的 AVD、而且 macOS 上一定裝得起來；Android 的差異留到實機測試與上架前的回歸再處理。這一條要寫進「約束與慣例」，因為 `/impl:feature` 與 `/impl:verify` 每個 UI task 都要照它開來確認。
+  | 技術 | 開發指令 | 備註 |
+  |---|---|---|
+  | Expo | `npx expo start --ios` | 需要 custom native module 時改 `npx expo run:ios` |
+  | Flutter | `flutter run -d ios` | 先 `open -a Simulator` 開好模擬器 |
+  | 原生 Swift | `xcodebuild` 或直接開 Xcode | CI 用 `xcodebuild -scheme <name> -destination 'platform=iOS Simulator,name=iPhone 15'` |
+  | Capacitor | `npx cap run ios` | |
+
+  開發者在 Windows / Linux、或產品明確以 Android 為主時改成 Android 並在文件寫明——這是預設值，不是硬規則。
 - **推播**：Expo → Expo Push（底層 FCM / APNs）；Flutter / 原生 → Firebase Cloud Messaging；backend 只需一個 push 發送端點。
 - **Auth**：與 Web 共用同一套（Supabase Auth / Clerk / 自建 JWT），mobile 端用 secure storage 存 token。
 - **發布**：Expo → EAS Build + EAS Submit；Flutter / 原生 → Fastlane。App store 審核週期（iOS 約 1–3 天）寫入「風險 / 注意事項」。

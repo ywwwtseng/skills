@@ -76,7 +76,7 @@ plan 的規則覆蓋表寫「未覆蓋 — <原因>」的，確認那個原因�
 
 ### Step 4：跑全套驗證
 
-實際執行（核心規則 3）：type check、lint、全部測試、build。UI 類的 feature 依 plan 的驗收描述用 `/run` 開起來確認。
+實際執行（核心規則 3）：type check、lint、全部測試、build。UI 類的 feature 依 plan 的驗收描述用 `/run` 開起來確認；行動端預設開 iOS 模擬器（指令見 `CLAUDE.md` 或 tech-stack 的「約束與慣例」）。開不起來就是 `fail`——「程式碼看起來對」不算驗過。
 
 逐條記下指令與結果。任何一條紅 → verdict 直接是 `fail`，附上失敗輸出。
 

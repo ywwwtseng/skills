@@ -141,7 +141,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 - **注意**：兩套視覺語言互斥，全專案只用選定的這一套；畫面規格另由 `/ui:screens` 產出，與視覺語言不重疊
 
 ### Mobile（有 App 時才有此段）
-（同格式，另加 **與 Web 共用**：哪些程式碼 / 型別 / API client 可共用）
+（同格式，另加 **與 Web 共用**：哪些程式碼 / 型別 / API client 可共用；以及 **本機開發平台**：預設 iOS 模擬器 + 實際的開發指令）
 
 ### Backend
 （同格式）
@@ -155,6 +155,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 ## 約束與慣例
 <給後續開發遵守的硬規則，每條一行：ORM、auth 方式、上傳方式、API 版本化、不要做的事>
 <有 UI 時，第一條固定是：**UI 風格：<tonal-ui / calm-ui / 既有設計系統>，全專案只用這一套，不混用另一套**>
+<有 App 時，加一條：**行動端本機開發預設開 iOS 模擬器**，並附該技術棧的開發指令（見 `references/mobile.md`）>
 
 ## 整體架構
 <mermaid 圖：web / mobile client → backend → db / redis，標注部署位置；有 App 時標注推播與 app store>

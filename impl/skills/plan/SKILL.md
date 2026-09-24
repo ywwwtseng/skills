@@ -79,6 +79,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 - 有測試的 task → 跑該測試檔（`pnpm test src/domain/order.test.ts`），並在「看到什麼算過」寫明要新增哪幾個測試案例（直接取自 BR 的「輸入 → 預期結果」）。
 - 純型別 / 設定類的 task → `pnpm typecheck` 或 `pnpm build`。
 - UI task → 除了 typecheck，寫明用 `/run` 開起來要看到什麼畫面；有 `docs/ui/screens/` 時，驗收直接引用規格的狀態（「在空狀態顯示 X、在離線顯示 Y」），不要只寫「畫面正常」。
+- 行動端的 UI task → **驗收指令寫成開 iOS 模擬器的那一條**（`npx expo start --ios`、`flutter run -d ios`……，以 `docs/architecture/tech-stack.md` 的「約束與慣例」為準）。不要寫成 `npx expo start` 讓執行的 agent 自己選平台——它會選到沒裝模擬器的那一個然後卡住。Android 專屬的行為（返回鍵、權限對話框差異）才另外開一個 task 標明要用 Android 驗。
 - **每個 task 的驗收都隱含包含「既有測試不能壞」**，這條寫在執行協議裡，不用每個 task 重複。
 
 ### Step 4：排序
