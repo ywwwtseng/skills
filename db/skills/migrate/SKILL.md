@@ -105,6 +105,10 @@ contract 階段的檔案產出但不執行（核心規則 5），並寫一份 ru
 
 ### Step 8：收尾
 
+**先做過期引用檢查**：這次的 migration 如果改了名字或移除了東西（改欄位名、改索引名、刪欄位、改列舉值），`grep -rn "<舊名>" docs/ --include="*.md"` 掃一次，找出還在引用舊名的文件（最常見的是 `docs/architecture/tech-stack.md` 的排程與選型理由、`docs/api/contract.md` 的欄位表）。逐一列出檔案與行號，標明結論有沒有受影響。**不要自己改別人的文件**（核心規則 9）。
+
+`docs/db/schema.md` 與實際 DDL 的差異在 Step 5 已經核過；這一步核的是**文件之間**的引用。
+
 在對話中：
 
 1. 新增 / 修改了哪些 migration 檔與 ORM schema 檔
@@ -113,6 +117,7 @@ contract 階段的檔案產出但不執行（核心規則 5），並寫一份 ru
 4. 驗證結果：introspect 比對過沒有、down → up 測過沒有、測試與 typecheck 結果
 5. **沒有套用的破壞性變更**與它們的 runbook 摘要
 6. 上游回饋（若有），建議跑 `/domain:feedback` 或重跑 `/db:schema`
+6.5. **過期引用**：哪些文件還在引用被改掉的識別名（檔案 + 行號 + 結論是否受影響）
 7. 下一步：`/git:commit` 提交 migration 與 ORM 變更；production 的套用由人依 runbook 執行
 
 ## 判斷準則

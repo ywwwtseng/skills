@@ -18,14 +18,14 @@
       "name": "arch",
       "source": "./arch",
       "description": "架構決策：/arch:tech-stack 透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/architecture/tech-stack.md；/arch:init 依該文件初始化專案骨架與工具鏈",
-      "version": "0.7.1",
+      "version": "0.7.2",
       "category": "productivity"
     },
     {
       "name": "db",
       "source": "./db",
       "description": "資料庫設計：schema 把 docs/domain/model/ 的概念層 domain model 轉成可實作的資料庫 schema，輸出 docs/db/schema.md（table、欄位型別、鍵、索引、約束、不變量落點、遷移順序）；migrate 依該文件算出與現況的 diff、產生可回滾的 migration 與 ORM schema、只對本機或開發資料庫套用並驗證，破壞性變更拆成 expand-migrate-contract 並只產檔不執行",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "category": "productivity"
     },
     {
