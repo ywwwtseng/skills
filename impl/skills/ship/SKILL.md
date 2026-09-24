@@ -1,6 +1,6 @@
 ---
 name: ship
-description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 這份 feature 佇列，然後一輪一輪把佇列上的 feature 從規則跑到進 main——判斷當前 feature 走到哪一階段（規劃 / 實作 / 稽核 / 開 PR / 合併），只呼叫該階段的那一個 skill，做完回寫佇列狀態，合併後切回 base branch 再取下一個。每輪開始前先清掉待處理的上游回饋。當使用者說「一路做下去」「把 backlog 跑完」「今晚自己跑」「做完一個接下一個」「無人看守開發」時使用。本 skill 不自己寫程式、不自己開 PR，只決定下一步該叫誰；不部署、不碰 production。
+description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 這份 feature 佇列，然後一輪一輪把佇列上的 feature 從規則跑到進 main——判斷當前 feature 走到哪一階段（規劃 / 實作 / 稽核 / 開 PR / 合併），只呼叫該階段的那一個 skill，做完回寫佇列狀態，合併後切回 base branch 再取下一個。每輪開始前先清掉待處理的上游回饋。第一輪開始前會先跑一次起飛前檢查（remote、gh、上游文件、專案骨架、資料表、UI 風格宣告），缺什麼就停下來說明而不是硬跑。當使用者說「一路做下去」「把 backlog 跑完」「今晚自己跑」「做完一個接下一個」「無人看守開發」「跑之前還要準備什麼」時使用。本 skill 不自己寫程式、不自己開 PR，只決定下一步該叫誰；不部署、不碰 production。
 ---
 
 # Impl Ship
@@ -27,7 +27,8 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 6. **佇列順序依相依，不依喜好。** 前置 feature 沒 `done` 就不能開始後面的。相依關係推不出來就問（一次一題）。多客戶端專案（行動端 / 第三方）固定是**伺服器端 feature 先於客戶端 feature**：契約要先被實作出來並進 main，客戶端才開始，否則客戶端會對著一份還沒實現的文件寫程式，而且整合失敗要到很後面才會被發現。同一個需求拆成 `<feature>-api` 與 `<feature>-app` 兩列，用「前置」欄串起來。
 7. **不擅自把新 feature 塞進佇列。** `docs/domain/business-rules/` 出現佇列裡沒有的規則文件時，列出來問要不要排進去、排在哪，不要自己決定專案接下來要做什麼。
 8. **卡住就停，並且寫清楚卡在哪。** 下游 skill 回報 `blocked` / `fail` / 需要裁定時，把原因原樣寫進 backlog 的備註再停。停下來時留下「回來的人要做什麼決定」比留下「它壞了」有用得多。
-9. **提問必須用 `AskUserQuestion`，一次只問一題。**
+9. **前置沒齊就不要起飛。** 第一輪開始前跑一次 `references/preflight.md` 的檢查。缺一份上游文件、缺 remote、缺 `gh`、資料表還沒建——這些不會讓迴圈立刻失敗，而是讓它在**做完最多工之後**才停（最典型的是整個 feature 做完、驗收過，才在 `/git:pr` 第一步發現沒有遠端）。
+10. **提問必須用 `AskUserQuestion`，一次只問一題。**
 
 ## backlog.md 格式
 
@@ -65,7 +66,15 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 
 ## 流程
 
-### Step 0：建立或讀取佇列
+### Step 0：起飛前檢查（只有第一輪做）
+
+照 `references/preflight.md` 逐項檢查：環境（git、remote、`gh`、工作區、分支）→ 文件鏈（規則、模型、tech-stack、schema / contract / screens 依專案形狀）→ 程式碼骨架（scaffold、驗證指令真的跑得起來）→ 一次性落地（資料表已建、UI 風格已宣告）。
+
+**有任何一項不通過就停在這裡**，回報缺什麼、要跑哪個 skill、建議的補齊順序，不要開始建佇列（核心規則 9）。
+
+`docs/impl/backlog.md` 已存在且有 `done` 的 feature → 這個專案已經起飛過，跳過本步驟。
+
+### Step 1：建立或讀取佇列
 
 `docs/impl/backlog.md` 不存在 → 建立：
 
@@ -76,20 +85,20 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 
 已存在 → **完整讀過**：佇列、階段、全部備註、變更紀錄。備註是上一輪的記憶。
 
-### Step 1：每輪的前置檢查
+### Step 2：每輪的前置檢查
 
 1. `git status` — 工作區不乾淨且不屬於當前 `doing` 的 feature → 停下來問。
 2. 掃各 `plan.md` 的「上游回饋」表：有 `high` 的待處理項 → 先跑 `/domain:feedback`，這一輪就到此為止（核心規則 5）。
 3. `docs/domain/business-rules/` 有佇列裡沒有的規則文件 → 列出來問（核心規則 7）。
 
-### Step 2：選 feature
+### Step 3：選 feature
 
 1. 有 `doing` 的 → 就是它（一次只做一個）。
 2. 沒有 → 取第一個 `todo` 且前置全部 `done` 的，狀態改 `doing`。
 3. 有 `blocked` 擋在前面且未解 → 先處理它，不要跳過去做後面的。
-4. 佇列全部 `done` → 進 Step 5 收尾。
+4. 佇列全部 `done` → 進 Step 7 收尾。
 
-### Step 3：判斷階段，呼叫**一個** skill
+### Step 4：判斷階段，呼叫**一個** skill
 
 依當前 feature 的檔案實況判斷（不要憑 backlog 上寫的階段，那是上一輪的紀錄）：
 
@@ -100,15 +109,15 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 | plan 全 `done`，沒有 `verification.md` 或它比最後一個 commit 舊 | `/impl:verify` | `verify` |
 | verdict `fail` 或 `pass with findings`（缺口已被寫成新 task） | `/impl:feature` | 回到 `feature` |
 | verdict `pass` | `/git:pr --merge` | `pr` → `merged` |
-| PR 已 merge | 標 `done`，回 Step 2 取下一個 | — |
+| PR 已 merge | 標 `done`，回 Step 3 取下一個 | — |
 
 `/git:pr --merge` 會在合併後切回 base branch 並 pull（它的 Step 9）。**確認它真的切回去了**再進下一個 feature——沒切回去的話，下一個 feature 的 commit 會疊在上一個分支上。
 
-### Step 4：回寫 backlog
+### Step 5：回寫 backlog
 
 每一輪結束都要寫（核心規則 2）：狀態、階段、PR 編號、最後更新、進度。下游 skill 回報的卡點原樣寫進備註。
 
-### Step 5：停止條件
+### Step 6：停止條件
 
 只有這五種情況停：
 
@@ -120,9 +129,9 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 | `/domain:feedback` 需要規則裁定 | 列出待決問題 |
 | 使用者喊停 | — |
 
-其餘一律繼續下一輪。要真的整晚跑，用 `/loop`（不給 interval，讓它自己抓節奏），每輪就是 Step 1–4。
+其餘一律繼續下一輪。要真的整晚跑，用 `/loop`（不給 interval，讓它自己抓節奏），每輪就是 Step 2–5。
 
-### Step 6：收尾
+### Step 7：收尾
 
 在對話中：
 
@@ -131,6 +140,10 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 3. 已合併的 PR（編號與標題）
 4. 停止原因（若停了）與「回來的人要做什麼決定」
 5. 當前分支與工作區是否乾淨
+
+## 判斷準則
+
+- `references/preflight.md`：起飛前的四類檢查（環境 / 文件鏈 / 程式碼骨架 / 一次性落地）、每項不通過會在哪裡爆、怎麼補、以及全新專案從零到可起飛的順序（Step 0 必讀）
 
 ## 與下游 skill 的協議
 
@@ -148,6 +161,7 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 
 | 症狀 | 為什麼是錯的 |
 |---|---|
+| 沒跑起飛前檢查就開始建佇列 | 缺 remote / 缺契約 / 資料表沒建，都要到做完最多工之後才發作（核心規則 9） |
 | 一輪裡把 plan → feature → verify → pr 全跑完 | 中途 context 就耗盡了，而且留下說不清楚做到哪的狀態（核心規則 1） |
 | 憑 backlog 上寫的階段決定下一步 | 那是上一輪寫的；檔案實況才是真的（Step 3） |
 | verdict 是 `pass with findings` 就合併 | 那些 findings 已經被寫成 task 了，合併等於把它們留在 main（核心規則 3） |
