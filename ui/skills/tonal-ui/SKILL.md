@@ -11,6 +11,17 @@ token 可以落在 CSS variables、Tailwind theme、React Native StyleSheet 或�
 **跟 `/ui:calm-ui` 二選一。** 那套是消費級 AI 產品的深色語言（近黑表面、極少卡片、Agent Feed）；
 這套是後台與內部系統的淺色語言。一個專案只能有一套。
 
+## 先確認這個專案選的是哪一套
+
+動手前依序查，查到就停：
+
+1. `CLAUDE.md` 的技術約束段（`/arch:init` 寫的「UI 風格：…」）
+2. `docs/architecture/tech-stack.md` 的「UI 風格」段或「約束與慣例」第一條
+3. 既有程式碼：有 `tokens.css` / `theme.ts` 就看它是淺色還是深色階梯
+4. 都沒有 → 用 `AskUserQuestion` 問一題，並建議把答案寫進 `CLAUDE.md`
+
+**查到的是另一套，就停下來說明，不要改用這一套做。** 混用會得到一個既不像工具也不像產品的東西，而且下一個 session 會再混一次。
+
 新做一個畫面、加一個元件、或把既有畫面改成這套風格時照這份做。所有數值在
 `references/tokens.css`（可直接貼），常見元件的寫法在 `references/component-recipes.md`。
 

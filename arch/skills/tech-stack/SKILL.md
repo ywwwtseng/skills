@@ -80,10 +80,13 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 | Frontend 特性（有 Web 時） | 需要 SEO・SSR / 高互動 SPA / 大量表單・後台 / 幾乎無 UI |
 | Mobile 特性（有 App 時） | iOS + Android 都要 / 只要單一平台 / 需要原生功能（相機・藍牙・背景定位）/ 需要離線 / 需要推播 |
 | Backend 特性 | Real-time（WebSocket） / 背景任務・排程 / 重運算・AI 推論 / 檔案上傳處理 |
+| UI 風格（有 Web 或 App 時） | 後台・內部系統（淺色、資訊密度高）/ 消費級 AI 產品（深色、Agent 主導）/ 已有設計系統 / 還沒決定 |
 | 主要資料模型 | 關聯資料為主 / 簡單 CRUD・傳統 Web / 文件資料為主 / 混合・不確定 |
 | 附加資料需求（多選） | Key-Value・Cache / 大量分析 / AI・Vector / 無 |
 
-**條件式提問**：Step 1 目標平台若不含 Web，跳過 Frontend 特性題；不含 App，跳過 Mobile 特性題。
+**條件式提問**：Step 1 目標平台若不含 Web，跳過 Frontend 特性題；不含 App，跳過 Mobile 特性題；兩者都不含（純 API / CLI / library）跳過 UI 風格題。
+
+**UI 風格的落點**：後台・內部系統 → `/ui:tonal-ui`；消費級 AI 產品 → `/ui:calm-ui`。兩套**互斥、不可混用**，所以這題要在文件裡寫死——沒寫的話每個 session 都要重猜，而猜錯的那一次會產出一個跟既有畫面不同語言的元件。已有設計系統 → 寫明位置，兩套都不套用。還沒決定 → 寫「未決」並列進「未決事項」，不要先挑一個。
 
 ### Step 4：初版推薦與確認（1–2 題）
 
@@ -109,6 +112,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 |---|---|---|
 | 架構 | … | … |
 | Frontend | … | … |
+| UI 風格 | … | … |（有 Web 或 App 時）
 | Mobile | … | … |（有 App 時）
 | Backend | … | … |
 | Database | … | … |
@@ -131,6 +135,11 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 - **替代方案**：…（何種情況下改選）
 - **風險 / 注意事項**：…（含 AI agent 友善度的降權項目，若有）
 
+### UI 風格（有 Web 或 App 時才有此段）
+- **選擇**：`/ui:tonal-ui`（後台・內部系統）/ `/ui:calm-ui`（消費級 AI 產品）/ 既有設計系統（附位置）/ 未決
+- **理由**：…
+- **注意**：兩套視覺語言互斥，全專案只用選定的這一套；畫面規格另由 `/ui:screens` 產出，與視覺語言不重疊
+
 ### Mobile（有 App 時才有此段）
 （同格式，另加 **與 Web 共用**：哪些程式碼 / 型別 / API client 可共用）
 
@@ -145,6 +154,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 
 ## 約束與慣例
 <給後續開發遵守的硬規則，每條一行：ORM、auth 方式、上傳方式、API 版本化、不要做的事>
+<有 UI 時，第一條固定是：**UI 風格：<tonal-ui / calm-ui / 既有設計系統>，全專案只用這一套，不混用另一套**>
 
 ## 整體架構
 <mermaid 圖：web / mobile client → backend → db / redis，標注部署位置；有 App 時標注推播與 app store>
