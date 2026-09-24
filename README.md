@@ -11,6 +11,7 @@ ywwwtseng 的個人 Claude Code plugins。
 /plugin install domain@skills
 /plugin install arch@skills
 /plugin install db@skills
+/plugin install api@skills
 /plugin install impl@skills
 /plugin install ui@skills
 /plugin install git@skills
@@ -35,6 +36,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | arch | init | `/arch:init` | 讀 `docs/architecture/tech-stack.md`，把專案實際建起來：repo 骨架、官方 scaffold 指令、lint / test / 型別檢查、`.env.example`、CI、`CLAUDE.md` 約束段落，最後跑一次 typecheck / lint / test / build 驗證；不 commit、不建雲端資源、不寫 secrets；scaffold 指令表在 `arch/skills/init/references/scaffold.md` |
 | db | schema | `/db:schema` | 讀 `docs/domain/model/` 的概念層模型，輸出單一份 `docs/db/schema.md`：table / collection、欄位與型別、主鍵外鍵、唯一約束、CHECK、索引、列舉落地、每條不變量的執行落點（DB 約束 or 應用層）、並行策略、遷移順序與破壞性變更；每張表與欄位都追溯回模型元素與規則 ID，模型缺漏回報而不在 schema 層補；只產設計文件，不寫 migration / ORM 檔；對應細則在 `db/skills/schema/references/`（`mapping.md`、`conventions.md`、`dialects.md`、`template.md`） |
 | db | migrate | `/db:migrate` | 把 `docs/db/schema.md` 變成真的 migration：先 introspect 現況算出與目標的 **diff**（不憑文件重建整份 CREATE TABLE）、把變更分成安全 / 需回填 / 破壞性三類、一個 migration 一件事且都寫得出 down（寫不出的標不可逆、單獨成檔）、同步 ORM schema 並用原生 SQL 補回 ORM 表達不出的 CHECK 與部分索引、**只對本機或開發資料庫套用**（連線判斷不出來就停）並用 `up → introspect 比對 → down → up` 驗證可回滾；破壞性變更依 expand-migrate-contract 拆階段，contract 只產檔不執行並附 runbook；工具指令在 `db/skills/migrate/references/tools.md`、各類變更配方在 `destructive.md` |
+| api | contract | `/api:contract` | 把 `docs/domain/model/` 的命令、查詢與領域事件轉成客戶端能依賴的契約，輸出單一份 `docs/api/contract.md`：端點（一個命令一個操作，狀態轉換各自獨立而不是 `PATCH {status}`）、request / response 欄位與型別、**每條 BR 的失敗情境都對應一個錯誤碼**（業務規則失敗不回 400）、統一的錯誤 envelope、認證授權、分頁排序篩選慣例、冪等與重試、推播 payload、以及向後相容規則與棄用流程；跟 `/db:schema` 對稱——兩者都吃同一份模型，一個回答「狀態怎麼存」，一個回答「外界怎麼呼叫」；行動端專案必備（舊版 app 會在手機上留數個月，契約發布後就是承諾）；細則在 `api/skills/contract/references/`（`mapping.md`、`compat.md`、`styles.md`、`template.md`） |
 | impl | ship | `/impl:ship` | 一人開發的無人看守總調度：維護 `docs/impl/backlog.md` 的 feature 佇列（feature / 規則文件 / 前置 / 狀態 / 階段 / PR），每輪先清掉 `high` 的待處理上游回饋，再依**檔案實況**（有沒有 plan.md、還有沒有未完成 task、有沒有 verification.md、verdict 是什麼）判斷當前 feature 走到哪一階段，**只呼叫那一個 skill**（`/impl:plan` → `/impl:feature` → `/impl:verify` → `/git:pr --merge`），回寫佇列後才進下一輪；合併後確認已切回 base branch 才取下一個 feature；只在佇列跑完 / `blocked` / verify `fail` / 需要規則裁定 / 使用者喊停時停下來；不寫程式碼、不開 PR、不決定專案要做什麼 |
 | impl | plan | `/impl:plan` | 把一個 feature 的 `docs/domain/business-rules/`、`docs/domain/model/`、`docs/db/schema.md` 切成可獨立驗證、可續跑的 task 清單，輸出 `docs/impl/<feature>/plan.md`：每個 task 帶追溯 ID、預估動到的檔案、前置依賴、驗收指令與狀態，檔案開頭自帶「執行協議」，讓被壓縮或跨 session 的 agent 只讀這份檔案就能接手；垂直切片優先（每個 task 做完系統仍可跑）、一個 task 一個 context window 一個 commit；不寫產品程式碼，實作由 `/impl:feature` 逐個 task 執行，每個 task 結束由 `/git:commit` 建還原點 |
 | impl | feature | `/impl:feature` | 依 `docs/impl/<feature>/plan.md` 逐個 task 實作：找出執行序上第一個未完成的 task、只載入它「來源」與「動到」指到的上下文、寫程式與測試（案例取自 BR 的「輸入 → 預期結果」）、跑驗收指令（該 task 的 + 既有測試不能紅）、回寫狀態到 plan.md、呼叫 `/git:commit` 帶 task ID 建還原點，然後才進下一個；驗收沒過不標 done、卡住三次改 `blocked` 停下來問、不擴張範圍也不改切法（要改回 `/impl:plan`）；不 push |
@@ -54,6 +56,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ├── domain/                           # 領域建模：business-rules、model、feedback
 ├── arch/                             # 架構決策：tech-stack、init
 ├── db/                               # 資料庫設計：schema、migrate
+├── api/                              # 介面契約：contract
 ├── impl/                             # 實作執行：ship、plan、feature、verify、fix
 ├── ui/                               # UI 風格：tonal-ui
 ├── git/                              # git 工作流：commit、pr

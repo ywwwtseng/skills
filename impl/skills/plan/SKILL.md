@@ -9,7 +9,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 
 ## 定位：設計文件與程式碼之間的那一層
 
-- **輸入**：`docs/domain/business-rules/<feature>.md`（要做什麼、每條規則的驗收）、`docs/domain/model/`（概念與不變量）、`docs/db/schema.md`（table 與落點）、`docs/architecture/tech-stack.md`（技術選擇、約束與慣例、驗證指令），以及**既有程式碼**（目錄結構、既有 feature 的實作與測試慣例）。
+- **輸入**：`docs/domain/business-rules/<feature>.md`（要做什麼、每條規則的驗收）、`docs/domain/model/`（概念與不變量）、`docs/db/schema.md`（table 與落點）、`docs/api/contract.md`（端點與錯誤碼，存在的話）、`docs/architecture/tech-stack.md`（技術選擇、約束與慣例、驗證指令），以及**既有程式碼**（目錄結構、既有 feature 的實作與測試慣例）。
 - **輸出**：單一檔案 `docs/impl/<feature>/plan.md`。一個 feature 一份；跨 feature 不合併，因為 plan 的生命週期到這個 feature 做完為止。
 - **不做**：寫產品程式碼、改上游文件、下 git 指令。本 skill 只產出 task 清單與執行協議，實作交給 `/impl:feature`，提交交給 `/git:commit`。
 
@@ -41,6 +41,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 
    漏掉這一步，新 feature 的 commit 會疊在上一個 feature 的分支上，最後被捲進上一個 PR。無人看守時沒有人會發現。
 4. **讀上游，缺什麼就停。** 沒有 `docs/domain/business-rules/<feature>.md` 時不要憑一句話排 task——說明需要先有規則，建議先跑 `/domain:business-rules`，然後停止。模型或 schema 缺席時可以繼續（有些 feature 不碰資料庫），但要在 plan 的「上游狀態」記明是在缺什麼的情況下排的。
+   有客戶端要呼叫這個 feature（web / 行動端 / 第三方）卻沒有 `docs/api/contract.md` 時，**不要自己發明端點與錯誤碼**——伺服器端與客戶端的 task 會各自發明一份，而且兩邊測試都會綠。建議先跑 `/api:contract`，然後停止。
 5. **抓驗證指令**（核心規則 9）：typecheck、lint、test（含只跑單一檔案的寫法）、build、dev。記下來，Step 3 每個 task 都要從這組指令挑。
 6. **盤點既有程式碼**：目錄結構、既有相似 feature 怎麼分層、測試放哪裡怎麼命名、有沒有現成可複用的東西。plan 的 task 要長得像這個 repo 既有的樣子，不是像教科書。
 
@@ -61,7 +62,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 |---|---|
 | ID | `T-001` 起，三位數，永不重編（續跑時新增的往後接） |
 | 標題 | 一句話，動詞開頭，說明產出什麼 |
-| 來源 | 追溯：`BR-order-012`、`order.md#Order.status`、`schema.md#orders`（核心規則 7） |
+| 來源 | 追溯：`BR-order-012`、`order.md#Order.status`、`schema.md#orders`、`contract.md#POST /orders/{id}/cancel`（核心規則 7） |
 | 動到 | 預估會建立 / 修改的檔案路徑（≤ 5，核心規則 4）。是預估，執行時不符要在備註更正 |
 | 前置 | 依賴的 task ID，無則寫「無」 |
 | 驗收 | 一條可以現在就跑的指令 + 一句「看到什麼算過」 |

@@ -11,7 +11,7 @@
       "name": "domain",
       "source": "./domain",
       "description": "領域建模：business-rules 從問題與功能描述推導可驗證的 business rules（docs/domain/business-rules/<主題>.md）；model 把規則累積成概念層 domain model，依聚合分檔輸出 docs/domain/model/<聚合>.md；feedback 收齊實作階段累積的上游回饋，分類後路由回對應 skill 修正，並追 BR → model → schema → task 的漣漪",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "category": "productivity"
     },
     {
@@ -29,10 +29,17 @@
       "category": "productivity"
     },
     {
+      "name": "api",
+      "source": "./api",
+      "description": "介面契約：contract 把 docs/domain/model/ 的命令、查詢與領域事件轉成客戶端可依賴的 API 契約，輸出 docs/api/contract.md（端點、request / response、錯誤碼、認證授權、冪等與重試、相容性與棄用），每個欄位與錯誤碼都追溯回模型元素與規則 ID",
+      "version": "0.1.0",
+      "category": "productivity"
+    },
+    {
       "name": "impl",
       "source": "./impl",
       "description": "實作執行：ship 是外層總調度，維護 docs/impl/backlog.md 的 feature 佇列並一輪推進一步（判斷階段 → 呼叫一個 skill → 回寫狀態）；plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍；fix 是 plan 之外的修復迴路，先分流是實作問題還是規則缺漏，再用 regression test 釘住 bug 並修 root cause",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "category": "productivity"
     },
     {

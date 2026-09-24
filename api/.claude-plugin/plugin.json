@@ -1,0 +1,19 @@
+{
+  "name": "api",
+  "description": "介面契約：contract 把 docs/domain/model/ 的命令、查詢與領域事件轉成客戶端可依賴的 API 契約，輸出 docs/api/contract.md（端點、request / response、錯誤碼、認證授權、冪等與重試、相容性與棄用），每個欄位與錯誤碼都追溯回模型元素與規則 ID",
+  "version": "0.1.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "api",
+    "contract",
+    "rest",
+    "graphql",
+    "openapi",
+    "error-codes",
+    "versioning",
+    "compatibility",
+    "mobile"
+  ]
+}
