@@ -1,0 +1,158 @@
+/*
+ * Calm UI 的 design token。直接貼進全域樣式的 :root。
+ * 規則與用途見 ../SKILL.md；這裡只放值。
+ *
+ * 深色優先：這裡的 :root 就是深色。淺色是之後才加的變體，不是預設。
+ * 動它之前先讀 SKILL.md 的「視覺語言」：底色是克制的近黑階梯，
+ * 整個介面只有一個強調色，顏色留給狀態與主要互動。
+ */
+
+:root {
+  /* ── 表面分層 ───────────────────────────────────────────────
+     頁面 → 次層 → 表面 → 浮起的表面。相鄰兩層的差距很小是刻意的：
+     分隔靠間距與排版，色差只是輔助。差距拉大就會變回「一堆卡片」 */
+  --color-bg: #0a0a0a;
+  --color-bg-secondary: #111111;
+  --color-surface: #171717;
+  --color-surface-elevated: #222222;
+  /* 可互動的列 / 項目 hover 時比自己的底色亮一階，不是變色 */
+  --color-surface-hover: #1c1c1c;
+  --color-surface-pressed: #262626;
+
+  /* ── 文字 ───────────────────────────────────────────────────
+     三階就夠。需要第四階通常代表版面該重排了 */
+  --color-text: #f5f5f5;
+  --color-text-secondary: #a1a1a1;
+  --color-text-muted: #6f6f6f;
+  /* 放在強調色色塊上的文字 */
+  --color-text-on-accent: #0a0a0a;
+
+  /* ── 強調色 ─────────────────────────────────────────────────
+     整個介面只有這一個。用途：目前狀態、進度、確認、主要互動、品牌。
+     換成品牌色時，只換這三個值，其餘不動 */
+  --color-accent: #e8e8e8;
+  --color-accent-hover: #ffffff;
+  --color-accent-subtle: rgba(245, 245, 245, 0.08);
+
+  /* ── 狀態 ───────────────────────────────────────────────────
+     只給真的有語意的東西。分類、標籤、圖示一律不給顏色。
+     深色底上的狀態色要降飽和，否則會刺眼並搶走強調色的注意力 */
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #60a5fa;
+  /* 狀態的底色（放在 chip / 標記背後），一律極淡 */
+  --color-success-subtle: rgba(74, 222, 128, 0.12);
+  --color-warning-subtle: rgba(251, 191, 36, 0.12);
+  --color-danger-subtle: rgba(248, 113, 113, 0.12);
+  --color-info-subtle: rgba(96, 165, 250, 0.12);
+
+  /* ── 框線 ───────────────────────────────────────────────────
+     極淡。要分隔先試間距與表面對比，三個都試過才用這個。
+     focus 是唯一必須明顯的那一條 */
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
+  --color-focus: #f5f5f5;
+
+  /* ── 字級 ───────────────────────────────────────────────────
+     標題大而肯定，輔助文字安靜。字重只用三種：400 / 500 / 600。
+     700 以上在深色底上會糊，而且通常代表層級是用粗體硬撐的 */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", "Noto Sans TC", sans-serif;
+  --font-size-display: 32px;  /* 首頁問候、單一畫面的主標 */
+  --font-size-title: 24px;    /* 區塊標題 */
+  --font-size-heading: 18px;  /* 項目標題 */
+  --font-size-body: 16px;     /* 內文，行動端不要小於這個 */
+  --font-size-small: 14px;    /* 說明、中繼資訊 */
+  --font-size-caption: 13px;  /* 時間、狀態標記 */
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  --line-height-tight: 1.25;  /* 標題 */
+  --line-height-normal: 1.55; /* 內文 */
+  --line-height-relaxed: 1.7; /* 長段落、Agent 的敘述 */
+
+  /* ── 間距 ───────────────────────────────────────────────────
+     留白是主要的分隔手段，所以這個階梯要夠大。
+     Agent Feed 的項目之間用 --space-6 以上，否則會擠成清單 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* 畫面左右留白：行動端 20，桌面 32。內容最大寬度讓長文不會橫跨整個螢幕 */
+  --space-gutter: 20px;
+  --content-max-width: 680px;
+
+  /* ── 形狀 ───────────────────────────────────────────────────
+     圓角克制。全圓角（膠囊）只給 chip 與小按鈕 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* ── 陰影 ───────────────────────────────────────────────────
+     只有浮起來的東西才有：選單、對話框、toast、底部面板。
+     平鋪的內容一律沒有陰影也沒有框 */
+  --shadow-overlay: 0 8px 32px rgba(0, 0, 0, 0.48);
+  --shadow-sheet: 0 -4px 24px rgba(0, 0, 0, 0.4);
+
+  /* ── 動效 ───────────────────────────────────────────────────
+     傳達狀態，不裝飾。沒有東西在變的時候畫面就該靜止 */
+  --duration-fast: 120ms;   /* hover、按下 */
+  --duration-normal: 200ms; /* 狀態轉換、內容出現 */
+  --duration-slow: 320ms;   /* 頁面轉場、底部面板 */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* ── 觸控 ───────────────────────────────────────────────────
+     行動優先：最小點擊區 44pt，主要動作放在拇指構得到的下方 */
+  --touch-target-min: 44px;
+}
+
+/* 尊重系統的減少動態設定。裝飾性動畫本來就不該有，
+   剩下的狀態轉換在這裡也要關掉 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+  }
+}
+
+/* 淺色變體：需要時才加。注意它不是把上面的值反過來——
+   淺色底下框線要更淡、陰影要更輕，狀態色要提高飽和才看得見 */
+:root[data-theme="light"] {
+  --color-bg: #ffffff;
+  --color-bg-secondary: #fafafa;
+  --color-surface: #f5f5f5;
+  --color-surface-elevated: #ffffff;
+  --color-surface-hover: #f0f0f0;
+  --color-surface-pressed: #e8e8e8;
+
+  --color-text: #0a0a0a;
+  --color-text-secondary: #5f5f5f;
+  --color-text-muted: #8f8f8f;
+  --color-text-on-accent: #ffffff;
+
+  --color-accent: #171717;
+  --color-accent-hover: #000000;
+  --color-accent-subtle: rgba(10, 10, 10, 0.06);
+
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
+
+  --color-border: rgba(0, 0, 0, 0.06);
+  --color-border-strong: rgba(0, 0, 0, 0.12);
+  --color-focus: #0a0a0a;
+
+  --shadow-overlay: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-sheet: 0 -4px 24px rgba(0, 0, 0, 0.1);
+}

@@ -1,7 +1,7 @@
 {
   "name": "ui",
-  "description": "UI：screens 把規則、模型與契約轉成畫面規格（畫面地圖、顯示什麼、可觸發哪些命令、每種狀態下看到什麼、每個錯誤碼的畫面行為），依畫面分檔輸出 docs/ui/screens/；tonal-ui 是視覺語言：不畫框線、用底色色塊分層（Gmail / Material 3 tonal surface），含 design token 與元件規則",
-  "version": "0.3.0",
+  "description": "UI：screens 把規則、模型與契約轉成畫面規格（畫面地圖、顯示什麼、可觸發哪些命令、每種狀態下看到什麼、每個錯誤碼的畫面行為），依畫面分檔輸出 docs/ui/screens/；視覺語言二選一——tonal-ui 給後台與內部系統（淺色、不畫框線、用底色色塊分層），calm-ui 給消費級 AI-native 產品（深色優先、極少裝飾、智慧用行為表達而不是發光球與漸層，含 Agent Feed / 對話 / 任務 / 狀態 / 通知的版型）",
+  "version": "0.4.0",
   "author": {
     "name": "ywwwtseng"
   },
@@ -15,6 +15,11 @@
     "screens",
     "flows",
     "states",
-    "spec"
+    "spec",
+    "calm-ui",
+    "dark-mode",
+    "agent",
+    "consumer",
+    "ai-native"
   ]
 }

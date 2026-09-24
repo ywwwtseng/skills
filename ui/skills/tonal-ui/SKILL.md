@@ -1,12 +1,15 @@
 ---
 name: tonal-ui
-description: Borderless, tonal-surface UI style（Gmail / Material 3 的長相）：不畫框線、用底色色塊分層、顏色只給有語意的東西。含完整的 design token（顏色／字級／圓角／間距）、元件規則與交件前檢查清單。當使用者要做新畫面、新元件、改版既有 UI、做 design review、或把這套風格搬到另一個技術棧（CSS / Tailwind / React Native）時使用。
+description: Borderless, tonal-surface UI style（Gmail / Material 3 的長相）：不畫框線、用底色色塊分層、顏色只給有語意的東西。含完整的 design token（顏色／字級／圓角／間距）、元件規則與交件前檢查清單。當使用者要做**後台或內部系統**的新畫面、新元件、改版既有 UI、做 design review、或把這套風格搬到另一個技術棧（CSS / Tailwind / React Native）時使用。跟 /ui:calm-ui 二選一、不可混用：後台與內部系統用本 skill（淺色、色塊分層），消費級 AI-native 產品用 calm-ui（深色、極少裝飾）。
 ---
 
 # Tonal UI：不畫框線，用色塊分層
 
 這是一套後台／內部系統用的視覺語言，從實際的 Next.js 後台實作抽出來，**與框架無關**：
 token 可以落在 CSS variables、Tailwind theme、React Native StyleSheet 或任何地方，規則不變。
+
+**跟 `/ui:calm-ui` 二選一。** 那套是消費級 AI 產品的深色語言（近黑表面、極少卡片、Agent Feed）；
+這套是後台與內部系統的淺色語言。一個專案只能有一套。
 
 新做一個畫面、加一個元件、或把既有畫面改成這套風格時照這份做。所有數值在
 `references/tokens.css`（可直接貼），常見元件的寫法在 `references/component-recipes.md`。

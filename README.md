@@ -44,7 +44,8 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | impl | fix | `/impl:fix` | plan 之外的修復迴路：先分流「規則說 A 程式做 B」（是 bug，修）/「規則沒寫這情況」（是缺規則，回 `/domain:business-rules`）/「程式照規則做但期望不同」（是規則變更），再寫一個**會紅的** regression test 釘住 bug（重現不出來就停，不准憑症狀猜）、找 root cause 而非症狀、做最小改動（不順手重構）、驗收新測試綠且既有測試不變紅、查一次同源問題（同一個 root cause 的其他呼叫點）、成因屬設計問題就開一條上游回饋，最後由 `/git:commit` 提交並把 root cause 與「既有測試為什麼沒抓到」寫進 body；動到超過 3 個檔案或要改介面就回 `/impl:plan` |
 | impl | refactor | `/impl:refactor` | 技術債的出口：`/impl:feature` 與 `/impl:fix` 都禁止順手改，那些被擋下來的東西全寫進備註後沒有人消費。本 skill 掃各 `plan.md` 的備註、`verification.md` 的 `low` findings、fix 報告裡「發現但沒修」的、程式碼的 TODO / FIXME，彙整成 `docs/impl/debt.md`（開總帳是刻意的——plan 的生命週期到 feature 做完為止，債是跨 feature 累積的），依 `收益 × 風險 × 有沒有測試保護` 排序後逐個執行。最硬的規則是**不准改測試**：既有測試全綠且 `git diff --stat` 裡看不到測試檔，才叫重構；要改測試才能過的那是改行為，退回 `/impl:plan`。沒有測試保護的標「需先補測試」不做（盲改）；一個重構一個 `refactor:` commit，body 寫收益、行為不變的證據與債的來源；**不進 `/impl:ship` 的自動迴圈**，人工觸發；債的分類與各自的安全改法在 `impl/skills/refactor/references/catalog.md` |
 | ui | screens | `/ui:screens` | 把規則、模型與契約轉成畫面規格，依畫面分檔輸出 `docs/ui/screens/<畫面>.md` + 含畫面地圖與導航規則的 `README.md`：每個畫面的用途、進入點、顯示什麼（逐項追溯到模型元素）、可觸發哪些命令（對應端點與權限）、版面骨架；**狀態是規格的主體**——逐條走完通用狀態（初次載入 / 空：從來沒有 vs 篩選後沒結果要分開 / 錯誤 / 部分失敗 / 權限不足 / 資料已被刪除）、表單狀態（送出中 / 送出失敗要保留使用者填的內容 / 重複送出對應冪等鍵）、以及行動端特有的離線、送出中斷網、弱網、背景喚醒後過期、推播與深連結進入的返回堆疊、系統權限被拒、鍵盤遮擋、登入過期；契約的每個錯誤碼都要有畫面行為（出現在哪 / 訊息 / 使用者能做什麼）；動作不可用時在隱藏 / disabled 加說明 / 可按才報錯之間三選一並寫理由；不做視覺設計（顏色字級間距交給 `/ui:tonal-ui`）；細則在 `ui/skills/screens/references/`（`states.md`、`template.md`） |
-| ui | tonal-ui | `/ui:tonal-ui`（也會自動載入） | 不畫框線、用底色色塊分層的 UI 風格（Gmail / Material 3 tonal surface）。做新畫面、新元件、改版或 design review 時套用；token 在 `ui/skills/tonal-ui/references/tokens.css` |
+| ui | tonal-ui | `/ui:tonal-ui`（也會自動載入） | **後台／內部系統**的視覺語言：不畫框線、用底色色塊分層（Gmail / Material 3 tonal surface）。做新畫面、新元件、改版或 design review 時套用；token 在 `ui/skills/tonal-ui/references/tokens.css` |
+| ui | calm-ui | `/ui:calm-ui`（也會自動載入） | **消費級 AI-native 產品**的視覺與互動語言：深色優先、極少裝飾，資訊層級靠排版與留白而不是卡片與框線；核心是「智慧用行為表達」——主動偵測、已完成的工作、明確的下一步，而不是發光球體、紫藍漸層、閃亮圖示、機器人圖示這些 AI 陳腔濫調；介面要三秒內回答「什麼需要我注意 / Agent 在做什麼 / 它需要我做什麼決定」；含 Agent Feed 首頁（不是 widget 牆）、輕量對話（不是每則訊息一張卡片）、任務的「已完成 / 進行中 / 接下來」（不是 Jira）、八種 Agent 狀態、通知、3–4 項導航的版型與文案，以及改版時「最後才處理顏色」的 13 步順序；**跟 `/ui:tonal-ui` 二選一不可混用**；token 在 `ui/skills/calm-ui/references/tokens.css`、版型在 `patterns.md` |
 | git | commit | `/git:commit` | 檢視 `git status` / `git diff`，把待提交內容切成多個邏輯變更，逐一 stage（絕不 `git add -A` / `.` / `-u`，排除 `node_modules`、`dist`、`.env`、secrets）並建立 Conventional Commit 格式的 commit，直到沒有可提交的檔案，不 push |
 | git | pr | `/git:pr [--merge] [base]` | 把 feature 的 commit 變成可審查的 PR：commit 留在預設分支時先安全搬到 `feat/<feature>`（先建分支確認 commit 都在，再把本地 base 指回 `origin/<base>`，全程不 reset / rebase / cherry-pick）、跑驗證閘門（有 `verification.md` 就採信其 verdict，`fail` 直接停；沒有就實跑 typecheck / lint / test / build）、檢查外送 diff 有沒有 secrets 與 build 產物、`push -u` 後用 `gh` 開 PR，body 帶 task 表 / BR 覆蓋表 / 驗收結果 / 待處理 / 審查重點；plan 還有未完成 task 或有 findings 就開 draft；加 `--merge`（一人開發的無人看守模式，`/impl:verify` 是唯一閘門）時，在「非 draft + verdict 為 `pass` + CI 綠 + 無衝突 + 無 CHANGES_REQUESTED」全部成立下用 `--rebase --delete-branch` 合併（保留每個 task 的還原點，不 squash），再 `switch` 回 base 並 `pull --ff-only`，讓下一個 feature 從乾淨起點開始；沒有 `--merge` 就只開 PR，不 force push、不推預設分支 |
 
@@ -60,7 +61,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ├── db/                               # 資料庫設計：schema、migrate
 ├── api/                              # 介面契約：contract
 ├── impl/                             # 實作執行：ship、plan、feature、verify、fix、refactor
-├── ui/                               # UI：screens、tonal-ui
+├── ui/                               # UI：screens、tonal-ui、calm-ui
 ├── git/                              # git 工作流：commit、pr
 └── <plugin>/
     ├── .claude-plugin/plugin.json    # plugin 名稱、版本
