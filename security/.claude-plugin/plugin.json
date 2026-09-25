@@ -1,0 +1,19 @@
+{
+  "name": "security",
+  "description": "資安掃描：audit 依序跑 Gitleaks（secrets，含 git 歷史）→ npm / pnpm / yarn / bun audit（套件漏洞）→ Semgrep（原始碼）→ Trivy config（Terraform 等 IaC）→ Trivy image（Docker），再由 Claude 讀程式碼排除誤報、合併重複、統一嚴重度並補查授權與注入，輸出 CRITICAL / HIGH / MEDIUM / LOW 計數與逐條 finding；只掃描與回報，不修改任何檔案",
+  "version": "0.1.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "security",
+    "audit",
+    "scan",
+    "gitleaks",
+    "npm-audit",
+    "semgrep",
+    "trivy",
+    "terraform",
+    "docker"
+  ]
+}

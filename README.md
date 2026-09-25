@@ -15,6 +15,7 @@ ywwwtseng 的個人 Claude Code plugins。
 /plugin install impl@skills
 /plugin install ui@skills
 /plugin install git@skills
+/plugin install security@skills
 ```
 
 本機開發時可直接用路徑：
@@ -48,6 +49,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | ui | calm-ui | `/ui:calm-ui`（也會自動載入） | **消費級 AI-native 產品**的視覺與互動語言：深色優先、極少裝飾，資訊層級靠排版與留白而不是卡片與框線；核心是「智慧用行為表達」——主動偵測、已完成的工作、明確的下一步，而不是發光球體、紫藍漸層、閃亮圖示、機器人圖示這些 AI 陳腔濫調；介面要三秒內回答「什麼需要我注意 / Agent 在做什麼 / 它需要我做什麼決定」；含 Agent Feed 首頁（不是 widget 牆）、輕量對話（不是每則訊息一張卡片）、任務的「已完成 / 進行中 / 接下來」（不是 Jira）、八種 Agent 狀態、通知、3–4 項導航的版型與文案，以及改版時「最後才處理顏色」的 13 步順序；**跟 `/ui:tonal-ui` 二選一不可混用**；token 在 `ui/skills/calm-ui/references/tokens.css`、版型在 `patterns.md` |
 | git | commit | `/git:commit` | 檢視 `git status` / `git diff`，把待提交內容切成多個邏輯變更，逐一 stage（絕不 `git add -A` / `.` / `-u`，排除 `node_modules`、`dist`、`.env`、secrets）並建立 Conventional Commit 格式的 commit，直到沒有可提交的檔案，不 push |
 | git | pr | `/git:pr [--merge] [base]` | 把 feature 的 commit 變成可審查的 PR：commit 留在預設分支時先安全搬到 `feat/<feature>`（先建分支確認 commit 都在，再把本地 base 指回 `origin/<base>`，全程不 reset / rebase / cherry-pick）、跑驗證閘門（有 `verification.md` 就採信其 verdict，`fail` 直接停；沒有就實跑 typecheck / lint / test / build）、檢查外送 diff 有沒有 secrets 與 build 產物、`push -u` 後用 `gh` 開 PR，body 帶 task 表 / BR 覆蓋表 / 驗收結果 / 待處理 / 審查重點；plan 還有未完成 task 或有 findings 就開 draft；加 `--merge`（一人開發的無人看守模式，`/impl:verify` 是唯一閘門）時，在「非 draft + verdict 為 `pass` + CI 綠 + 無衝突 + 無 CHANGES_REQUESTED」全部成立下用 `--rebase --delete-branch` 合併（保留每個 task 的還原點，不 squash），再 `switch` 回 base 並 `pull --ff-only`，讓下一個 feature 從乾淨起點開始；沒有 `--merge` 就只開 PR，不 force push、不推預設分支 |
+| security | audit | `/security:audit`（也會自動載入，例如「幫我做 security scan」） | 依序跑五類掃描再由 Claude 分析：Secrets（Gitleaks，掃 git 全部歷史與工作目錄，一律 `--redact`）→ Dependencies（依 lockfile 選 npm / pnpm / yarn / bun audit，非 JS 專案用 Trivy fs）→ Source Code（Semgrep，`--metrics=off`、不用 `--config auto`）→ IaC（Trivy config，含 Terraform 與 tfvars）→ Docker（Trivy image，只掃本機已有的 image，不自動 build）→ Review（統一嚴重度、合併重複、**每條 HIGH 以上都打開原始碼確認**、誤報移到「已排除」、補查掃描器看不到的 IDOR 與注入），輸出 CRITICAL / HIGH / MEDIUM / LOW 計數、掃描涵蓋表（沒跑的標 `skipped`，絕不寫成「未發現問題」）與逐條 finding（File / Source / Fix）；原始報告放 repo 外的暫存目錄；只讀不改，不跑 `npm audit fix`、不 commit |
 
 ## 結構
 
@@ -63,6 +65,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ├── impl/                             # 實作執行：ship、plan、feature、verify、fix、refactor
 ├── ui/                               # UI：screens、tonal-ui、calm-ui
 ├── git/                              # git 工作流：commit、pr
+├── security/                         # 資安掃描：audit
 └── <plugin>/
     ├── .claude-plugin/plugin.json    # plugin 名稱、版本
     ├── commands/<command>.md         # slash command（可選）
