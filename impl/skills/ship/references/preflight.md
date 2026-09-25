@@ -46,6 +46,7 @@ B5 要在 B6 之前：畫面規格要逐條走契約的錯誤碼表，決定每�
 | C1 | 專案是否已 scaffold | 有 `package.json` / `pyproject.toml` / `go.mod` 等，且裝得起來 | T-001 會變成「建專案」——那是 `/arch:init` 的工作，不是一個 feature task | `/arch:init` |
 | C2 | 驗證指令真的跑得起來 | B3 抓到的 typecheck / lint / test / build 逐條實跑一次 | `/impl:feature` 每個 task 的驗收都會紅，但原因是指令本身不存在 | 修正 `package.json` 或 B3 的文件 |
 | C3 | 有沒有「既有的相似實作」 | 至少有一個走完整分層的樣板（可以是 `/arch:init` 建的 walking skeleton） | `/impl:feature` 找不到樣板就自己發明分層、命名與測試寫法，而且每個 task 發明的不一樣 | 讓第一個 feature 的 T-001 做貫穿切片 |
+| C4 | 測試分層已決定 | `docs/architecture/testing.md` 存在，且它列的每條測試指令（含 `test:integration`）實跑是綠的 | 每個 feature 都只寫 mock 資料庫的單元測試，`/impl:verify` 在層級比對時全部判成 `部分覆蓋`，或更糟——沒有 testing.md 可比對，DB 約束從來沒被驗過卻一路 `pass` | `/arch:test-strategy` |
 
 C3 不是硬性阻塞——第一個 feature 的 T-001 本來就該是貫穿切片（`/impl:plan` 核心規則 5）。但要意識到**第一個 feature 是在定調**，它建立的分層與測試慣例會被後面所有 feature 沿用。值得在它跑完後人工看一次。
 
@@ -74,6 +75,8 @@ C3 不是硬性阻塞——第一個 feature 的 T-001 本來就該是貫穿切�
       ↓
 /db:schema  →  /db:migrate       B4、D1
 /api:contract → /ui:screens      B5、B6
+      ↓
+/arch:test-strategy     C4（要讀 schema 與 contract，所以排在它們之後）
       ↓
 /git:commit             A4
       ↓

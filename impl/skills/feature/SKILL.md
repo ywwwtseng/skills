@@ -50,7 +50,7 @@ plan 回答「照什麼順序做、做完怎麼算過」；本 skill 只回答�
 1. task 的「來源」→ 對應的 BR 原文（含輸入 → 預期結果）、模型元素（屬性、不變量、狀態轉換）、schema table（欄位、約束）。
 2. task 的「動到」→ 那幾個既有檔案；不存在就是要新建。
 3. 一個**既有的相似實作**（同層的另一個 feature）當樣板，抓分層、命名、錯誤處理與測試寫法。
-4. `docs/architecture/tech-stack.md` 的「約束與慣例」段（整個 session 讀一次就好）。
+4. `docs/architecture/tech-stack.md` 的「約束與慣例」段與 `docs/architecture/testing.md` 的分層對照（存在的話；整個 session 讀一次就好）。
 
 ### Step 2：狀態改 `doing`
 
@@ -65,7 +65,7 @@ plan 回答「照什麼順序做、做完怎麼算過」；本 skill 只回答�
 ### Step 4：測試
 
 - 依核心規則 9，把該 task 覆蓋的每條 BR 的「輸入 → 預期結果」寫成斷言，含邊界與例外分支。
-- 測試檔位置與命名照 repo 既有慣例。
+- 測試層照 `docs/architecture/testing.md` 的分層對照（例如落點是 DB 約束的不變量要寫整合測試、打真的測試資料庫，不是 mock）；測試檔位置與命名照 repo 既有慣例。
 - 斷言裡帶上 BR-ID（測試名稱或註解），這樣測試紅的時候知道是哪條規則被違反。
 
 ### Step 5：驗收

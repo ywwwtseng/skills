@@ -44,6 +44,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
    有客戶端要呼叫這個 feature（web / 行動端 / 第三方）卻沒有 `docs/api/contract.md` 時，**不要自己發明端點與錯誤碼**——伺服器端與客戶端的 task 會各自發明一份，而且兩邊測試都會綠。建議先跑 `/api:contract`，然後停止。
    這個 feature 有畫面卻沒有 `docs/ui/screens/` 時同理：UI task 的驗收會寫不出來（只能寫「開起來看看」），空狀態與錯誤呈現會由每個 task 各自發明。建議先跑 `/ui:screens`。
 5. **抓驗證指令**（核心規則 9）：typecheck、lint、test（含只跑單一檔案的寫法）、build、dev。記下來，Step 3 每個 task 都要從這組指令挑。
+   有 `docs/architecture/testing.md` 時一併讀它的指令表與分層對照——Step 3 每個 task 該寫哪一層測試、跑哪一條指令，照那張表決定。
 6. **盤點既有程式碼**：目錄結構、既有相似 feature 怎麼分層、測試放哪裡怎麼命名、有沒有現成可複用的東西。plan 的 task 要長得像這個 repo 既有的樣子，不是像教科書。
 
 ### Step 1：切片策略
@@ -77,6 +78,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 逐個 task 把驗收寫具體，只能從 Step 0 抓到的指令組合：
 
 - 有測試的 task → 跑該測試檔（`pnpm test src/domain/order.test.ts`），並在「看到什麼算過」寫明要新增哪幾個測試案例（直接取自 BR 的「輸入 → 預期結果」）。
+- 測試層照 `docs/architecture/testing.md` 的分層對照：落點是 DB 約束的不變量、權限、契約錯誤碼，驗收要跑整合 / API 層的指令（`pnpm test:integration tests/integration/order.test.ts`），不要寫成 mock 掉資料庫的單元測試。沒有 `testing.md` 時照既有慣例，並在「上游狀態」記明。
 - 純型別 / 設定類的 task → `pnpm typecheck` 或 `pnpm build`。
 - UI task → 除了 typecheck，寫明用 `/run` 開起來要看到什麼畫面；有 `docs/ui/screens/` 時，驗收直接引用規格的狀態（「在空狀態顯示 X、在離線顯示 Y」），不要只寫「畫面正常」。
 - 行動端的 UI task → **驗收指令寫成開 iOS 模擬器的那一條**（`npx expo start --ios`、`flutter run -d ios`……，以 `docs/architecture/tech-stack.md` 的「約束與慣例」為準）。不要寫成 `npx expo start` 讓執行的 agent 自己選平台——它會選到沒裝模擬器的那一個然後卡住。Android 專屬的行為（返回鍵、權限對話框差異）才另外開一個 task 標明要用 Android 驗。

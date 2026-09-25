@@ -1,6 +1,6 @@
 ---
 name: ship
-description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 這份 feature 佇列，然後一輪一輪把佇列上的 feature 從規則跑到進 main——判斷當前 feature 走到哪一階段（規劃 / 實作 / 稽核 / 開 PR / 合併），只呼叫該階段的那一個 skill，做完回寫佇列狀態，合併後切回 base branch 再取下一個。每輪開始前先清掉待處理的上游回饋。第一輪開始前會先跑一次起飛前檢查（remote、gh、上游文件、專案骨架、資料表、UI 風格宣告），缺什麼就停下來說明而不是硬跑。當使用者說「一路做下去」「把 backlog 跑完」「今晚自己跑」「做完一個接下一個」「無人看守開發」「跑之前還要準備什麼」時使用。本 skill 不自己寫程式、不自己開 PR，只決定下一步該叫誰；不部署、不碰 production。
+description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 這份 feature 佇列，然後一輪一輪把佇列上的 feature 從規則跑到進 main——判斷當前 feature 走到哪一階段（規劃 / 實作 / 稽核 / 開 PR / 合併），只呼叫該階段的那一個 skill，做完回寫佇列狀態，合併後切回 base branch 再取下一個。每輪開始前先清掉待處理的上游回饋。第一輪開始前會先跑一次起飛前檢查（remote、gh、上游文件、專案骨架、測試分層、資料表、UI 風格宣告），缺什麼就停下來說明而不是硬跑。當使用者說「一路做下去」「把 backlog 跑完」「今晚自己跑」「做完一個接下一個」「無人看守開發」「跑之前還要準備什麼」時使用。本 skill 不自己寫程式、不自己開 PR，只決定下一步該叫誰；不部署、不碰 production。
 ---
 
 # Impl Ship
@@ -68,7 +68,7 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 
 ### Step 0：起飛前檢查（只有第一輪做）
 
-照 `references/preflight.md` 逐項檢查：環境（git、remote、`gh`、工作區、分支）→ 文件鏈（規則、模型、tech-stack、schema / contract / screens 依專案形狀）→ 程式碼骨架（scaffold、驗證指令真的跑得起來）→ 一次性落地（資料表已建、UI 風格已宣告）。
+照 `references/preflight.md` 逐項檢查：環境（git、remote、`gh`、工作區、分支）→ 文件鏈（規則、模型、tech-stack、schema / contract / screens 依專案形狀）→ 程式碼骨架（scaffold、驗證指令真的跑得起來、測試分層已由 `/arch:test-strategy` 決定）→ 一次性落地（資料表已建、UI 風格已宣告）。
 
 **有任何一項不通過就停在這裡**，回報缺什麼、要跑哪個 skill、建議的補齊順序，不要開始建佇列（核心規則 9）。
 
@@ -147,7 +147,7 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 
 ## 判斷準則
 
-- `references/preflight.md`：起飛前的四類檢查（環境 / 文件鏈 / 程式碼骨架 / 一次性落地）、每項不通過會在哪裡爆、怎麼補、以及全新專案從零到可起飛的順序（Step 0 必讀）
+- `references/preflight.md`：起飛前的四類檢查（環境 / 文件鏈 / 程式碼骨架含測試分層 / 一次性落地）、每項不通過會在哪裡爆、怎麼補、以及全新專案從零到可起飛的順序（Step 0 必讀）
 
 ## 與下游 skill 的協議
 
