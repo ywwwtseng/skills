@@ -17,8 +17,8 @@
     {
       "name": "arch",
       "source": "./arch",
-      "description": "架構決策：/arch:tech-stack 透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/architecture/tech-stack.md；/arch:init 依該文件初始化專案骨架與工具鏈",
-      "version": "0.7.2",
+      "description": "架構決策：/arch:tech-stack 透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/architecture/tech-stack.md；/arch:init 依該文件初始化專案骨架與工具鏈；/arch:test-strategy 決定規則類型 → 測試層的對照並建好測試資料庫與分層指令，輸出 docs/architecture/testing.md，開發中的專案（含零測試）先盤點現況、依風險補特徵測試",
+      "version": "0.8.0",
       "category": "productivity"
     },
     {
@@ -39,7 +39,7 @@
       "name": "impl",
       "source": "./impl",
       "description": "實作執行：ship 是外層總調度，維護 docs/impl/backlog.md 的 feature 佇列並一輪推進一步（判斷階段 → 呼叫一個 skill → 回寫狀態）；plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍；fix 是 plan 之外的修復迴路，先分流是實作問題還是規則缺漏，再用 regression test 釘住 bug 並修 root cause；refactor 收齊被禁止順手改的技術債（plan 備註、verify 的 low findings、fix 發現但沒修的），在測試保護下做行為不變的改善，不准改測試",
-      "version": "0.8.2",
+      "version": "0.9.0",
       "category": "productivity"
     },
     {
