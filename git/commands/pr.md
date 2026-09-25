@@ -173,11 +173,12 @@ Do not invent coverage, test names, or results. A rule with no test is listed as
 
 ### 7. Wait for CI
 
-Run `gh pr checks --watch` with a bounded wait (stop waiting after a few minutes or when checks settle).
+Wait until every check has finished: `gh pr checks <number> --watch --interval 30`. Real CI runs (install, database services, the full test suite) routinely take 5–10 minutes, so do not stop after a few minutes — a wait that ends while checks are still pending leaves a green pull request unmerged. Cap the wait at about 20 minutes. If the tool that runs the command has a shorter timeout, run it in the background and wait for it to finish instead of polling.
 
 - All green → continue.
 - Red → report which check failed and the failing output. Do not attempt to fix it here; hand back to `/impl:fix`. **Never merge on red.**
-- No checks configured → say so, and treat step 3's verification evidence as the only gate.
+- Still pending when the cap is reached → do not merge. Leave the pull request open, report that CI is still running, and skip to step 10. Running this command again resumes: step 6 finds the open pull request and this step waits on it again.
+- No checks configured → say so, and treat step 3's verification evidence as the only gate. A pull request opened moments ago can briefly report no checks while CI is still being scheduled; re-check after about 30 seconds before concluding there are none.
 
 ### 8. Merge (only with `--merge`)
 
