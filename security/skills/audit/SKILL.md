@@ -1,6 +1,7 @@
 ---
 name: audit
-description: 對目前專案依序跑一輪安全掃描再由 Claude 分析結果——Secrets（Gitleaks，含 git 歷史）→ Dependencies（npm / pnpm / yarn / bun audit，非 JS 專案用 Trivy fs）→ Source Code（Semgrep，關閉 metrics）→ IaC（Trivy config，含 Terraform / Kubernetes / Dockerfile）→ Docker（Trivy image）→ Review（讀程式碼排除誤報、合併重複、統一嚴重度、補掃描器看不到的授權與注入問題），最後輸出 CRITICAL / HIGH / MEDIUM / LOW 計數與逐條 finding（檔案:行號、套件、修法）。當使用者說「幫我做 security scan」「安全掃描」「security audit」「掃一下有沒有漏洞」「檢查 secrets / 套件漏洞 / Terraform 設定」「上線前做一次資安檢查」時使用。本 skill 只掃描與回報，不修程式、不升級套件、不改設定、不 commit。
+description: 對目前專案依序跑一輪安全掃描再由 Claude 分析結果——Secrets（Gitleaks，含 git 歷史）→ Dependencies（npm / pnpm / yarn / bun audit，非 JS 專案用 Trivy fs）→ Source Code（Semgrep，關閉 metrics）→ IaC（Trivy config，含 Terraform / Kubernetes / Dockerfile）→ Docker（Trivy image）→ Review（讀程式碼排除誤報、合併重複、統一嚴重度、再依入口清單人工檢查掃描器看不到的存取控制、業務邏輯、SSRF、認證與資料外洩），最後輸出 CRITICAL / HIGH / MEDIUM / LOW 計數與逐條 finding（檔案:行號、套件、修法）。只由使用者以 /security:audit 手動執行，不會被自動觸發。本 skill 只掃描與回報，不修程式、不升級套件、不改設定、不 commit。
+disable-model-invocation: true
 ---
 
 # Security Audit
@@ -25,7 +26,7 @@ description: 對目前專案依序跑一輪安全掃描再由 Claude 分析結�
 6. **非零 exit code 不等於工具壞了。** Gitleaks、npm audit、Trivy 有發現時都會回非零。判斷依據是 JSON 報告有沒有產出、能不能解析，不是 exit code。
 7. **每個 HIGH / CRITICAL 都要打開原始碼確認。** 讀 finding 指到的那幾行和前後文，判斷是真的、誤報、還是只在測試 / 範例裡。沒讀過程式碼的 HIGH 不准寫進報告（核心規則 8 的例外除外）。
 8. **套件漏洞以「是否被用到」調整，不以「是否存在」刪除。** dev-only、不可達的漏洞可以降級並註明理由，但不能從報告消失。
-9. **不自己裝工具。** 缺工具時用 `AskUserQuestion` **一次問完**：列出缺哪些、安裝指令（`references/tools.md`）、選項是「我裝好了，繼續」/「跳過這幾項」。無人看守（`/loop`、`/impl:ship` 呼叫）時不問，直接標 `skipped`。
+9. **不自己裝工具。** 缺工具時用 `AskUserQuestion` **一次問完**：列出缺哪些、安裝指令（`references/tools.md`）、選項是「我裝好了，繼續」/「跳過這幾項」。無人看守（例如包在 `/loop` 裡跑）時不問，直接標 `skipped`。
 10. **不自動 build image。** `docker build` 會執行 Dockerfile 裡的任意指令。本機已經有這個專案的 image 才掃；沒有就問要不要 build，無人看守時標 `skipped`。
 
 ## 流程
@@ -77,13 +78,11 @@ description: 對目前專案依序跑一輪安全掃描再由 Claude 分析結�
    - `誤報`（測試 fixture、文件裡的範例 key、已被參數化的查詢）→ 移到報告末尾「已排除」段，寫一句理由
    - `只在測試 / 開發環境` → 降一級並註明
 4. **套件漏洞看可達性**（核心規則 8）：是直接還是間接依賴、是不是 devDependency、有沒有修補版本、升級是 patch 還是 major。
-5. **補掃描器看不到的**：針對幾個高風險點做一輪人工檢查，找到的標來源 `Claude review`、並標信心（`高` / `中`）：
-   - 授權：API route / controller 有沒有檢查「這筆資源屬於呼叫者」（IDOR），不是只檢查有沒有登入
-   - 拼接進 SQL、shell、檔案路徑、URL 的使用者輸入（掃描器常漏跨函式的資料流）
-   - 回給前端的錯誤訊息或 log 裡有沒有帶 token、密碼、完整連線字串
-   - `.env*` 有沒有被 `.gitignore` 擋住
+5. **補掃描器看不到的**：照 `references/review.md` 做人工檢查。先列出**全部**對外入口（依框架找 route、server action、controller），再依風險深讀：金額 → 認證 → 帶資源 ID 的寫入 → 檔案 → 對外請求 → 管理後台。對每個深讀的入口走九類清單：存取控制（IDOR、mass assignment、RLS）、認證與 session、注入、請求偽造與重導（SSRF、open redirect、CSRF、CORS、webhook 驗簽）、檔案上傳、業務邏輯（前端算的金額、負數、狀態跳步、race condition）、資料外洩、密碼學與隨機、設定。另外確認 `.env*` 有被 `.gitignore` 擋住。
 
-   只看路由、資料存取、認證這幾層，不通讀整個 repo。
+   有 `docs/domain/business-rules/` 時，權限與約束類規則就是正確答案，逐條對照 handler 有沒有真的擋。
+
+   找到的標來源 `Claude review` 與信心（`高`：從入口讀到 sink 且確認中間沒有檢查；`中`：檢查可能在沒讀到的地方）。只讀入口到資料存取這條路徑，不通讀整個 repo；報告寫明入口總數與深讀了幾個。
 6. **每條 finding 寫修法**：一句話、可執行（升到哪一版、改成參數化查詢、CIDR 收窄到什麼）。
 
 ### Step 7：輸出報告
@@ -99,6 +98,7 @@ description: 對目前專案依序跑一輪安全掃描再由 Claude 分析結�
 ## 判斷準則
 
 - `references/tools.md`：各工具的安裝指令、依版本區分的掃描指令、JSON 欄位怎麼摘要、各工具嚴重度對照 CRITICAL / HIGH / MEDIUM / LOW 的規則（Step 0–6 必讀）
+- `references/review.md`：人工檢查的入口清單做法（依框架）、深讀順序、九類檢查項目（每項的找法、成立條件、預設嚴重度）、信心與證據的標準（Step 6.5 必讀）
 - `references/report.md`：報告格式與範例、已排除段與掃描涵蓋表的寫法（Step 7 必讀）
 
 ## 常見失敗模式
@@ -114,3 +114,6 @@ description: 對目前專案依序跑一輪安全掃描再由 Claude 分析結�
 | 只掃工作目錄的 secrets | 已經刪掉但還在 git 歷史的 key 才是最常見的外流（Step 1） |
 | 為了掃 image 自動 `docker build` | Dockerfile 可以執行任意指令（核心規則 10） |
 | 把 exit code 1 當成工具執行失敗 | 那通常代表「有發現」（核心規則 6） |
+| 沒列入口清單就開始挑檔案讀 | 漏掉的永遠是沒想到的那個 route（`references/review.md`） |
+| 人工檢查只看了三個 route，報告寫「未發現授權問題」 | 沒深讀的入口不算檢查過；要寫「入口 N 個，深讀 M 個」（核心規則 5） |
+| Semgrep 乾淨就跳過業務邏輯 | 前端算的金額、負數、race condition，掃描器一條都抓不到 |

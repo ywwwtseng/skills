@@ -25,7 +25,7 @@ LOW       <n>
 | Source Code | Semgrep 1.x | ran | p/default、p/owasp-top-ten、p/typescript；<N> 個檔案解析失敗 |
 | IaC | Trivy config | ran | `terraform/`（tf-vars：`prod.tfvars`） |
 | Docker | Trivy image | skipped | 有 Dockerfile，本機沒有 image，使用者選擇不 build |
-| Review | Claude | ran | 確認 <N> 條 HIGH 以上、排除 <N> 條誤報 |
+| Review | Claude | ran | 確認 <N> 條 HIGH 以上、排除 <N> 條誤報；入口 <N> 個，深讀 <M> 個（未深讀的不算檢查過） |
 
 狀態只有四種：`ran` / `skipped`（有對象但沒跑，寫原因）/ `n/a`（沒有對象）/ `error`（跑了但失敗，附錯誤訊息）。
 
