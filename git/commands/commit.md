@@ -74,6 +74,8 @@ After staging, run:
 
 `git diff --cached`
 
+If `gitleaks` is installed, also run `gitleaks git --staged` (gitleaks before 8.19: `gitleaks protect --staged`). Any finding → unstage that file and report it; never commit it. If it is not installed, say so in the report.
+
 Before committing, verify that:
 
 - The staged diff contains only the intended logical change.

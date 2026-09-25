@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git switch:*), Bash(git checkout:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(git remote:*), Bash(git fetch:*), Bash(git push:*), Bash(gh:*), Bash(pnpm:*), Bash(npm:*), Bash(yarn:*), Bash(bun:*), Bash(cargo:*), Bash(uv:*), Bash(make:*), Read, Grep, Glob, AskUserQuestion
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git branch --show-current:*), Bash(git branch -f:*), Bash(git branch --list:*), Bash(git switch:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(git remote:*), Bash(git fetch:*), Bash(git pull --ff-only:*), Bash(git push -u origin:*), Bash(gh auth status:*), Bash(gh pr view:*), Bash(gh pr create:*), Bash(gh pr edit:*), Bash(gh pr checks:*), Bash(gh pr merge:*), Bash(gitleaks:*), Bash(pnpm typecheck:*), Bash(pnpm run typecheck:*), Bash(pnpm lint:*), Bash(pnpm run lint:*), Bash(pnpm test:*), Bash(pnpm run test:*), Bash(pnpm build:*), Bash(pnpm run build:*), Bash(npm typecheck:*), Bash(npm run typecheck:*), Bash(npm lint:*), Bash(npm run lint:*), Bash(npm test:*), Bash(npm run test:*), Bash(npm build:*), Bash(npm run build:*), Bash(yarn typecheck:*), Bash(yarn run typecheck:*), Bash(yarn lint:*), Bash(yarn run lint:*), Bash(yarn test:*), Bash(yarn run test:*), Bash(yarn build:*), Bash(yarn run build:*), Bash(bun typecheck:*), Bash(bun run typecheck:*), Bash(bun lint:*), Bash(bun run lint:*), Bash(bun test:*), Bash(bun run test:*), Bash(bun build:*), Bash(bun run build:*), Bash(cargo check:*), Bash(cargo clippy:*), Bash(cargo test:*), Bash(cargo build:*), Bash(uv run pytest:*), Bash(uv run mypy:*), Bash(uv run ruff:*), Bash(make typecheck:*), Bash(make lint:*), Bash(make test:*), Bash(make build:*), Read, Grep, Glob, Write, AskUserQuestion
 argument-hint: [--merge] [base-branch]
 description: Move the current feature branch's commits to a reviewable pull request, with traceability back to the plan and business rules; with --merge, land it and return to the base branch
 ---
@@ -83,7 +83,9 @@ A pull request must never be opened on red code.
 
 ### 4. Review the outgoing diff
 
-Run `git diff origin/<base>...HEAD --stat` and inspect the diff before pushing. Pushing is publication — what goes out is hard to take back.
+Run `git diff origin/<base>...HEAD --stat` for the file list, then read the full `git diff origin/<base>...HEAD` before pushing. Pushing is publication — what goes out is hard to take back. The file list alone does not show a key hard-coded inside an ordinary source file.
+
+If `gitleaks` is installed, also scan the outgoing commits: `gitleaks git --log-opts="origin/<base>..HEAD"` (gitleaks before 8.19: `gitleaks detect --log-opts="origin/<base>..HEAD"`). Any finding → stop and report it. If it is not installed, say so in the report; reading the diff is then the only check.
 
 Stop and report if the diff contains:
 
