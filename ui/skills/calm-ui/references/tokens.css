@@ -1,6 +1,6 @@
 /*
  * Calm UI 的 design token。直接貼進全域樣式的 :root。
- * 規則與用途見 ../SKILL.md；這裡只放值。
+ * 規則與用途見 ../SKILL.md，版面怎麼用這些值見 layout.md；這裡只放值。
  *
  * 深色優先：這裡的 :root 就是深色。淺色是之後才加的變體，不是預設。
  * 動它之前先讀 SKILL.md 的「視覺語言」：底色是克制的近黑階梯，
@@ -86,15 +86,42 @@
   --space-7: 48px;
   --space-8: 64px;
 
-  /* 畫面左右留白：行動端 20，桌面 32。內容最大寬度讓長文不會橫跨整個螢幕 */
+  /* 畫面左右留白：行動端 20，桌面 32（下方 media query 切換） */
   --space-gutter: 20px;
-  --content-max-width: 680px;
+
+  /* ── 版面 ───────────────────────────────────────────────────
+     欄寬只有三種：閱讀欄、表單欄、全寬。不要為單一畫面發明寬度。
+     斷點（media query 不能用變數，寫在這裡當約定）：
+       compact < 640 / medium 640–1023 / expanded ≥ 1024 / wide ≥ 1440 */
+  --column-reading: 720px;   /* 所有內容頁；16px 下一行約 40 個中文字 */
+  --column-form: 480px;      /* 表單、設定欄位 */
+  --content-max-width: var(--column-reading); /* 舊名，保留相容 */
+
+  --sidebar-width: 260px;    /* expanded 以上常駐；以下變抽屜 */
+  --sidebar-width-drawer: min(85vw, 320px);
+  --topbar-height: 56px;     /* compact 為 52，見下方 media query */
+  --tabbar-height: 56px;     /* 行動端底部導航，不含 safe area */
+
+  --split-conversation-min: 400px; /* 分割面板時左側主內容最窄 */
+  /* 常駐的 Agent 輸入框（有的話），規格見 patterns.md */
+  --composer-min-height: 52px;
+  --composer-max-height: 40vh;
+  --dialog-width-sm: 480px;
+  --dialog-width-md: 640px;
+
+  /* 控制項高度：訊息動作 / 桌面按鈕・側欄列・選單項 / 輸入欄位・行動端按鈕 */
+  --control-height-sm: 32px;
+  --control-height: 36px;
+  --control-height-lg: 44px;
+  --icon-size-sm: 16px;
+  --icon-size: 20px;
 
   /* ── 形狀 ───────────────────────────────────────────────────
      圓角克制。全圓角（膠囊）只給 chip 與小按鈕 */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-xl: 24px;   /* 常駐的 Agent 輸入框 */
   --radius-full: 9999px;
 
   /* ── 陰影 ───────────────────────────────────────────────────
@@ -113,6 +140,18 @@
   /* ── 觸控 ───────────────────────────────────────────────────
      行動優先：最小點擊區 44pt，主要動作放在拇指構得到的下方 */
   --touch-target-min: 44px;
+}
+
+@media (max-width: 639px) {
+  :root {
+    --topbar-height: 52px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --space-gutter: 32px;
+  }
 }
 
 /* 尊重系統的減少動態設定。裝飾性動畫本來就不該有，
