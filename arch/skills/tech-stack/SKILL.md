@@ -93,13 +93,13 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 | Frontend 特性（有 Web 時） | 需要 SEO・SSR / 高互動 SPA / 大量表單・後台 / 幾乎無 UI |
 | Mobile 特性（有 App 時） | iOS + Android 都要 / 只要單一平台 / 需要原生功能（相機・藍牙・背景定位）/ 需要離線 / 需要推播 |
 | Backend 特性 | Real-time（WebSocket） / 背景任務・排程 / 重運算・AI 推論 / 檔案上傳處理 |
-| UI 風格（有 Web 或 App 時） | 後台・內部系統（淺色、資訊密度高）/ 消費級 AI 產品（深色、Agent 主導）/ 已有設計系統 / 還沒決定 |
+| UI 風格（有 Web 或 App 時，**每個介面各問一次**） | console・後台・內部系統（淺色、資訊密度高）/ 消費級 AI 產品（深色、Agent 主導）/ 已有設計系統 / 還沒決定 |
 | 主要資料模型 | 關聯資料為主 / 簡單 CRUD・傳統 Web / 文件資料為主 / 混合・不確定 |
 | 附加資料需求（多選） | Key-Value・Cache / 大量分析 / AI・Vector / 無 |
 
 **條件式提問**：Step 1 目標平台若不含 Web，跳過 Frontend 特性題；不含 App，跳過 Mobile 特性題；兩者都不含（純 API / CLI / library）跳過 UI 風格題。
 
-**UI 風格的落點**：後台・內部系統 → `/ui:tonal-ui`；消費級 AI 產品 → `/ui:calm-ui`。兩套**互斥、不可混用**，所以這題要在文件裡寫死——沒寫的話每個 session 都要重猜，而猜錯的那一次會產出一個跟既有畫面不同語言的元件。已有設計系統 → 寫明位置，兩套都不套用。還沒決定 → 寫「未決」並列進「未決事項」，不要先挑一個。
+**UI 風格的落點**：風格跟著**介面**走，不跟著專案走。先列出專案有哪些有畫面的介面——Step 1 的 Web / App，加上需求裡的 console・後台（有管理者或營運人員要操作就有）——每個介面選一套。預設推薦：console・後台 → `/ui:tonal-ui`；使用者端 Web 與行動 App → `/ui:calm-ui`（使用者端 Web 本身就是後台型工具時才改）。**同一個介面內兩套互斥、不可混用**；不同介面各用一套是正常的。這題要在文件裡寫成「介面路徑 → 風格」的對照——沒寫的話每個 session 都要重猜，而猜錯的那一次會產出一個跟同介面既有畫面不同語言的元件；只寫一句全專案風格，console 會被做成深色消費級、或 web 被做成後台。已有設計系統 → 寫明位置，該介面兩套都不套用。還沒決定 → 寫「未決」並列進「未決事項」，不要先挑一個。
 
 ### Step 4：初版推薦與確認（1–2 題）
 
@@ -125,7 +125,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 |---|---|---|
 | 架構 | … | … |
 | Frontend | … | … |
-| UI 風格 | … | … |（有 Web 或 App 時）
+| UI 風格 | <介面 → 風格，例：console → tonal-ui；web、mobile → calm-ui> | … |（有 Web 或 App 時）
 | Mobile | … | … |（有 App 時）
 | Backend | … | … |
 | Database | … | … |
@@ -149,9 +149,16 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 - **風險 / 注意事項**：…（含 AI agent 友善度的降權項目，若有）
 
 ### UI 風格（有 Web 或 App 時才有此段）
-- **選擇**：`/ui:tonal-ui`（後台・內部系統）/ `/ui:calm-ui`（消費級 AI 產品）/ 既有設計系統（附位置）/ 未決
-- **理由**：…
-- **注意**：兩套視覺語言互斥，全專案只用選定的這一套；畫面規格另由 `/ui:screens` 產出，與視覺語言不重疊
+- **對照**（每個有畫面的介面一列）：
+
+  | 介面 | 路徑 | 風格 | token 落點 | 理由 |
+  |---|---|---|---|---|
+  | Console（後台） | `apps/console` | `/ui:tonal-ui` | `apps/console/src/styles/tokens.css` | … |
+  | Web | `apps/web` | `/ui:calm-ui` | `apps/web/src/styles/tokens.css` | … |
+  | Mobile | `apps/mobile` | `/ui:calm-ui` | `apps/mobile/src/theme.ts` | … |
+
+  風格選項：`/ui:tonal-ui`（console・後台・內部系統）/ `/ui:calm-ui`（消費級 AI 產品）/ 既有設計系統（附位置）/ 未決。同一套風格的多個介面可以共用一份 token 套件（例 `packages/ui-tokens`）
+- **注意**：同一個介面內兩套視覺語言互斥、不混用；不同介面可以不同套。畫面規格另由 `/ui:screens` 產出，與視覺語言不重疊
 
 ### Mobile（有 App 時才有此段）
 （同格式，另加 **與 Web 共用**：哪些程式碼 / 型別 / API client 可共用；以及 **本機開發平台**：預設 iOS 模擬器 + 實際的開發指令）
@@ -167,7 +174,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 
 ## 約束與慣例
 <給後續開發遵守的硬規則，每條一行：ORM、auth 方式、上傳方式、API 版本化、不要做的事>
-<有 UI 時，第一條固定是：**UI 風格：<tonal-ui / calm-ui / 既有設計系統>，全專案只用這一套，不混用另一套**>
+<有 UI 時，第一條固定是 UI 風格對照：**UI 風格（依介面，同一個介面內不混用）：`apps/console` → tonal-ui；`apps/web`、`apps/mobile` → calm-ui。寫某個介面的畫面前先載入它對應的 skill，顏色・字級・間距・圓角只用該介面的 token**>
 <有 App 時，加一條：**行動端本機開發預設開 iOS 模擬器**，並附該技術棧的開發指令（見 `references/mobile.md`）>
 <選 Expo 時，再加一條：**用 dev build 不用 Expo Go；新增或升級原生依賴後先 `npx expo run:ios` 重建 binary 再開**（理由見 `references/mobile.md`）>
 

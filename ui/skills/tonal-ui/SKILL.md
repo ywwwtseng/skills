@@ -1,6 +1,6 @@
 ---
 name: tonal-ui
-description: Borderless, tonal-surface UI style（Gmail / Material 3 的長相）：不畫框線、用底色色塊分層、顏色只給有語意的東西。含完整的 design token（顏色／字級／圓角／間距）、元件規則與交件前檢查清單。當使用者要做**後台或內部系統**的新畫面、新元件、改版既有 UI、做 design review、或把這套風格搬到另一個技術棧（CSS / Tailwind / React Native）時使用。跟 /ui:calm-ui 二選一、不可混用：後台與內部系統用本 skill（淺色、色塊分層），消費級 AI-native 產品用 calm-ui（深色、極少裝飾）。
+description: Borderless, tonal-surface UI style（Gmail / Material 3 的長相）：不畫框線、用底色色塊分層、顏色只給有語意的東西。含完整的 design token（顏色／字級／圓角／間距）、元件規則與交件前檢查清單。當使用者要做**後台或內部系統**的新畫面、新元件、改版既有 UI、做 design review、或把這套風格搬到另一個技術棧（CSS / Tailwind / React Native）時使用。同一個介面內跟 /ui:calm-ui 二選一、不可混用：console・後台與內部系統用本 skill（淺色、色塊分層），使用者端 Web 與行動 App 用 calm-ui（深色、極少裝飾）；同一個專案的不同介面可以各用一套。
 ---
 
 # Tonal UI：不畫框線，用色塊分層
@@ -8,19 +8,20 @@ description: Borderless, tonal-surface UI style（Gmail / Material 3 的長相�
 這是一套後台／內部系統用的視覺語言，從實際的 Next.js 後台實作抽出來，**與框架無關**：
 token 可以落在 CSS variables、Tailwind theme、React Native StyleSheet 或任何地方，規則不變。
 
-**跟 `/ui:calm-ui` 二選一。** 那套是消費級 AI 產品的深色語言（近黑表面、極少卡片、Agent Feed）；
-這套是後台與內部系統的淺色語言。一個專案只能有一套。
+**同一個介面內跟 `/ui:calm-ui` 二選一。** 那套是消費級 AI 產品的深色語言（近黑表面、極少卡片、Agent Feed）；
+這套是 console・後台與內部系統的淺色語言。一個介面（一個 app）只能有一套；
+同一個專案裡 console 用本套、使用者端 Web 與行動 App 用 calm-ui 是正常的——那是不同介面，不算混用。
 
-## 先確認這個專案選的是哪一套
+## 先確認這個介面選的是哪一套
 
-動手前依序查，查到就停：
+先看要動的檔案屬於哪個介面（`apps/console`、`apps/web`、`apps/mobile`……），再依序查那個介面的風格，查到就停：
 
-1. `CLAUDE.md` 的技術約束段（`/arch:init` 寫的「UI 風格：…」）
-2. `docs/architecture/tech-stack.md` 的「UI 風格」段或「約束與慣例」第一條
-3. 既有程式碼：有 `tokens.css` / `theme.ts` 就看它是淺色還是深色階梯
-4. 都沒有 → 用 `AskUserQuestion` 問一題，並建議把答案寫進 `CLAUDE.md`
+1. `CLAUDE.md` 技術約束段的 UI 風格對照（`/arch:init` 寫的「UI 風格（依介面）：…」）
+2. `docs/architecture/tech-stack.md` 的「UI 風格」對照表或「約束與慣例」第一條
+3. 該介面的既有程式碼：有 `tokens.css` / `theme.ts` 就看它是淺色還是深色階梯
+4. 都沒有 → 用 `AskUserQuestion` 問一題，並建議把答案寫進 `CLAUDE.md` 的對照
 
-**查到的是另一套，就停下來說明，不要改用這一套做。** 混用會得到一個既不像工具也不像產品的東西，而且下一個 session 會再混一次。
+**這個介面查到的是另一套，就停下來說明，不要改用這一套做。** 混用會得到一個既不像工具也不像產品的東西，而且下一個 session 會再混一次。
 
 新做一個畫面、加一個元件、或把既有畫面改成這套風格時照這份做。所有數值在
 `references/tokens.css`（可直接貼），常見元件的寫法在 `references/component-recipes.md`。

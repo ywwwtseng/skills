@@ -1,6 +1,6 @@
 ---
 name: screens
-description: 把 business rules、domain model 與 API 契約轉成畫面規格——有哪些畫面、每個畫面顯示什麼、可以觸發哪些命令、以及**每一種狀態下使用者看到什麼**（載入、空、錯誤、權限不足、離線、弱網送出中、背景喚醒後過期、推播與深連結進入），每個契約錯誤碼都要有對應的畫面行為；依畫面分檔輸出 docs/ui/screens/<畫面>.md 與一份含畫面地圖的 README.md，每個元素追溯回命令、端點與規則 ID。當使用者說「設計畫面」「有哪些頁面」「這個流程長怎樣」「空狀態要顯示什麼」「錯誤怎麼呈現」「App 的導航怎麼走」時使用。本 skill 不做視覺設計（顏色字級間距交給 /ui:tonal-ui）、不做元件實作、不設計 API。
+description: 把 business rules、domain model 與 API 契約轉成畫面規格——有哪些畫面、每個畫面顯示什麼、可以觸發哪些命令、以及**每一種狀態下使用者看到什麼**（載入、空、錯誤、權限不足、離線、弱網送出中、背景喚醒後過期、推播與深連結進入），每個契約錯誤碼都要有對應的畫面行為；依畫面分檔輸出 docs/ui/screens/<畫面>.md 與一份含畫面地圖的 README.md，每個元素追溯回命令、端點與規則 ID。當使用者說「設計畫面」「有哪些頁面」「這個流程長怎樣」「空狀態要顯示什麼」「錯誤怎麼呈現」「App 的導航怎麼走」時使用。本 skill 不做視覺設計（顏色字級間距交給該介面選定的 /ui:tonal-ui 或 /ui:calm-ui）、不做元件實作、不設計 API。
 ---
 
 # UI Screens
@@ -13,7 +13,7 @@ description: 把 business rules、domain model 與 API 契約轉成畫面規格�
 
 - **輸入**：`docs/domain/business-rules/`（規則與失敗情境）、`docs/domain/model/`（命令、查詢、狀態機、權限）、`docs/api/contract.md`（端點、錯誤碼、分頁——存在的話）、`docs/architecture/tech-stack.md`（有哪些客戶端平台）、既有畫面與元件。
 - **輸出**：`docs/ui/screens/<畫面>.md`（一個畫面一份，像 model 依聚合分檔）+ `docs/ui/screens/README.md`（畫面地圖、導航規則、全域狀態與行為）。
-- **不做**：視覺設計（顏色、字級、間距、圓角 → `/ui:tonal-ui` 或 `/ui:calm-ui`，依專案選定的那一套）、元件實作、API 設計（→ `/api:contract`）、資料庫。
+- **不做**：視覺設計（顏色、字級、間距、圓角 → `/ui:tonal-ui` 或 `/ui:calm-ui`，依畫面所屬介面選定的那一套）、元件實作、API 設計（→ `/api:contract`）、資料庫。
 
 `/api:contract` 回答「客戶端能呼叫什麼」；本 skill 回答「使用者在螢幕上看到什麼、能做什麼」。
 
@@ -23,7 +23,7 @@ description: 把 business rules、domain model 與 API 契約轉成畫面規格�
 2. **狀態是規格的主體，不是附註。** 每個畫面都要走完 `references/states.md` 的狀態清單。只寫 happy path 的畫面規格等於沒寫：實作時 agent 一樣要自己發明空狀態與錯誤處理，而且每個 task 發明的不一樣。
 3. **每個錯誤碼都要有畫面行為。** 逐條走 `docs/api/contract.md` 的錯誤碼表：這個錯誤發生時使用者看到什麼、能做什麼（重試？回上一頁？重新登入？）。沒有定義的錯誤碼，App 只會顯示「發生錯誤」，而使用者不知道該怎麼辦。
 4. **行動端的狀態比 web 多，而且不能省略。** 離線、送出中斷網、背景喚醒後資料已過期、權限被拒、從推播或深連結直接進入某個畫面、鍵盤遮擋、返回手勢。這些在 web 上很少出現，在 App 上天天發生——不寫，實作就會漏。
-5. **不做視覺設計。** 資訊層級、版面骨架、元素順序、優先顯示什麼要寫；顏色、字級、間距、圓角一律交給視覺語言 skill。專案選的是哪一套，讀 `CLAUDE.md` 的技術約束或 `docs/architecture/tech-stack.md` 的「UI 風格」段（後台用 `/ui:tonal-ui`、消費級 AI 產品用 `/ui:calm-ui`，一個專案只選一套）。兩份文件不重疊。
+5. **不做視覺設計。** 資訊層級、版面骨架、元素順序、優先顯示什麼要寫；顏色、字級、間距、圓角一律交給視覺語言 skill。每個介面用哪一套，讀 `CLAUDE.md` 的 UI 風格對照或 `docs/architecture/tech-stack.md` 的「UI 風格」段（console・後台用 `/ui:tonal-ui`、使用者端 Web 與行動 App 用 `/ui:calm-ui`；一個介面一套，不同介面可以不同）。每份畫面規格的標頭寫明它屬於哪個介面，`/impl:plan` 靠它決定 UI task 要載入哪一套。兩份文件不重疊。
 6. **導航是全域決策，寫在 README。** 返回去哪、登入後去哪、深連結進入時的返回堆疊、跨流程的中斷與回復——寫一次，所有畫面共用。讓每個畫面各自決定，App 就會出現走不出去的死路。
 7. **一個畫面一份檔案，一個流程一張圖。** 畫面之間的關係放 README 的畫面地圖；單一畫面的細節放它自己的檔案。
 8. **不改上游文件。** 設計畫面時發現規則沒定義某個情境、模型缺一個查詢、契約缺一個端點，寫進最相關的 `docs/impl/<feature>/plan.md` 的「上游回饋」表（狀態 `待處理`），交給 `/domain:feedback`。
@@ -115,7 +115,7 @@ description: 把 business rules、domain model 與 API 契約轉成畫面規格�
 3. 覆蓋統計：模型命令 N 個，能在畫面觸發 M 個（未落地逐條列原因）
 4. 最值得確認的 3 個流程假設
 5. 上游回饋（若有），建議跑 `/domain:feedback`
-6. 下一步：`/impl:plan` 讀本文件排 UI 的 task（驗收欄可以直接寫「在 X 狀態下顯示 Y」）；視覺套用專案選定的那一套（`/ui:tonal-ui` 或 `/ui:calm-ui`）
+6. 下一步：`/impl:plan` 讀本文件排 UI 的 task（驗收欄可以直接寫「在 X 狀態下顯示 Y」）；視覺套用各畫面所屬介面選定的那一套（`/ui:tonal-ui` 或 `/ui:calm-ui`）
 
 ## 判斷準則
 

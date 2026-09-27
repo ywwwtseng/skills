@@ -48,6 +48,7 @@
 ````markdown
 # 訂單詳情
 
+> 介面：`apps/mobile`（`/ui:calm-ui`）
 > 來源：`order.md#Order`、`BR-order-031`　|　端點：`GET /orders/{id}`
 > 進入點：訂單列表、推播、深連結 `app://orders/{id}`
 
@@ -71,7 +72,7 @@
 
 ## 版面骨架
 
-<資訊層級與元素順序；不含顏色、字級、間距——那些在 /ui:tonal-ui 或 /ui:calm-ui>
+<資訊層級與元素順序；不含顏色、字級、間距——那些在標頭寫的那一套 /ui:tonal-ui 或 /ui:calm-ui>
 
 ## 狀態
 

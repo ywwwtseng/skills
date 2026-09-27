@@ -55,8 +55,9 @@ C3 不是硬性阻塞——第一個 feature 的 T-001 本來就該是貫穿切�
 | # | 檢查 | 通過條件 | 沒過會在哪裡爆 | 怎麼補 |
 |---|---|---|---|---|
 | D1 | 資料表是否已建立 | 本機 / 開發資料庫的 schema 與 `docs/db/schema.md` 一致 | 第一個 feature 寫完程式才發現沒有資料表 | `/db:migrate` |
-| D2 | UI 風格是否已宣告 | `CLAUDE.md` 或 `tech-stack.md` 寫明 `tonal-ui` / `calm-ui` / 既有設計系統 | 兩套視覺語言都會被觸發，產出互相矛盾的元件 | 在 `CLAUDE.md` 加一行 |
+| D2 | UI 風格對照是否已宣告 | `CLAUDE.md` 或 `tech-stack.md` 有「介面 → 風格」對照，涵蓋每個有畫面的介面（例：`apps/console` → `tonal-ui`；`apps/web`、`apps/mobile` → `calm-ui`） | 沒有對照：每個 task 自己猜，同一個介面裡兩套混用；只寫一句全專案風格：console 被做成深色消費級、或 web 被做成後台 | `/arch:tech-stack` 決定後在 `CLAUDE.md` 補對照 |
 | D3 | **有 App 時**：App 在模擬器開得起來 | `testing.md` 的 `test:smoke` 在 base branch 上實跑是綠的（沒有這條就用開發指令建一次 binary、開模擬器看到首頁）；Expo 專案用的是 dev build（有 `expo-dev-client`），不是 Expo Go | 每個 UI task 的驗收都卡在「開不起來」；或更糟——全部測試綠、PR 一路合併，使用者打開 App 才發現一啟動就崩（原生模組沒編進 binary） | 裝 Xcode / 開好模擬器；Expo Go 改 dev build（tech-stack 的 `references/mobile.md`）；缺 `test:smoke` 跑 `/arch:test-strategy`；指令寫進 `CLAUDE.md` |
+| D4 | **有畫面時**：各介面的 token 已落地 | 對照表上每個**已經有畫面**的介面，都有該風格的 theme 檔（CSS variables / Tailwind theme / `theme.ts`）且畫面有引用；還沒有畫面的介面不檢查（`/impl:plan` 會排 design foundation task） | 每個 UI task 各自寫死顏色，web 與 mobile 各長各的；迴圈只做新 feature，不會回頭改既有畫面，醜的會一直醜下去 | 對該介面呼叫 `/ui:<風格>`，照它「改版既有介面」的順序先落 token 再改版；建議人在旁邊看，不要放進迴圈 |
 
 **D1 特別注意**：`/impl:ship` 的階段表只有 `plan → feature → verify → pr`，**不包含 `/db:migrate`**。所以資料庫的落地是起飛前的一次性動作。schema 之後再變動（feature 做到一半發現要加欄位），ship 不會自己去跑 migrate——那會變成一條上游回饋或一個 `blocked` task 停下來等人。
 
@@ -65,9 +66,9 @@ C3 不是硬性阻塞——第一個 feature 的 T-001 本來就該是貫穿切�
 全新專案從零到可以起飛：
 
 ```
-/arch:tech-stack        B3、D2（UI 風格在這一題決定）
+/arch:tech-stack        B3、D2（各介面的 UI 風格在這一題決定）
       ↓
-/arch:init              C1、C2
+/arch:init              C1、C2、D4（落各介面的 token）
       ↓
 /domain:business-rules  B1（每個 feature 一份）
       ↓

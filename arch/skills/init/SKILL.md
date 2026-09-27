@@ -57,6 +57,7 @@ description: 讀 docs/architecture/tech-stack.md 的技術選型決策，把專�
 - 測試框架與一個會通過的範例測試（Vitest / pytest / `go test`）
 - 契約單一來源：zod schema / Prisma schema / OpenAPI spec 的檔案位置先建好空殼
 - 統一的指令入口：`typecheck`、`lint`、`test`、`build`、`dev`（monorepo 走 turbo pipeline）
+- 有 UI 時落 design token：依 tech-stack「UI 風格」對照，逐個介面呼叫它選定的 `/ui:tonal-ui` 或 `/ui:calm-ui`，把該 skill 的 `references/tokens.css` 落到對照表寫的 token 落點（Web：全域 CSS variables 或 Tailwind `theme.extend`；React Native：`theme.ts`），並讓骨架的首頁實際引用它。**先有 token 再有第一個畫面**——第一個畫面寫死色碼，之後每個 task 都會照抄，最後抽不乾淨
 
 ### Step 4：資料庫與 infra（範圍有選才做）
 
@@ -73,7 +74,7 @@ description: 讀 docs/architecture/tech-stack.md 的技術選型決策，把專�
 
 1. 把決策文件的「約束與慣例」寫進 `CLAUDE.md`（已存在就附加一段 `## 技術約束`，不覆蓋既有內容），並附上 `docs/architecture/tech-stack.md` 連結。
    有 App 時，**行動端本機開發預設平台與開發指令**也要進 `CLAUDE.md`（例如「行動端開發預設開 iOS 模擬器：建置 `npx expo run:ios`、日常 `npx expo start --dev-client --ios`；新增或升級原生依賴後先重建」）——`/impl:feature` 每個 UI task 的驗收都要照它開來確認，寫在這裡它才不用每次去猜要開哪個平台。
-   **UI 風格那一條一定要進 `CLAUDE.md`**（例如「UI 風格：calm-ui，全專案只用這一套」）。`tech-stack.md` 是它的決策來源，但 `CLAUDE.md` 每個 session 都會自動載入——寫在這裡，視覺語言 skill 被觸發之前答案就已經在 context 裡了。
+   **UI 風格對照那一條一定要進 `CLAUDE.md`**，寫成介面路徑 → 風格（例如「UI 風格（依介面，同一個介面內不混用）：`apps/console` → tonal-ui；`apps/web`、`apps/mobile` → calm-ui；寫畫面前先載入對應 skill，只用該介面的 token」）。`tech-stack.md` 是它的決策來源，但 `CLAUDE.md` 每個 session 都會自動載入——寫在這裡，視覺語言 skill 被觸發之前答案就已經在 context 裡了。
 2. 在對話中回報：建立了哪些目錄與檔案、跑過哪些驗證指令與結果、`.env` 需要填哪些 key、下一步建議（`/git:commit` 提交骨架、`/domain:business-rules` 開始定規則；有了 `docs/db/schema.md` 之後跑 `/arch:test-strategy` 定測試分層並建測試資料庫）。
 
 ## 參考

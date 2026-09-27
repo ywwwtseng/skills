@@ -43,6 +43,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 4. **讀上游，缺什麼就停。** 沒有 `docs/domain/business-rules/<feature>.md` 時不要憑一句話排 task——說明需要先有規則，建議先跑 `/domain:business-rules`，然後停止。模型或 schema 缺席時可以繼續（有些 feature 不碰資料庫），但要在 plan 的「上游狀態」記明是在缺什麼的情況下排的。
    有客戶端要呼叫這個 feature（web / 行動端 / 第三方）卻沒有 `docs/api/contract.md` 時，**不要自己發明端點與錯誤碼**——伺服器端與客戶端的 task 會各自發明一份，而且兩邊測試都會綠。建議先跑 `/api:contract`，然後停止。
    這個 feature 有畫面卻沒有 `docs/ui/screens/` 時同理：UI task 的驗收會寫不出來（只能寫「開起來看看」），空狀態與錯誤呈現會由每個 task 各自發明。建議先跑 `/ui:screens`。
+   有畫面時再讀 `CLAUDE.md` 或 tech-stack 的 **UI 風格對照**，記下這個 feature 動到的每個介面用哪一套（`/ui:tonal-ui` / `/ui:calm-ui`），以及該介面的 token 是否已落進程式碼（theme 檔存在、既有畫面有引用）。對照沒寫就停，建議先補——少了它，每個 UI task 會各自決定畫面長相，而且在迴圈裡視覺語言 skill 幾乎不會自己被觸發。
 5. **抓驗證指令**（核心規則 9）：typecheck、lint、test（含只跑單一檔案的寫法）、build、dev。記下來，Step 3 每個 task 都要從這組指令挑。
    有 `docs/architecture/testing.md` 時一併讀它的指令表與分層對照——Step 3 每個 task 該寫哪一層測試、跑哪一條指令，照那張表決定。
 6. **盤點既有程式碼**：目錄結構、既有相似 feature 怎麼分層、測試放哪裡怎麼命名、有沒有現成可複用的東西。plan 的 task 要長得像這個 repo 既有的樣子，不是像教科書。
@@ -55,6 +56,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 2. **後續切片依什麼分**：預設依**業務規則群組**分（一組相關的 BR 一個 task），不是依技術層分。狀態機類的 feature 依「狀態轉換」分；CRUD 類的依「命令」分（建立 / 修改 / 取消各一個）。
 3. **例外與邊界何時做**：預設 happy path 的 task 完成後，緊接著補它的例外分支，不要把所有例外堆到最後——堆到最後的東西在 long-running 裡最容易被截斷。
 4. **哪些不在這次範圍**：明確列「不做」，避免 agent 在跑的時候自行擴張。
+5. **畫面的地基**：這個 feature 動到的介面還沒有 token（Step 0 查到的）→ 在第一個 UI task 之前排一個 design foundation task：把該介面選定那套的 `references/tokens.css` 落成 theme（Web：CSS variables / Tailwind `theme.extend`；React Native：`theme.ts`），來源寫 `/ui:<風格>`，驗收是 typecheck + 一個引用 token 的畫面截圖。沒有這個 task，每個 UI task 會各自寫死顏色，web 與 mobile 各長各的。
 
 ### Step 2：定義 task
 
@@ -81,6 +83,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 - 測試層照 `docs/architecture/testing.md` 的分層對照：落點是 DB 約束的不變量、權限、契約錯誤碼，驗收要跑整合 / API 層的指令（`pnpm test:integration tests/integration/order.test.ts`），不要寫成 mock 掉資料庫的單元測試。沒有 `testing.md` 時照既有慣例，並在「上游狀態」記明。
 - 純型別 / 設定類的 task → `pnpm typecheck` 或 `pnpm build`。
 - UI task → 除了 typecheck，寫明用 `/run` 開起來要看到什麼畫面；有 `docs/ui/screens/` 時，驗收直接引用規格的狀態（「在空狀態顯示 X、在離線顯示 Y」），不要只寫「畫面正常」。
+- UI task 的「來源」**一定要寫所屬介面與視覺語言**（`介面：apps/web → /ui:calm-ui`，用到版型時加上 `patterns.md#Agent Feed` 這種指向）——這是 `/impl:feature` 決定要載入哪一套的唯一依據。「看到什麼算過」再加兩條：截圖逐項過該 skill 的交件前檢查清單；畫面檔的 diff 裡沒有寫死的色碼或任意值（`#RRGGBB`、`rgb(`、`bg-[#…]`）。
 - 行動端的 UI task → **驗收指令寫成開 iOS 模擬器的那一條**（`npx expo start --dev-client --ios`、`flutter run -d ios`……，以 `CLAUDE.md` 或 `docs/architecture/tech-stack.md` 的「約束與慣例」為準），並加跑 `test:smoke`（`docs/architecture/testing.md` 有這條時）。不要寫成 `npx expo start` 讓執行的 agent 自己選平台——它會選到沒裝模擬器的那一個然後卡住。Android 專屬的行為（返回鍵、權限對話框差異）才另外開一個 task 標明要用 Android 驗。
 - **會新增或升級原生依賴的 task**（例如裝 Google 登入、IAP、原生推播 SDK；判斷方式見 tech-stack 的 `references/mobile.md`）→ 驗收第一步是重建 binary（Expo：`npx expo run:ios`），再在模擬器啟動、看到首頁。JS 測試與 typecheck 對這類錯誤全綠，只有真的開 App 才會崩。
 - 專案的開發指令還是 Expo Go（沒有 `expo-dev-client`，`dev` 是 `expo start --ios`），而這個 feature 會引入原生依賴 → **排一個前置 task 切到 dev build**：裝 `expo-dev-client`、改 `dev` / `ios` scripts、更新 `CLAUDE.md` 的開發指令，驗收是 `npx expo run:ios` 後 App 開得起來。放在引入原生依賴的那個 task 之前。
@@ -137,6 +140,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 5. **標記**：驗收過了才改成 `done`。「動到」與預估不符時在備註更正，這是給後續 task 的情報。
 6. **commit**：呼叫 `/git:commit`，commit message 的 scope 或 body 帶上 task ID（`feat(order): 加入狀態轉換 (T-003)`）。程式碼與 plan.md 的狀態更新放在**同一個 commit**，狀態與產出要一起前進。commit 完才算這個 task 結束，才可以開始下一個。
 7. **不改 plan 以外的規劃決策**：發現整個切法錯了，停下來說明並建議重跑 `/impl:plan`，不要邊做邊改執行序。
+8. **UI task 先載入視覺語言**：來源欄寫了 `/ui:tonal-ui` 或 `/ui:calm-ui`，就先呼叫那個 skill 再寫畫面；顏色、字級、間距、圓角只用該介面的 token，不寫死。只讀規則與模型就動手，畫面會長成框架的預設樣子。
 
 ## 輸出模板
 
@@ -148,7 +152,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 
 ## 執行協議
 
-<原樣抄上方「與 /impl:feature 的協議」7 條。接手的 agent 可能沒載入任何 skill，這段是它唯一的操作說明。>
+<原樣抄上方「與 /impl:feature 的協議」8 條。接手的 agent 可能沒載入任何 skill，這段是它唯一的操作說明。>
 
 驗證指令：
 

@@ -1,6 +1,6 @@
 ---
 name: calm-ui
-description: Calm UI——消費級、AI-native 產品的視覺與互動語言：深色優先、極少裝飾、資訊層級靠排版與留白而不是卡片與框線，而「智慧」一律用行為（主動偵測、已完成的工作、明確的下一步）表達，不用發光球體、漸層、閃亮特效、機器人圖示這些 AI 陳腔濫調。含 Agent Feed 首頁、對話、任務進度、Agent 狀態、通知與導航的版型，完整 design token，以及改版既有介面的工作順序。當使用者要做 AI 助理、agent 產品、服務中心、生產力工具或任務型 app 的畫面、元件、改版或 design review 時使用。跟 /ui:tonal-ui 二選一、不可混用：後台與內部系統用 tonal-ui（淺色、色塊分層），消費級 AI 產品用本 skill。
+description: Calm UI——消費級、AI-native 產品的視覺與互動語言：深色優先、極少裝飾、資訊層級靠排版與留白而不是卡片與框線，而「智慧」一律用行為（主動偵測、已完成的工作、明確的下一步）表達，不用發光球體、漸層、閃亮特效、機器人圖示這些 AI 陳腔濫調。含 Agent Feed 首頁、對話、任務進度、Agent 狀態、通知與導航的版型，完整 design token，以及改版既有介面的工作順序。當使用者要做 AI 助理、agent 產品、服務中心、生產力工具或任務型 app 的畫面、元件、改版或 design review 時使用。同一個介面內跟 /ui:tonal-ui 二選一、不可混用：console・後台與內部系統用 tonal-ui（淺色、色塊分層），使用者端 Web 與行動 App 用本 skill；同一個專案的不同介面可以各用一套。
 ---
 
 # Calm UI：智慧來自行為，不是裝飾
@@ -8,19 +8,20 @@ description: Calm UI——消費級、AI-native 產品的視覺與互動語言�
 給消費級的 AI 產品用的視覺與互動語言——AI 助理、agent 產品、服務中心、生產力與任務型 app。
 所有數值在 `references/tokens.css`（可直接貼），五種畫面的版型與文案在 `references/patterns.md`。
 
-**跟 `/ui:tonal-ui` 二選一。** 那套是後台與內部系統的淺色語言（白卡片、灰底、色塊分層）；
-這套是消費級產品的深色語言。一個專案只能有一套，混用會得到一個既不像工具也不像產品的東西。
+**同一個介面內跟 `/ui:tonal-ui` 二選一。** 那套是 console・後台與內部系統的淺色語言（白卡片、灰底、色塊分層）；
+這套是消費級產品的深色語言。一個介面（一個 app）只能有一套，混用會得到一個既不像工具也不像產品的東西。
+但同一個專案裡 console 用 tonal-ui、使用者端 Web 與行動 App 用本套是正常的——那是不同介面，不算混用。
 
-## 先確認這個專案選的是哪一套
+## 先確認這個介面選的是哪一套
 
-動手前依序查，查到就停：
+先看要動的檔案屬於哪個介面（`apps/web`、`apps/mobile`、`apps/console`……），再依序查那個介面的風格，查到就停：
 
-1. `CLAUDE.md` 的技術約束段（`/arch:init` 寫的「UI 風格：…」）
-2. `docs/architecture/tech-stack.md` 的「UI 風格」段或「約束與慣例」第一條
-3. 既有程式碼：有 `tokens.css` / `theme.ts` 就看它是淺色還是深色階梯
-4. 都沒有 → 用 `AskUserQuestion` 問一題，並建議把答案寫進 `CLAUDE.md`
+1. `CLAUDE.md` 技術約束段的 UI 風格對照（`/arch:init` 寫的「UI 風格（依介面）：…」）
+2. `docs/architecture/tech-stack.md` 的「UI 風格」對照表或「約束與慣例」第一條
+3. 該介面的既有程式碼：有 `tokens.css` / `theme.ts` 就看它是淺色還是深色階梯
+4. 都沒有 → 用 `AskUserQuestion` 問一題，並建議把答案寫進 `CLAUDE.md` 的對照
 
-**查到的是另一套，就停下來說明，不要改用這一套做。** 混用會得到一個既不像工具也不像產品的東西，而且下一個 session 會再混一次。
+**這個介面查到的是另一套，就停下來說明，不要改用這一套做。** 混用會得到一個既不像工具也不像產品的東西，而且下一個 session 會再混一次。
 
 ## 一句話
 
