@@ -22,7 +22,7 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 1. **一輪只推進一步。** 一輪 = 判斷當前 feature 走到哪 → 呼叫**那一個** skill → 回寫 backlog。不要在同一輪裡硬把規劃、實作、稽核、開 PR 全跑完——那會在中途耗盡 context，而且留下一個說不清楚做到哪的狀態。
 2. **狀態一律落在檔案。** 進度寫 `backlog.md` 與各自的 `plan.md`，不要只留在對話裡。驗收標準同 `/impl:plan`：一個完全沒有上下文的新 session 只讀這兩份檔案就要能接手。
 3. **不跳過階段。** 順序是 `plan → feature ⟲ → verify → pr`，每一階段的產出是下一階段的輸入。沒有 `verification.md` 就不開 PR、verdict 不是 `pass` 就不合併——閘門就是這樣運作的。一人開發時沒有第二個人會審這個 PR，`/impl:verify` 是唯一有人在看的關卡（`--merge` 的前提）。
-4. **該停的時候要停，不該停的時候不要停。** 無人看守不等於不停。停在下面「停止條件」列出的六種情況是對的；停在「PR 開完了但沒有人切回 base」這種機械性動作上，是流程沒接完。
+4. **該停的時候要停，不該停的時候不要停。** 無人看守不等於不停。停在下面「停止條件」列出的七種情況是對的；停在「PR 開完了但沒有人切回 base」這種機械性動作上，是流程沒接完。
 5. **每輪開始先清回饋。** 有 `high` 嚴重度的待處理上游回饋（規則已經寫錯進程式碼了）→ 先跑 `/domain:feedback`，再繼續做新東西。帶著已知錯誤的規則往前做，做得越多錯得越多。
 6. **佇列順序依相依，不依喜好。** 前置 feature 沒 `done` 就不能開始後面的。相依關係推不出來就問（一次一題）。多客戶端專案（行動端 / 第三方）固定是**伺服器端 feature 先於客戶端 feature**：契約要先被實作出來並進 main，客戶端才開始，否則客戶端會對著一份還沒實現的文件寫程式，而且整合失敗要到很後面才會被發現。同一個需求拆成 `<feature>-api` 與 `<feature>-app` 兩列，用「前置」欄串起來。
 7. **不擅自把新 feature 塞進佇列。** `docs/domain/business-rules/` 出現佇列裡沒有的規則文件時，列出來問要不要排進去、排在哪，不要自己決定專案接下來要做什麼。
@@ -112,7 +112,7 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 | PR 開著、CI 還在跑（上一輪等到上限仍未跑完） | `/git:pr --merge`（沿用既有 PR 繼續等） | `pr` |
 | PR 開著、CI 紅 | `/impl:fix`；修完的下一輪再 `/git:pr --merge`（推上去、重等 CI） | `pr` |
 | PR 開著、被 CI 以外的條件擋下（衝突、`CHANGES_REQUESTED`、draft） | 不呼叫；原因寫進備註，停下來問 | `pr` |
-| PR 已 merge | 標 `done`，回 Step 3 取下一個 | — |
+| PR 已 merge | 切回 base 後，有畫面的專案在 base 上跑一次 `test:smoke`：綠 → 標 `done`，回 Step 3 取下一個；紅 → 停（幾個 feature 疊在一起後 App 開不起來，要人看） | — |
 
 `/git:pr --merge` 會在合併後切回 base branch 並 pull（它的 Step 9）。**確認它真的切回去了**再進下一個 feature——沒切回去的話，下一個 feature 的 commit 會疊在上一個分支上。
 
@@ -122,7 +122,7 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 
 ### Step 6：停止條件
 
-只有這六種情況停：
+只有這七種情況停：
 
 | 停止原因 | 怎麼回報 |
 |---|---|
@@ -131,6 +131,7 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 | verify `fail` 且缺口無法自動補（測試被動過手腳、規則根本沒定義） | 寫明是哪一條 finding |
 | `/domain:feedback` 需要規則裁定 | 列出待決問題 |
 | PR 被 CI 以外的條件擋下（衝突、`CHANGES_REQUESTED`、draft），或 CI 紅且 `/impl:fix` 修不掉 | 寫明 PR 編號、擋下的條件與失敗的 check |
+| 合併後 base 上的 `test:smoke` 紅 | 寫明剛合併的 PR、失敗輸出與截圖位置，建議 `/impl:fix` |
 | 使用者喊停 | — |
 
 其餘一律繼續下一輪。要真的整晚跑，用 `/loop`（不給 interval，讓它自己抓節奏），每輪就是 Step 2–5。
@@ -170,6 +171,7 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 | 憑 backlog 上寫的階段決定下一步 | 那是上一輪寫的；檔案實況才是真的（Step 3） |
 | verdict 是 `pass with findings` 就合併 | 那些 findings 已經被寫成 task 了，合併等於把它們留在 main（核心規則 3） |
 | PR 合併後沒切回 base 就開始下一個 feature | 下一個 feature 的 commit 疊在舊分支上，被捲進舊 PR（Step 3 末） |
+| 合併後沒在 base 上跑冒煙就取下一個 feature | 每個 feature 各自驗過，疊在一起才壞的啟動錯誤會一路帶到最後，使用者打開 App 才發現（Step 4） |
 | 帶著 `high` 的待處理回饋繼續做新 feature | 規則已經錯進程式碼了，做越多錯越多（核心規則 5） |
 | 看到新的規則文件就自己排進佇列開始做 | 專案要做什麼不是 agent 決定的（核心規則 7） |
 | `blocked` 時只寫「卡住了」 | 回來的人不知道要做什麼決定，等於沒有回報（核心規則 8） |

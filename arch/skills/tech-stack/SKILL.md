@@ -169,6 +169,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 <給後續開發遵守的硬規則，每條一行：ORM、auth 方式、上傳方式、API 版本化、不要做的事>
 <有 UI 時，第一條固定是：**UI 風格：<tonal-ui / calm-ui / 既有設計系統>，全專案只用這一套，不混用另一套**>
 <有 App 時，加一條：**行動端本機開發預設開 iOS 模擬器**，並附該技術棧的開發指令（見 `references/mobile.md`）>
+<選 Expo 時，再加一條：**用 dev build 不用 Expo Go；新增或升級原生依賴後先 `npx expo run:ios` 重建 binary 再開**（理由見 `references/mobile.md`）>
 
 ## 整體架構
 <mermaid 圖：web / mobile client → backend → db / redis，標注部署位置；有 App 時標注推播與 app store>

@@ -34,6 +34,7 @@ Monorepo 內建立 app 時，先 `cd apps/` 再跑各框架 CLI；建完回根�
 |---|---|
 | Expo | `pnpm create expo-app@latest <dir> --template blank-typescript --no-install` |
 | Expo（monorepo） | 建完加 `metro.config.js` 的 workspace 設定（`watchFolders` 指到 repo root、`nodeModulesPaths`） |
+| Expo dev build | 建完 `npx expo install expo-dev-client`；`package.json` 的 `ios` 設 `expo run:ios`、`dev` 設 `expo start --dev-client --ios`（不用 Expo Go，理由見 tech-stack 的 `references/mobile.md`） |
 | Flutter | `flutter create --org <reverse.domain> <dir>` |
 | Capacitor | 在既有 web app 內：`pnpm add @capacitor/core && pnpm add -D @capacitor/cli && pnpm exec cap init <name> <appId> --web-dir dist` |
 

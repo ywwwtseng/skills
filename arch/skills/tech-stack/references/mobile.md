@@ -32,12 +32,16 @@
 - **本機開發平台**：**預設 iOS 模擬器**。理由是啟動最快、不需要先開 Android Studio 的 AVD、而且 macOS 上一定裝得起來；Android 的差異留到實機測試與上架前的回歸再處理。這一條要寫進「約束與慣例」，因為 `/impl:feature` 與 `/impl:verify` 每個 UI task 都要照它開來確認。
   | 技術 | 開發指令 | 備註 |
   |---|---|---|
-  | Expo | `npx expo start --ios` | 需要 custom native module 時改 `npx expo run:ios` |
+  | Expo | 建置：`npx expo run:ios`；日常：`npx expo start --dev-client --ios` | 預設用 dev build（見下一條），不用 Expo Go |
   | Flutter | `flutter run -d ios` | 先 `open -a Simulator` 開好模擬器 |
   | 原生 Swift | `xcodebuild` 或直接開 Xcode | CI 用 `xcodebuild -scheme <name> -destination 'platform=iOS Simulator,name=iPhone 15'` |
   | Capacitor | `npx cap run ios` | |
 
   開發者在 Windows / Linux、或產品明確以 Android 為主時改成 Android 並在文件寫明——這是預設值，不是硬規則。
+- **Expo 一律用 dev build，不用 Expo Go。** Expo Go 是預先編好的 App，只帶 Expo SDK 內建的原生模組。專案一旦裝了任何帶原生程式碼的套件（Google 登入、IAP、部分分析 / 推播 SDK……），在 Expo Go 裡**一啟動就崩**（`TurboModuleRegistry.getEnforcing(...): '<Module>' could not be found`）——JS 打包、typecheck、Jest 全都是綠的，要到真的開 App 才看得到。而 v1 需要什麼原生套件在選型時通常還不確定，所以一開始就裝 `expo-dev-client`、用 `expo run:ios` 建自己的 binary，比等到某個 feature 引入原生套件才切換便宜。
+  - **原生依賴的判斷**：套件目錄下有 `ios/`、`android/`、`*.podspec`、`expo-module.config.json` 或 `app.plugin.js` 其中之一。
+  - **加了或升級原生依賴，binary 就要重建**（`npx expo run:ios`，或先 `npx expo prebuild --clean`）。舊的 binary 裡沒有新模組，錯誤跟 Expo Go 一模一樣。
+  - 這兩條都要寫進「約束與慣例」，`/impl:plan`、`/impl:feature`、`/impl:verify` 依它判斷何時要重建。
 - **推播**：Expo → Expo Push（底層 FCM / APNs）；Flutter / 原生 → Firebase Cloud Messaging；backend 只需一個 push 發送端點。
 - **Auth**：與 Web 共用同一套（Supabase Auth / Clerk / 自建 JWT），mobile 端用 secure storage 存 token。
 - **發布**：Expo → EAS Build + EAS Submit；Flutter / 原生 → Fastlane。App store 審核週期（iOS 約 1–3 天）寫入「風險 / 注意事項」。

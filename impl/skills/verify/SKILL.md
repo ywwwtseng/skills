@@ -77,7 +77,13 @@ plan 的規則覆蓋表寫「未覆蓋 — <原因>」的，確認那個原因�
 
 ### Step 4：跑全套驗證
 
-實際執行（核心規則 3）：type check、lint、全部測試、build。UI 類的 feature 依 plan 的驗收描述用 `/run` 開起來確認；行動端預設開 iOS 模擬器（指令見 `CLAUDE.md` 或 tech-stack 的「約束與慣例」）。開不起來就是 `fail`——「程式碼看起來對」不算驗過。
+實際執行（核心規則 3）：type check、lint、全部測試、build。有畫面的專案**一定**再跑一次啟動確認，不論這個 feature 有沒有 UI task——任何 feature 都可能在共用的入口（root layout、provider、啟動時 import 的模組）加東西：
+
+1. 這個 feature 的 diff（lockfile / `package.json`）有新增或升級原生依賴 → 先重建 binary（Expo：`npx expo run:ios`）。沒重建就啟動，驗到的是舊 binary。
+2. 跑 `docs/architecture/testing.md` 的 `test:smoke`；沒有這條就照 `CLAUDE.md` 或 tech-stack「約束與慣例」的開發指令開模擬器（行動端預設 iOS），截圖確認首頁畫出來、沒有紅屏或 `Uncaught Error`。
+3. Expo 專案還在用 Expo Go 開、而 diff 裡有原生依賴 → `fail`，並接一個「切到 dev build」的 task。
+
+開不起來就是 `fail`——「程式碼看起來對」「Metro 起來了」都不算驗過。沒有 `test:smoke` 是一條 `medium` finding，建議跑 `/arch:test-strategy` 補上。
 
 逐條記下指令與結果。任何一條紅 → verdict 直接是 `fail`，附上失敗輸出。
 

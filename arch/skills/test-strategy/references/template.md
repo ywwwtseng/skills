@@ -14,8 +14,9 @@
 | 單元 | `pnpm test:unit` | |
 | 整合 / API | `pnpm test:integration` | |
 | E2E | `pnpm test:e2e` | |
+| 冒煙 | `pnpm test:smoke` | |
 
-`/impl:feature` 的「既有測試不能壞」一律跑「全部」那一條。
+`/impl:feature` 的「既有測試不能壞」一律跑「全部」那一條。`test:smoke` 不含在「全部」裡（要建置、要模擬器），由 `/impl:verify` 與 UI task 的驗收另外跑。
 
 ## 分層對照
 
@@ -27,6 +28,14 @@
 | 權限 | API | `tests/api/` | 經過真的認證中介層 |
 | 契約錯誤碼 | API | `tests/api/` | 每個錯誤碼至少一條 |
 | 關鍵流程 | E2E | `e2e/` | 每個 feature 的 happy path + 一個錯誤路徑 |
+| 啟動得起來 | 冒煙 | `e2e/smoke/` | 有畫面就一定有；打包 + 真的 binary 啟動 |
+
+## 冒煙測試
+
+- 打包：`<指令>`（CI：有 / 無）
+- 啟動：`<建置指令>` → `<啟動斷言的工具與檔案>`（CI：有 / 只在本機）
+- 首頁斷言的元素：`<元素>`
+- 需要重建 binary 的時機：<新增或升級原生依賴後；判斷方式>
 
 ## 測試資料庫
 

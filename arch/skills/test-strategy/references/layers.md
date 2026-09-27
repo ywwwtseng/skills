@@ -1,6 +1,6 @@
 # 測試分層對照
 
-## 四層定義
+## 五層定義
 
 | 層 | 測什麼 | 替換什麼 | 速度 |
 |---|---|---|---|
@@ -8,8 +8,11 @@
 | **整合** | 應用層 + 真的資料庫：repository、交易、DB 約束、並行、migration | 只替換外部服務（金流、寄信、第三方 API） | 百毫秒 |
 | **API** | 從 HTTP 進去：路由、認證授權中介層、request 驗證、錯誤碼與 envelope | 同整合層 | 百毫秒 |
 | **E2E** | 從畫面進去：關鍵使用者流程 | 盡量不替換；外部服務用 sandbox 或 stub server | 秒 |
+| **冒煙（smoke）** | 真的 binary / 真的瀏覽器啟動得起來、首頁畫得出來 | 不替換 | 秒～分（含建置） |
 
 API 層與整合層通常共用同一套測試資料庫與 setup，差別只在入口。專案小的時候可以合成一條 `test:integration`。
+
+冒煙層跟 E2E 的差別：E2E 驗業務流程、依 `docs/ui/screens/` 才有；冒煙只驗「開得起來」，**有畫面就一定要有**，不看有沒有畫面規格。單元與元件測試在 Node 裡 render，碰不到打包、原生模組、啟動時的環境變數——這一整類錯誤只有冒煙層抓得到。
 
 ## 規則類型 → 預設測試層
 
@@ -29,6 +32,7 @@ API 層與整合層通常共用同一套測試資料庫與 setup，差別只在�
 | contract | 冪等鍵 | API | 同一個鍵送兩次 |
 | screens | 關鍵流程（happy path + 一個錯誤路徑） | E2E | |
 | screens | 其他狀態（空、錯誤、載入、權限不足） | 元件測試 | E2E 太慢，逐一覆蓋會讓整套跑不動 |
+| tech-stack | 有 Web 或 App：啟動得起來 | **冒煙** | 原生模組沒編進 binary、打包失敗、啟動時缺環境變數，其他層全綠也照樣白屏 |
 
 ## mock 邊界
 
@@ -73,6 +77,25 @@ API 層與整合層通常共用同一套測試資料庫與 setup，差別只在�
 | Go | `go test` | `go test` + `testcontainers-go`；`httptest` | Playwright |
 | React Native / Expo | Jest + `@testing-library/react-native` | —（伺服器端另計） | Maestro（預設，YAML、較穩定）/ Detox |
 | Flutter | `flutter test` | — | `integration_test` / Maestro |
+
+## 冒煙測試做法
+
+兩段，都要有：
+
+1. **打包**（快，CI 在 Linux 也能跑）：抓模組解析、語法、打包設定錯誤。
+2. **啟動**（慢，要模擬器或瀏覽器）：用**真的 binary** 啟動，斷言首頁的某個元素出現、且沒有錯誤畫面。打包成功但 runtime 才失敗的錯誤（原生模組不在 binary 裡、啟動時丟例外）只有這段抓得到。
+
+| 技術棧 | 打包 | 啟動 |
+|---|---|---|
+| Expo | `npx expo export --platform ios` | `npx expo run:ios` 建 dev build → Maestro：`launchApp` + `assertVisible: <首頁元素>` + `assertNotVisible: "Uncaught Error"` |
+| Flutter | `flutter build ios --simulator --debug` | Maestro 或 `integration_test` 只跑一個「開首頁」案例 |
+| Web（Next.js / Vite） | `pnpm build` | Playwright：起 production build，`goto('/')`，斷言首頁元素可見且 console 沒有 error |
+
+- 斷言用首頁**一定會出現**的元素（標題、登入按鈕），不要用需要資料才出現的東西——那是 E2E 的範圍，而且會讓冒煙依賴後端。
+- 首頁需要登入時，斷言登入畫面出現即可。
+- **Expo 一律用 dev build 跑，不用 Expo Go**：Expo Go 裡沒有專案自己的原生模組，冒煙會在它身上假紅；反過來，專案沒有原生模組時 Expo Go 會假綠，等於沒驗到真正會出貨的 binary。
+- 新增或升級原生依賴後，啟動段要先重建 binary 再跑（原生依賴的判斷見 tech-stack 的 `references/mobile.md`）。
+- CI 預設只跑打包段；啟動段需要 macOS runner，有才加，沒有就在 `testing.md` 寫明「啟動段只在本機由 `/impl:verify` 跑」。
 
 打亂順序的旗標：Vitest `--sequence.shuffle`、Jest `--randomize`、pytest `-p random_order`（需 `pytest-random-order`）、`go test -shuffle=on`。
 

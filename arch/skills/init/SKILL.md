@@ -67,12 +67,12 @@ description: 讀 docs/architecture/tech-stack.md 的技術選型決策，把專�
 
 ### Step 5：驗證
 
-依序跑安裝、`typecheck`、`lint`、`test`、`build`，全部要通過。失敗就修到過；修不掉時在最終報告裡如實寫出失敗指令與錯誤訊息，不要宣稱完成。
+依序跑安裝、`typecheck`、`lint`、`test`、`build`，全部要通過。有 App 時再加一條：實際建一次 binary 並在模擬器啟動（Expo：`npx expo run:ios`），看到首頁才算過——Metro 或 build 跑起來不代表 App 載入得起來。失敗就修到過；修不掉時在最終報告裡如實寫出失敗指令與錯誤訊息，不要宣稱完成。
 
 ### Step 6：收尾
 
 1. 把決策文件的「約束與慣例」寫進 `CLAUDE.md`（已存在就附加一段 `## 技術約束`，不覆蓋既有內容），並附上 `docs/architecture/tech-stack.md` 連結。
-   有 App 時，**行動端本機開發預設平台與開發指令**也要進 `CLAUDE.md`（例如「行動端開發預設開 iOS 模擬器：`npx expo start --ios`」）——`/impl:feature` 每個 UI task 的驗收都要照它開來確認，寫在這裡它才不用每次去猜要開哪個平台。
+   有 App 時，**行動端本機開發預設平台與開發指令**也要進 `CLAUDE.md`（例如「行動端開發預設開 iOS 模擬器：建置 `npx expo run:ios`、日常 `npx expo start --dev-client --ios`；新增或升級原生依賴後先重建」）——`/impl:feature` 每個 UI task 的驗收都要照它開來確認，寫在這裡它才不用每次去猜要開哪個平台。
    **UI 風格那一條一定要進 `CLAUDE.md`**（例如「UI 風格：calm-ui，全專案只用這一套」）。`tech-stack.md` 是它的決策來源，但 `CLAUDE.md` 每個 session 都會自動載入——寫在這裡，視覺語言 skill 被觸發之前答案就已經在 context 裡了。
 2. 在對話中回報：建立了哪些目錄與檔案、跑過哪些驗證指令與結果、`.env` 需要填哪些 key、下一步建議（`/git:commit` 提交骨架、`/domain:business-rules` 開始定規則；有了 `docs/db/schema.md` 之後跑 `/arch:test-strategy` 定測試分層並建測試資料庫）。
 

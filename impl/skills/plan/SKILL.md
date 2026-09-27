@@ -81,7 +81,9 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 - 測試層照 `docs/architecture/testing.md` 的分層對照：落點是 DB 約束的不變量、權限、契約錯誤碼，驗收要跑整合 / API 層的指令（`pnpm test:integration tests/integration/order.test.ts`），不要寫成 mock 掉資料庫的單元測試。沒有 `testing.md` 時照既有慣例，並在「上游狀態」記明。
 - 純型別 / 設定類的 task → `pnpm typecheck` 或 `pnpm build`。
 - UI task → 除了 typecheck，寫明用 `/run` 開起來要看到什麼畫面；有 `docs/ui/screens/` 時，驗收直接引用規格的狀態（「在空狀態顯示 X、在離線顯示 Y」），不要只寫「畫面正常」。
-- 行動端的 UI task → **驗收指令寫成開 iOS 模擬器的那一條**（`npx expo start --ios`、`flutter run -d ios`……，以 `docs/architecture/tech-stack.md` 的「約束與慣例」為準）。不要寫成 `npx expo start` 讓執行的 agent 自己選平台——它會選到沒裝模擬器的那一個然後卡住。Android 專屬的行為（返回鍵、權限對話框差異）才另外開一個 task 標明要用 Android 驗。
+- 行動端的 UI task → **驗收指令寫成開 iOS 模擬器的那一條**（`npx expo start --dev-client --ios`、`flutter run -d ios`……，以 `CLAUDE.md` 或 `docs/architecture/tech-stack.md` 的「約束與慣例」為準），並加跑 `test:smoke`（`docs/architecture/testing.md` 有這條時）。不要寫成 `npx expo start` 讓執行的 agent 自己選平台——它會選到沒裝模擬器的那一個然後卡住。Android 專屬的行為（返回鍵、權限對話框差異）才另外開一個 task 標明要用 Android 驗。
+- **會新增或升級原生依賴的 task**（例如裝 Google 登入、IAP、原生推播 SDK；判斷方式見 tech-stack 的 `references/mobile.md`）→ 驗收第一步是重建 binary（Expo：`npx expo run:ios`），再在模擬器啟動、看到首頁。JS 測試與 typecheck 對這類錯誤全綠，只有真的開 App 才會崩。
+- 專案的開發指令還是 Expo Go（沒有 `expo-dev-client`，`dev` 是 `expo start --ios`），而這個 feature 會引入原生依賴 → **排一個前置 task 切到 dev build**：裝 `expo-dev-client`、改 `dev` / `ios` scripts、更新 `CLAUDE.md` 的開發指令，驗收是 `npx expo run:ios` 後 App 開得起來。放在引入原生依賴的那個 task 之前。
 - **每個 task 的驗收都隱含包含「既有測試不能壞」**，這條寫在執行協議裡，不用每個 task 重複。
 
 ### Step 4：排序
