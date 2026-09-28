@@ -115,6 +115,8 @@
   --control-height-lg: 44px;
   --icon-size-sm: 16px;
   --icon-size: 20px;
+  /* 設定組裡的一列；行動 52、桌面 48（下方 media query 切換） */
+  --settings-row-height: 52px;
 
   /* ── 形狀 ───────────────────────────────────────────────────
      圓角克制。全圓角（膠囊）只給 chip 與小按鈕 */
@@ -151,6 +153,7 @@
 @media (min-width: 1024px) {
   :root {
     --space-gutter: 32px;
+    --settings-row-height: 48px;
   }
 }
 
