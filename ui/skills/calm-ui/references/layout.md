@@ -354,7 +354,38 @@ ming@example.com                               ←      信箱 small / secondary
 | 輸入欄位、行動端按鈕 | `--control-height-lg` | 44 |
 | 圖示 | `--icon-size-sm` / `--icon-size` | 16 / 20 |
 
-行動端所有可點的東西點擊區至少 `--touch-target-min`（44），視覺上小的圖示用透明內距補足。
+行動端所有可點的東西點擊區至少 `--touch-target-min`（44），視覺上小的圖示用透明內距補足，細節見下一節。
+
+## Safe area、點擊區與圖層
+
+行動端（原生 App、手機瀏覽器、PWA）的每個畫面都要過這三件事。畫面看起來對、實際卻按不到或被系統 UI 蓋住，是最常見、也最難從截圖看出來的問題。
+
+### Safe area
+
+- **靠近上緣或下緣的東西，位置一律是「safe area inset + 版面間距」**，不能只寫固定的 `top` / `bottom`。`top: 24px` 在有動態島、瀏海的 iPhone 上會落進狀態列。
+- **用平台的 safe area 機制，不要依機型寫死數字**：
+  - Web：viewport 要有 `viewport-fit=cover`，再用 `env(safe-area-inset-*)`（見 token 的 `--safe-*`）。少了 `viewport-fit=cover`，`env()` 永遠是 0
+  - React Native / Expo：`react-native-safe-area-context` 的 `SafeAreaView` 或 `useSafeAreaInsets()`；不要用 RN 內建、只支援 iOS 的 `SafeAreaView`
+  - iOS 原生：`safeAreaLayoutGuide`；SwiftUI 的 `ignoresSafeArea()` 只給背景
+  - Android：edge-to-edge 之後用 `WindowInsets` 處理狀態列與手勢列
+- **上方**：頂列內容、返回鈕、關閉鈕、頁首動作都在 inset-top 之下。頂列的底色可以延伸到狀態列底下，內容不行。
+- **下方**：tab bar、常駐輸入框、全寬送出按鈕、底部面板的按鈕列都在 inset-bottom（home indicator）之上。tab bar 的高度是 token 高度 + inset-bottom，底色延伸到螢幕底。
+- **左右**：橫向時 inset-left / right 也要算，左右留白取 `max(gutter, inset)`。
+- **背景、底色、圖片可以滿版延伸進 safe area；可互動的東西與文字不行。**
+- **捲動內容的底部留白**＝底部固定元件的高度 + inset-bottom，捲到底時最後一項不能被 tab bar 或輸入框蓋住。
+- 鍵盤彈出也是一種 inset：常駐輸入框、表單送出鈕要跟著鍵盤上移，不能被蓋住。
+
+### 點擊區
+
+- **每個可互動的控制項，實際點擊區至少 44 × 44pt**（`--touch-target-min`）。圖示或按鈕視覺上可以更小，用透明內距補足（Web 用 padding 或擴大的偽元素；RN 用 `hitSlop` 或外層 `Pressable` 最小 44），不要為了點擊區把圖示放大。
+- 相鄰的點擊區不重疊；小圖示鈕並排時，中心距至少 44。
+- **點擊區不能壓到系統 UI**：狀態列、動態島、home indicator、Android 手勢列。貼邊的按鈕擴大點擊區時只往內擴，不往 safe area 裡擴。
+
+### 圖層
+
+- 重要的互動元件一律在裝飾層、背景層之上，層級從 token 的 `--z-*` 取，不要寫 `9999`。
+- **看得到但按不到，先查 z-index 與 stacking context**：`transform`、`opacity < 1`、`filter`、`position` + `z-index` 都會建立新的 stacking context，子元素的 z-index 出不了父層。
+- **看得到的元件上面不能蓋著透明或看不見的層**：全螢幕的漸層遮罩、關閉後沒卸載的 overlay、`opacity: 0` 但還在的面板。純裝飾層加 `pointer-events: none`（RN：`pointerEvents="none"`）；關閉的 overlay 要卸載，或同時設 `visibility: hidden` 與 `pointer-events: none`。
 
 ## 交件前的排版檢查
 
@@ -369,4 +400,7 @@ ming@example.com                               ←      信箱 small / secondary
 - [ ] 中英文之間有空格、標點一致嗎？
 - [ ] 設定類畫面：列都包在 `--color-surface` 的組裡、組內有分隔線、組外沒有框嗎？每一列都是「左標題、右尾端」、能點的都有尾端、不能點的都沒有？每組都有 heading 級的分組標題、說明都在組下方？2–5 個互斥選項是展開的單選組？一組的圖示是全有或全無？破壞性動作是單獨一組的紅字列而不是實心按鈕？
 - [ ] 縮到 375 寬：沒有水平捲動、tab bar 與頂列正確、點擊區 ≥ 44？
+- [ ] 在有動態島的 iPhone（或模擬器）與有手勢列的 Android 上看過：頂端的按鈕都在狀態列下方、底部的按鈕都在 home indicator 上方？沒有寫死的 `top` / `bottom` 偏移？
+- [ ] 每個可點的東西點擊區 ≥ 44 × 44、彼此不重疊、不壓到系統 UI？
+- [ ] 每個看得到的按鈕都按得到？上面沒有透明層或沒卸載的 overlay？
 - [ ] 把所有顏色換成灰階，層級還看得出來嗎？

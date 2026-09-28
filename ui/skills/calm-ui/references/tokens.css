@@ -142,6 +142,22 @@
   /* ── 觸控 ───────────────────────────────────────────────────
      行動優先：最小點擊區 44pt，主要動作放在拇指構得到的下方 */
   --touch-target-min: 44px;
+
+  /* ── Safe area ──────────────────────────────────────────────
+     有動態島、瀏海、home indicator 的裝置，靠邊的東西一律加上這些。
+     viewport 要有 viewport-fit=cover，否則 env() 永遠是 0 */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* ── 圖層 ───────────────────────────────────────────────────
+     只用這幾階。互動元件永遠在裝飾層之上；不要寫 9999 */
+  --z-decoration: -1;  /* 背景、漸層、插圖，而且要 pointer-events: none */
+  --z-sticky: 10;      /* 頂列、tab bar、常駐輸入框 */
+  --z-dropdown: 100;   /* 選單、下拉面板 */
+  --z-overlay: 200;    /* 對話框、底部面板與它們的遮罩 */
+  --z-toast: 300;
 }
 
 @media (max-width: 639px) {

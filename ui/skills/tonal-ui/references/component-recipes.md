@@ -167,7 +167,7 @@ CSS 屬性選擇器比對是區分大小寫的，打錯只會安靜地變回灰�
 ```css
 .panel {
   position: absolute;
-  z-index: 100;
+  z-index: var(--z-dropdown);
   padding: 8px;
   border-radius: var(--border-radius-container);
   background-color: var(--color-background-layout); /* 面板自己是灰的 */
