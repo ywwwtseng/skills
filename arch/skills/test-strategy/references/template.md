@@ -11,12 +11,23 @@
 | 用途 | 指令 | 單一檔案 |
 |---|---|---|
 | 全部 | `pnpm test` | `pnpm test <path>` |
+| 受影響 | `pnpm test:affected` | |
 | 單元 | `pnpm test:unit` | |
 | 整合 / API | `pnpm test:integration` | |
 | E2E | `pnpm test:e2e` | |
 | 冒煙 | `pnpm test:smoke` | |
 
-`/impl:feature` 的「既有測試不能壞」一律跑「全部」那一條。`test:smoke` 不含在「全部」裡（要建置、要模擬器），由 `/impl:verify` 與 UI task 的驗收另外跑。
+`/impl:feature`、`/impl:fix` 每次驗收的「既有測試不能壞」跑「受影響」那一條；「全部」留給 `/git:push` 推之前、`/impl:verify` 與 CI。`test:smoke` 不含在「全部」裡（要建置、要模擬器），由 `/impl:verify`、`/git:push` 與 UI task 的驗收另外跑。
+
+### 改跑全部的情況
+
+改動碰到下列任一項時，「受影響」追不到（它靠 import 關係找測試），驗收改跑「全部」：
+
+- migration、ORM schema
+- 測試的 setup / fixture / factory：`<路徑>`
+- 設定檔：`package.json`、lockfile、`tsconfig`、測試設定、`.env.example`
+- 共用模組：`<被大量 import 的路徑，例如 src/lib/、src/domain/ 的根>`
+- 「受影響」指令報錯，或回報找不到任何測試
 
 ## 分層對照
 

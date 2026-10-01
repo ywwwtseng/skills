@@ -75,6 +75,17 @@ description: 讀 docs/architecture/tech-stack.md 的技術選型決策，把專�
 1. 把決策文件的「約束與慣例」寫進 `CLAUDE.md`（已存在就附加一段 `## 技術約束`，不覆蓋既有內容），並附上 `docs/architecture/tech-stack.md` 連結。
    有 App 時，**行動端本機開發預設平台與開發指令**也要進 `CLAUDE.md`（例如「行動端開發預設開 iOS 模擬器：建置 `npx expo run:ios`、日常 `npx expo start --dev-client --ios`；新增或升級原生依賴後先重建」）——`/impl:feature` 每個 UI task 的驗收都要照它開來確認，寫在這裡它才不用每次去猜要開哪個平台。
    **UI 風格對照那一條一定要進 `CLAUDE.md`**，寫成介面路徑 → 風格（例如「UI 風格（依介面，同一個介面內不混用）：`apps/console` → tonal-ui；`apps/web`、`apps/mobile` → calm-ui；寫畫面前先載入對應 skill，只用該介面的 token」）。`tech-stack.md` 是它的決策來源，但 `CLAUDE.md` 每個 session 都會自動載入——寫在這裡，視覺語言 skill 被觸發之前答案就已經在 context 裡了。
+   **交付流程一定要進 `CLAUDE.md`**（附加一段 `## 交付流程`，已存在就不動）。沒有這段，沒下指令的改動會照 Claude 的預設走：不 commit、不 push、測試跑多少看心情：
+
+   ```markdown
+   ## 交付流程
+   - 只有 `/impl:ship`（通常是 `/loop /impl:ship`）走完整流程：plan → feature → verify → PR → merge。
+   - 其他一律直推 base branch：沒下指令的改動、單獨跑的 `/impl:fix`、`/impl:feature`、`/impl:refactor`。
+     改 → 跑受影響的測試（`test:affected`）+ typecheck → `/git:commit` → `/git:push`（跑全套後 push）。
+     不開分支、不開 PR、不寫 plan、不跑 verify。這段就是對 commit 與 push 的授權，不用每次再問。
+   - 例外：沒下指令的改動會碰到 business rules、DB schema / migration、API 契約時，先停下來說明，
+     建議改走 `/domain:business-rules`、`/db:migrate` 或 `/api:contract`，不要直推。
+   ```
 2. 在對話中回報：建立了哪些目錄與檔案、跑過哪些驗證指令與結果、`.env` 需要填哪些 key、下一步建議（`/git:commit` 提交骨架、`/domain:business-rules` 開始定規則；有了 `docs/db/schema.md` 之後跑 `/arch:test-strategy` 定測試分層並建測試資料庫）。
 
 ## 參考

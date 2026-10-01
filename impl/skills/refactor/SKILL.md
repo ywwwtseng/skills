@@ -13,7 +13,7 @@ description: 把實作過程累積下來、但被禁止順手改的技術債收�
 
 - **輸入**：各 `docs/impl/*/plan.md` 的 task 備註、`docs/impl/*/verification.md` 的 `low` findings、`/impl:fix` 報告裡「發現但沒修」的項目、程式碼裡的 `TODO` / `FIXME`，以及使用者直接指出的地方。
 - **輸出**：`docs/impl/debt.md`（債的總帳）、行為不變的程式碼改善、每個重構一個 `refactor:` commit。
-- **不做**：修 bug（→ `/impl:fix`）、加功能、改公開介面、改上游文件、`git push`。
+- **不做**：修 bug（→ `/impl:fix`）、加功能、改公開介面、改上游文件、自己下 `git push`（這一輪的重構都 commit 完，由 `/git:push` 直推）。
 
 **這裡開總帳是刻意的**，跟 `/domain:feedback` 不開總帳的理由並不衝突：回饋要回寫它被發現的那份檔案，因為那份檔案還活著；但 `plan.md` 的生命週期到 feature 做完為止，而債是**跨 feature 累積**的——留在已完成的 plan 備註裡，等於沒有人會再看到。
 
@@ -95,13 +95,18 @@ body 要寫三件事：**收益**、**行為不變的證據**、**債的來源**
 - 處理結果 → commit hash
 - 新發現的債 → 往後接號新增
 
-### Step 6：收尾
+### Step 6：交付
+
+這一輪的重構都 commit 完、debt.md 也回寫並 commit 後，呼叫 `/git:push` 直推 base branch。被擋下就把它的回報列進收尾。
+
+### Step 7：收尾
 
 1. 收到 N 筆債（自動處理 M / 需先補測試 K / 駁回 J）
 2. 每個重構：做了什麼、收益、commit hash
 3. 驗收：測試全綠、測試檔未被修改（附 `git diff --stat` 佐證）
 4. **發現但沒修的 bug**，建議跑 `/impl:fix`
 5. 仍在 `debt.md` 上的項目與它們的阻礙
+6. `/git:push` 的結果（推了哪些 commit、CI 狀態）
 
 ## debt.md 格式
 

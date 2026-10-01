@@ -24,6 +24,8 @@ Take the commits produced by this feature's implementation and turn them into on
 
 This is the exit of the pipeline: `/domain:business-rules` → `/domain:model` → `/db:schema` → `/impl:plan` → `/impl:feature` → `/git:commit` → **`/git:pr`**. Every earlier step refuses to push, so nothing leaves the machine until this command runs.
 
+This is the delivery path for `/impl:ship` only. Outside it, work is pushed straight to the default branch with `/git:push`; use this command by hand only when the user explicitly asks for a pull request.
+
 Arguments (`$ARGUMENTS`):
 
 - **`--merge`** — after the pull request is green, land it and return to the base branch (steps 8 and 9). This is the unattended solo mode: no other person is going to review it, so `/impl:verify` is the gate. Without this flag, stop after opening the pull request and leave merging to a human.

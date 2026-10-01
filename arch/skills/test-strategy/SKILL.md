@@ -89,7 +89,8 @@ Step 0 偵測後決定走哪一條，在報告裡寫明判定結果與依據：
 只建對照表用得到的層，不要預先把 E2E 搭好卻沒有任何 E2E 要寫。冒煙層例外：有畫面就建（Step 1 第 6 項）。
 
 1. **指令**：分層拆開，而且每一條都能單獨跑、能指定單一檔案。
-   - `test`：跑全部（CI 與 `/impl:feature` 的「既有測試不能壞」用這條）
+   - `test`：跑全部（CI、`/git:push` 推之前、`/impl:verify` 用這條）
+   - `test:affected`：只跑受這次改動影響的測試（`/impl:feature`、`/impl:fix` 每次驗收的「既有測試不能壞」用這條）。依工具選：Vitest `vitest run --changed origin/main`、Jest `jest --findRelatedTests $(git diff --name-only origin/main)`、pytest `pytest --testmon`、monorepo `turbo run test --filter=...[origin/main]` / `nx affected -t test`、Go 只跑改到的 package。找不到任何受影響的測試時要回報，不要默默綠
    - `test:unit`、`test:integration`、`test:e2e`：依對照表需要才建
    - `test:smoke`：有畫面就建；不併進 `test`（要建置、要模擬器，會拖慢每個 task 的驗收）
    - 既有的 `test` 指令已經有人在用 → 保持它的語意（通常就是全部），新增的只加不改

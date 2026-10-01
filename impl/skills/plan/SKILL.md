@@ -33,7 +33,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 ### Step 0：確認範圍、讀上游、盤點現況
 
 1. **確認是哪個 feature。** 使用者沒指定時，列出 `docs/domain/business-rules/` 下的檔案讓他選（`AskUserQuestion`）。一次只規劃一個 feature。
-2. **檢查續跑。** `docs/impl/<feature>/plan.md` 已存在 → 進入 Step 6 的續跑模式，不要重寫整份（跳過下一步，你應該已經在這個 feature 的分支上）。
+2. **檢查續跑。** `docs/impl/<feature>/plan.md` 已存在 → 進入 Step 6 的續跑模式，不要重寫整份（跳過下一步，你應該已經在這個 feature 的分支上；單獨執行、直推的情況下則在 base branch 上）。
 3. **確認起點分支**（只有全新 feature 才做）。規劃一個新 feature 前，工作區要乾淨、而且要站在 base branch 上：
    - 當前在別的 feature 分支上，**且**那個 feature 已經開過 PR（`gh pr view` 查得到）→ `git switch <base>` 並 `git pull --ff-only`，從乾淨的起點開始。
    - 當前在別的 feature 分支上，但**還沒開 PR**（上一個 feature 做到一半被打斷）→ 停下來問要先做完它還是擱置，不要默默切走。
@@ -44,7 +44,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
    有客戶端要呼叫這個 feature（web / 行動端 / 第三方）卻沒有 `docs/api/contract.md` 時，**不要自己發明端點與錯誤碼**——伺服器端與客戶端的 task 會各自發明一份，而且兩邊測試都會綠。建議先跑 `/api:contract`，然後停止。
    這個 feature 有畫面卻沒有 `docs/ui/screens/` 時同理：UI task 的驗收會寫不出來（只能寫「開起來看看」），空狀態與錯誤呈現會由每個 task 各自發明。建議先跑 `/ui:screens`。
    有畫面時再讀 `CLAUDE.md` 或 tech-stack 的 **UI 風格對照**，記下這個 feature 動到的每個介面用哪一套（`/ui:tonal-ui` / `/ui:calm-ui`），以及該介面的 token 是否已落進程式碼（theme 檔存在、既有畫面有引用）。對照沒寫就停，建議先補——少了它，每個 UI task 會各自決定畫面長相，而且在迴圈裡視覺語言 skill 幾乎不會自己被觸發。
-5. **抓驗證指令**（核心規則 9）：typecheck、lint、test（含只跑單一檔案的寫法）、build、dev。記下來，Step 3 每個 task 都要從這組指令挑。
+5. **抓驗證指令**（核心規則 9）：typecheck、lint、test（含只跑單一檔案的寫法、只跑受影響測試的寫法）、build、dev。記下來，Step 3 每個 task 都要從這組指令挑。
    有 `docs/architecture/testing.md` 時一併讀它的指令表與分層對照——Step 3 每個 task 該寫哪一層測試、跑哪一條指令，照那張表決定。
 6. **盤點既有程式碼**：目錄結構、既有相似 feature 怎麼分層、測試放哪裡怎麼命名、有沒有現成可複用的東西。plan 的 task 要長得像這個 repo 既有的樣子，不是像教科書。
 
@@ -87,7 +87,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 - 行動端的 UI task → **驗收指令寫成開 iOS 模擬器的那一條**（`npx expo start --dev-client --ios`、`flutter run -d ios`……，以 `CLAUDE.md` 或 `docs/architecture/tech-stack.md` 的「約束與慣例」為準），並加跑 `test:smoke`（`docs/architecture/testing.md` 有這條時）。不要寫成 `npx expo start` 讓執行的 agent 自己選平台——它會選到沒裝模擬器的那一個然後卡住。Android 專屬的行為（返回鍵、權限對話框差異）才另外開一個 task 標明要用 Android 驗。
 - **會新增或升級原生依賴的 task**（例如裝 Google 登入、IAP、原生推播 SDK；判斷方式見 tech-stack 的 `references/mobile.md`）→ 驗收第一步是重建 binary（Expo：`npx expo run:ios`），再在模擬器啟動、看到首頁。JS 測試與 typecheck 對這類錯誤全綠，只有真的開 App 才會崩。
 - 專案的開發指令還是 Expo Go（沒有 `expo-dev-client`，`dev` 是 `expo start --ios`），而這個 feature 會引入原生依賴 → **排一個前置 task 切到 dev build**：裝 `expo-dev-client`、改 `dev` / `ios` scripts、更新 `CLAUDE.md` 的開發指令，驗收是 `npx expo run:ios` 後 App 開得起來。放在引入原生依賴的那個 task 之前。
-- **每個 task 的驗收都隱含包含「既有測試不能壞」**，這條寫在執行協議裡，不用每個 task 重複。
+- **每個 task 的驗收都隱含包含「受影響的既有測試不能壞」**，這條寫在執行協議裡，不用每個 task 重複。全套測試不在每個 task 跑，留給交付前（`/git:push` 或 `/impl:verify`）。
 
 ### Step 4：排序
 
@@ -127,7 +127,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 3. 覆蓋率：feature 的 BR 共 N 條，被 task 覆蓋 M 條，未覆蓋 K 條（逐條列出原因）
 4. 列出最值得確認的 3 個切法假設
 5. 列出「上游回饋」（規則 / 模型 / schema 的矛盾或缺口，若有），建議跑 `/domain:feedback` 處理
-6. 下一步：`/impl:feature` 從 `T-001` 開始執行；要讓它自己連續跑，用 `/loop`（不給 interval，讓它自己抓節奏），每個 task 結束由 `/git:commit` 建立還原點；全部 task 做完由 `/impl:verify` 稽核、`/git:pr` 開 PR
+6. 下一步：`/impl:feature` 從 `T-001` 開始執行；要讓它自己連續跑，用 `/loop`（不給 interval，讓它自己抓節奏），每個 task 結束由 `/git:commit` 建立還原點；全部 task 做完由 `/git:push` 跑全套後直推 base branch；在 `/impl:ship` 裡則由 ship 接著跑 `/impl:verify` 與 `/git:pr --merge`
 
 ## 與 /impl:feature 的協議
 
@@ -136,9 +136,9 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 1. **接手**：讀 plan.md → 找執行序上第一個非 `done` 的 task。有 `blocked` 擋在前面且未解，先處理它，不要跳過去做後面的。狀態是 `doing` 表示上一輪被中斷：先看 `git status` 有沒有未提交的產出，據此判斷接續還是重來；判斷不出來就問使用者，不要自行丟棄。
 2. **開工**：把狀態改成 `doing` 並存檔，再開始寫程式。這樣中途被中斷，下一個 session 知道這個 task 做到一半。
 3. **只做這一個 task**。看到順手可以改的其他東西，寫進備註或新增 task，不要順手改——順手改會讓這次 commit 不可回溯。
-4. **驗收**：跑該 task 的驗收指令，**外加**既有測試不能壞。沒過就修；修不掉改成 `blocked`，在備註寫「卡在哪、試過什麼、需要什麼才能解」，然後停下來問使用者，不要硬幹也不要跳下一個。
+4. **驗收**：跑該 task 的驗收指令，**外加**受影響的既有測試（驗證指令表的「受影響測試」）不能壞。這個 task 動到 migration、ORM schema、測試 setup / fixture / factory、設定檔（`package.json`、lockfile、`tsconfig`、測試設定），或是最後一個 task，或「受影響測試」不存在、報錯、找不到任何測試 → 改跑「全部測試」。沒過就修；修不掉改成 `blocked`，在備註寫「卡在哪、試過什麼、需要什麼才能解」，然後停下來問使用者，不要硬幹也不要跳下一個。
 5. **標記**：驗收過了才改成 `done`。「動到」與預估不符時在備註更正，這是給後續 task 的情報。
-6. **commit**：呼叫 `/git:commit`，commit message 的 scope 或 body 帶上 task ID（`feat(order): 加入狀態轉換 (T-003)`）。程式碼與 plan.md 的狀態更新放在**同一個 commit**，狀態與產出要一起前進。commit 完才算這個 task 結束，才可以開始下一個。
+6. **commit**：呼叫 `/git:commit`，commit message 的 scope 或 body 帶上 task ID（`feat(order): 加入狀態轉換 (T-003)`）。程式碼與 plan.md 的狀態更新放在**同一個 commit**，狀態與產出要一起前進。commit 完才算這個 task 結束，才可以開始下一個。每個 task 不 push；全部 `done` 後才交付：單獨執行時呼叫 `/git:push` 直推 base branch，由 `/impl:ship` 調度時交回 ship（它走 PR）。
 7. **不改 plan 以外的規劃決策**：發現整個切法錯了，停下來說明並建議重跑 `/impl:plan`，不要邊做邊改執行序。
 8. **UI task 先載入視覺語言**：來源欄寫了 `/ui:tonal-ui` 或 `/ui:calm-ui`，就先呼叫那個 skill 再寫畫面；顏色、字級、間距、圓角只用該介面的 token，不寫死。只讀規則與模型就動手，畫面會長成框架的預設樣子。
 
@@ -160,6 +160,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 |---|---|
 | 型別檢查 | `pnpm typecheck` |
 | Lint | `pnpm lint` |
+| 受影響測試 | `pnpm test:affected` |
 | 全部測試 | `pnpm test` |
 | 單一測試 | `pnpm test <path>` |
 | Build | `pnpm build` |
@@ -195,7 +196,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 - **來源**：<BR-ID / 模型元素 / schema table>
 - **動到**：`<path>`、`<path>`
 - **前置**：無
-- **驗收**：`pnpm test src/domain/order.test.ts`　→ 新增的 3 個案例（BR-order-012 的三條輸入 → 預期結果）全綠，既有測試不變紅
+- **驗收**：`pnpm test src/domain/order.test.ts`　→ 新增的 3 個案例（BR-order-012 的三條輸入 → 預期結果）全綠，受影響的既有測試不變紅
 - **狀態**：todo
 - **備註**：
 

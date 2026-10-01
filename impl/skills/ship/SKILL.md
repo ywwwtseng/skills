@@ -1,6 +1,7 @@
 ---
 name: ship
-description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 這份 feature 佇列，然後一輪一輪把佇列上的 feature 從規則跑到進 main——判斷當前 feature 走到哪一階段（規劃 / 實作 / 稽核 / 開 PR / 合併），只呼叫該階段的那一個 skill，做完回寫佇列狀態，合併後切回 base branch 再取下一個。每輪開始前先清掉待處理的上游回饋。第一輪開始前會先跑一次起飛前檢查（remote、gh、上游文件、專案骨架、測試分層、資料表、各介面 UI 風格與 token），缺什麼就停下來說明而不是硬跑。當使用者說「一路做下去」「把 backlog 跑完」「今晚自己跑」「做完一個接下一個」「無人看守開發」「跑之前還要準備什麼」時使用。本 skill 不自己寫程式、不自己開 PR，只決定下一步該叫誰；不部署、不碰 production。
+description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 這份 feature 佇列，然後一輪一輪把佇列上的 feature 從規則跑到進 main——判斷當前 feature 走到哪一階段（規劃 / 實作 / 稽核 / 開 PR / 合併），只呼叫該階段的那一個 skill，做完回寫佇列狀態，合併後切回 base branch 再取下一個。每輪開始前先清掉待處理的上游回饋。第一輪開始前會先跑一次起飛前檢查（remote、gh、上游文件、專案骨架、測試分層、資料表、各介面 UI 風格與 token），缺什麼就停下來說明而不是硬跑。當使用者說「一路做下去」「把 backlog 跑完」「今晚自己跑」「做完一個接下一個」「無人看守開發」「跑之前還要準備什麼」時使用。本 skill 不自己寫程式、不自己開 PR，只決定下一步該叫誰；不部署、不碰 production。只在使用者明確下 /impl:ship（通常是 /loop /impl:ship）時執行。
+disable-model-invocation: true
 ---
 
 # Impl Ship
@@ -14,6 +15,8 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 - **輸入**：`docs/impl/backlog.md`（feature 佇列與狀態）、各 feature 的 `plan.md` 與 `verification.md`、`docs/domain/business-rules/` 下還沒排進佇列的規則文件。
 - **輸出**：回寫後的 `backlog.md`，以及被推進的 feature（由下游 skill 實際產出程式碼、PR、merge）。
 - **不做**：寫程式碼、開 PR、下 git 指令、改上游文件、部署。全部委派：`/impl:plan`、`/impl:feature`、`/impl:verify`、`/git:pr`、`/domain:feedback`、`/impl:fix`。技術債清理（`/impl:refactor`）**不在迴圈裡**——重構的價值判斷需要人，讓它在無人看守時自動去改已經能正常運作的程式碼，風險大於收益；由使用者在 feature 之間手動跑。
+
+**本 skill 是唯一走 PR 的路線。** 平常的開發（沒下指令的改動、單獨跑的 `/impl:fix`、`/impl:feature`、`/impl:refactor`）一律 `/git:commit` 後由 `/git:push` 直推 base branch；只有在這個迴圈裡，feature 才走 `verify → /git:pr --merge`。所以本 skill 呼叫下游 skill 時要告訴它「由 `/impl:ship` 調度」——它們看到這句就不呼叫 `/git:push`，交付留給這裡的 `/git:pr --merge`。本 skill 只在使用者明確下 `/impl:ship` 時執行，不會被自動觸發。
 
 `plan.md` 回答「這個 feature 的下一個 task 是什麼」；`backlog.md` 回答「這個專案的下一個 feature 是什麼」。兩份都是檔案，所以兩層都能被壓縮、被中斷、跨 session 續跑。
 
@@ -100,7 +103,7 @@ description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 
 
 ### Step 4：判斷階段，呼叫**一個** skill
 
-依當前 feature 的檔案實況判斷（不要憑 backlog 上寫的階段，那是上一輪的紀錄）：
+依當前 feature 的檔案實況判斷（不要憑 backlog 上寫的階段，那是上一輪的紀錄）。呼叫 `/impl:feature`、`/impl:fix` 時都帶上「由 `/impl:ship` 調度」，讓它們不自己 `/git:push`：
 
 | 實況 | 呼叫 | 之後階段 |
 |---|---|---|

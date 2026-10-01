@@ -12,8 +12,8 @@ description: 修一個已經存在的缺陷——先分流這到底是「實作�
 ## 定位：plan 之外的修復迴路
 
 - **輸入**：一個症狀——使用者回報、CI 失敗、錯誤 log、`/impl:verify` 的 finding、線上異常。
-- **輸出**：一個先紅後綠的 regression test、最小範圍的修正、一個 commit（root cause 寫在 body）。
-- **不做**：排 task、重構、改規則、補新功能、`git push`。規則要改回 `/domain:business-rules`（或 `/domain:feedback`），範圍大到要設計回 `/impl:plan`。
+- **輸出**：一個先紅後綠的 regression test、最小範圍的修正、一個 commit（root cause 寫在 body）；單獨執行時由 `/git:push` 直推 base branch。
+- **不做**：排 task、重構、改規則、補新功能、自己下 `git push`（交付交給 `/git:push`；由 `/impl:ship` 調度時不交付，交回 ship）。規則要改回 `/domain:business-rules`（或 `/domain:feedback`），範圍大到要設計回 `/impl:plan`。
 
 ## 核心規則
 
@@ -28,7 +28,7 @@ description: 修一個已經存在的缺陷——先分流這到底是「實作�
 3. **修 root cause，不修症狀。** 在錯誤發生的地方補一個 `if` 擋掉，通常只是把問題推到下一層。說得出「為什麼會變成這樣」才動手。
 4. **最小改動。** 順手重構、順手改名、順手補型別，會讓「這個 commit 造成了什麼」無法辨識——而修復的 commit 正是之後最常被回溯的那種。看到該改的寫進報告（之後由 `/impl:refactor` 收）或開一條上游回饋，不要順手。
 5. **不改既有測試的預期值。** 既有測試紅了，代表你的修正破壞了別的規則，不是那個測試寫錯了。真的是測試寫錯，那是一條 `規則矛盾` 的上游回饋，停下來提出。
-6. **驗收三件事全綠**：新的 regression test 綠、既有測試全綠、typecheck / lint 綠。缺一不可。
+6. **驗收三件事全綠**：新的 regression test 綠、受影響的既有測試全綠（碰到共用的東西就跑全部，見 Step 5）、typecheck / lint 綠。缺一不可。全套留給 `/git:push` 推之前跑。
 7. **同一個 root cause 要查別處有沒有。** 一個誤用的 helper、一個少檢查的邊界，通常不會只犯一次。查一次，同源的一起修（同一個 root cause 算一個邏輯變更）；不同源的記下來，不要一起修。
 8. **卡住三次就停。** 同一個錯誤試過 3 次仍無解，或需要外部資訊（帳號、金鑰、線上資料、第三方行為），停下來問，附「卡在哪 / 試過什麼 / 需要什麼才能解」。
 9. **root cause 寫進 commit body，不另開文件。** 修復的歷史就是 git 歷史。另開一份 `fixes.md` 只會變成沒有人讀的第二份真相。
@@ -77,7 +77,7 @@ description: 修一個已經存在的缺陷——先分流這到底是「實作�
 ### Step 5：驗收
 
 1. 新的 regression test → 綠。
-2. 全部既有測試 → 綠。紅了看核心規則 5。
+2. 受影響的既有測試（`docs/architecture/testing.md` 的 `test:affected`）→ 綠。紅了看核心規則 5。修正動到 migration、ORM schema、測試 setup / fixture、設定檔或 `testing.md` 列的共用模組，或 `test:affected` 不存在、報錯、找不到任何測試 → 改跑全部測試。
 3. typecheck / lint → 綠。
 4. 修不掉就如實說修不掉，附失敗指令與錯誤訊息。試過 3 次 → 核心規則 8。
 
@@ -110,6 +110,11 @@ fix(order): 用付款時間而非建立時間計算退款期限
 
 「既有測試為什麼沒抓到」比修正本身更有價值——它指出測試的盲區。
 
+### Step 8.5：交付
+
+- 由 `/impl:ship` 調度（它修的是 PR 上紅掉的 CI）→ 不交付，交回 ship，它會重推 PR。
+- 單獨執行 → 呼叫 `/git:push`：全套測試綠後直推 base branch。被擋下（在 feature 分支上、全套有紅、rebase 衝突）就把它的回報原樣列進收尾。
+
 ### Step 9：收尾
 
 在對話中：
@@ -120,7 +125,7 @@ fix(order): 用付款時間而非建立時間計算退款期限
 4. 同源一起修掉的地方
 5. 發現但**沒有**修的其他問題：不同源的 bug（再跑一次 `/impl:fix`）、該重構的地方（交給 `/impl:refactor`）
 6. 新增的上游回饋（若有），建議跑 `/domain:feedback`
-7. commit hash；沒有 push
+7. commit hash；`/git:push` 的結果（推了沒有、CI 狀態），或「交回 ship」
 
 ## 常見失敗模式
 

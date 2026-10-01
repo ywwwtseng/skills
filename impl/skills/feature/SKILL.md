@@ -11,7 +11,7 @@ description: 依 docs/impl/<feature>/plan.md 逐個 task 把 feature 實作出�
 
 - **輸入**：`docs/impl/<feature>/plan.md`（唯一的指令來源），加上當前 task「來源」欄指到的上游片段（`docs/domain/business-rules/`、`docs/domain/model/`、`docs/db/schema.md`）與「動到」欄列出的既有程式碼。
 - **輸出**：程式碼與測試、回寫後的 `plan.md`、每個 task 一個 commit。
-- **不做**：規劃（切 task、排順序、改執行序）、改上游文件、`git push`。規劃回 `/impl:plan`，提交交給 `/git:commit`。
+- **不做**：規劃（切 task、排順序、改執行序）、改上游文件、每個 task 各自 push。規劃回 `/impl:plan`，提交交給 `/git:commit`；全部 task 做完才交付——單獨執行時呼叫 `/git:push` 直推，由 `/impl:ship` 調度時交回 ship（它走 PR）。
 
 plan 回答「照什麼順序做、做完怎麼算過」；本 skill 只回答「現在這一個 task 怎麼做完」。分開的意義是：執行過程中記憶會被壓縮，但下一步要做什麼永遠在檔案裡查得到。
 
@@ -21,7 +21,7 @@ plan 回答「照什麼順序做、做完怎麼算過」；本 skill 只回答�
 2. **一次只做一個 task。** 「做完」的定義是三件事都成立：驗收過、plan.md 狀態改成 `done`、commit 建立。缺任何一件都不算完，不可以開始下一個。
 3. **狀態先寫再動手，每次變更立刻存檔。** 開工時先把狀態改成 `doing` 並寫入檔案，再開始改程式。不要累積到最後一次更新 plan——中途被中斷的話，沒寫進檔案的進度就是不存在。
 4. **只載入這個 task 需要的上下文。** 依「來源」欄只讀被指到的那幾條 BR、那個模型元素、那張 table；依「動到」欄只讀那幾個檔。**不要通讀整份 model 或整個 repo**——context 是 long-running 最稀缺的資源，燒在無關的檔案上會讓後面的 task 無法完成。需要更多才讀更多，並在備註記下「這個 task 其實還需要看 X」。唯一的例外是 UI task 所屬介面的視覺語言 skill（Step 1 第 5 點）——那不是無關的上下文，省掉它畫面就沒有依據。
-5. **驗收沒過不准標 `done`，也不准往下一個走。** 驗收 = 該 task 的驗收指令通過 **且** 既有測試沒有變紅。修不掉就改 `blocked`，不要硬幹、不要跳過、不要降低標準。
+5. **驗收沒過不准標 `done`，也不准往下一個走。** 驗收 = 該 task 的驗收指令通過 **且** 受影響的既有測試沒有變紅（Step 5 第 2 點；碰到共用的東西就跑全部）。修不掉就改 `blocked`，不要硬幹、不要跳過、不要降低標準。
 6. **為了讓測試通過而改測試、改規則、改斷言，是禁止的。** 測試紅了代表程式不符合規則，或這條規則本身有問題。是後者的話寫進「上游回饋」並停下來問，不要靜悄悄把預期值改成實際輸出。
 7. **不擴張範圍。** 看到順手能修的 bug、能重構的地方、能補的型別，寫進當前 task 的備註或在 plan 新增一個 task，不要順手改。順手改會讓這個 commit 混入無關變更，還原點就失效了。備註裡的這些記錄之後由 `/impl:refactor` 收齊處理，所以寫清楚位置與理由，不要只寫「這裡很醜」。
 8. **照既有程式碼的樣子寫。** 沿用 repo 既有的分層、命名、錯誤處理與測試慣例，遵守 `docs/architecture/tech-stack.md` 的「約束與慣例」。不要引入 plan 與決策文件都沒寫的套件；真的需要就停下來問。
@@ -73,7 +73,12 @@ plan 回答「照什麼順序做、做完怎麼算過」；本 skill 只回答�
 ### Step 5：驗收
 
 1. 跑該 task「驗收」欄的指令，要通過，且「看到什麼算過」描述的現象要成立。
-2. 跑既有測試（plan 驗證指令表的「全部測試」）與 typecheck，**不能變紅**。
+2. 跑受影響的既有測試（plan 驗證指令表的「受影響測試」，通常是 `test:affected`）與 typecheck，**不能變紅**。這個 task 動到下列任一項就改跑「全部測試」——它們被很多測試間接依賴，import 關係追不到：
+   - migration、ORM schema、測試的 setup / fixture / factory
+   - `package.json`、lockfile、`tsconfig`、測試設定、`.env.example` 這類設定檔
+   - `testing.md`「改跑全部的情況」列出的共用模組
+   - plan 裡最後一個 task
+   - `test:affected` 不存在、報錯、或回報找不到任何測試
 3. UI 類的 task 依驗收欄的描述用 `/run` 實際開起來確認。**行動端預設開 iOS 模擬器**（指令以 `CLAUDE.md` 或 `docs/architecture/tech-stack.md` 的「約束與慣例」為準），除非該 task 的驗收明確指定 Android。「開起來」指的是 App 畫出首頁、沒有紅屏或 `Uncaught Error`——Metro 或模擬器起來不算。有 `test:smoke` 就跑它。畫得出來之後截圖，照該視覺語言 skill 的交件前檢查清單逐項看，不符合就修——這是驗收的一部分，不是之後再打磨的事。
 4. 這個 task 新增或升級了**原生依賴**（`git diff` 的 lockfile / `package.json` 裡有帶 `ios/`、`android/`、`*.podspec`、`expo-module.config.json` 的套件）→ 不論是不是 UI task，都要先重建 binary（Expo：`npx expo run:ios`）再啟動確認。舊 binary 或 Expo Go 裡沒有這個模組，App 會在 import 時就崩，而 typecheck 與 Jest 都看不到。開發指令還是 Expo Go 的話，這是 plan 漏排了切換 dev build 的前置 task：改 `blocked`，備註寫明，不要自己順手切。
 5. 沒過就修，修完重跑整組。試過 3 次仍無解 → 進 Step 6 的 `blocked` 分支（核心規則 10）。
@@ -111,7 +116,7 @@ commit 完成，這個 task 才算結束。
 
 預設一路做下去，直到以下任一情況才停：
 
-- 全部 task `done` → 進收尾，並建議跑 `/impl:verify`（每個 task 只驗了自己那一塊，整個 feature 的規則覆蓋沒有人檢查過）
+- 全部 task `done` → 交付後進收尾。由 `/impl:ship` 調度時不交付，直接收尾交回 ship（它會接著跑 `/impl:verify` 與 `/git:pr --merge`）；單獨執行時呼叫 `/git:push`，它會跑全套測試後直推 base branch。要做規則覆蓋稽核可以另外跑 `/impl:verify`，不是直推的前提
 - 出現 `blocked` → 停下來問
 - 需要使用者決策 → 問完再繼續
 - 使用者喊停
@@ -130,7 +135,8 @@ commit 完成，這個 task 才算結束。
 4. plan 進度：`done N / 總數 M`，下一個是哪個 task
 5. `blocked` 的 task 與卡點（若有）
 6. 「上游回饋」（若有），建議跑 `/domain:feedback` 一次收齊處理
-7. 下一步：還有 task 未完成 → 再跑一次 `/impl:feature`；全部 `done` → 跑 `/impl:verify` 做規則覆蓋與品質稽核，過了再由 `/git:pr` 開 PR。本 skill 不 push
+7. 交付：單獨執行且全部 `done` → `/git:push` 的結果（推了哪些 commit、CI 狀態）；由 `/impl:ship` 調度 → 寫「交回 ship」
+8. 下一步：還有 task 未完成 → 再跑一次 `/impl:feature`；`/git:push` 被擋下 → 依它的回報處理
 
 ## 常見失敗模式
 
@@ -139,6 +145,7 @@ commit 完成，這個 task 才算結束。
 | 一口氣做完好幾個 task 再一起 commit | 還原點消失，其中一個做壞就得整批回退 |
 | 測試紅了就改斷言 / 改 BR 讓它綠 | 規則被靜悄悄改掉，而且沒有人知道（核心規則 6） |
 | 該 task 驗收綠了，但既有測試紅了還是標 `done` | 下一個 task 會建在壞掉的基礎上（核心規則 5） |
+| 改了 migration 或測試 setup 還是只跑 `test:affected` | 這些靠 import 關係追不到，受影響的測試會被漏掉，壞掉的要到 `/git:push` 跑全套才發現 |
 | 備註寫了「已完成」但狀態還是 `doing` | 狀態欄是機器讀的，備註是給人看的；接手的 agent 會重做一遍 |
 | 開場先通讀整份 model 與 schema | context 在第一個 task 就燒掉大半（核心規則 4） |
 | 邊做邊覺得切法不對，順手改執行序 | plan 與實際產出分岔，之後沒有人知道哪個是真的（核心規則 11） |
