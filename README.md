@@ -35,7 +35,20 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | `/loop /impl:ship` | 完整流程：plan → feature → verify → `/git:pr --merge`。唯一開分支、開 PR 的路線；`/impl:ship` 只能手動下，不會被自動觸發 |
 | 其他一切（沒下指令的改動、單獨的 `/impl:fix`、`/impl:feature`、`/impl:refactor`） | 直推：改 → `test:affected` + typecheck → `/git:commit` → `/git:push`（跑全套後直推 base branch） |
 
-沒下指令的改動要照直推走，專案的 `CLAUDE.md` 要有 `## 交付流程` 段（`/arch:init` 會寫；既有專案照 `arch/skills/init/SKILL.md` Step 6 的範本手動補）。
+沒下指令的改動要照直推走，靠的是全域 `~/.claude/CLAUDE.md` 的 `## 交付流程` 段（所有專案共用一份，`/arch:init` 不再寫進專案；個別專案要走 PR 就在自己的 `CLAUDE.md` 覆寫）：
+
+```markdown
+## 交付流程
+
+專案的 `CLAUDE.md` 另有交付規則時，以專案的為準。
+
+- 只有 `/impl:ship`（通常是 `/loop /impl:ship`）走完整流程：plan → feature → verify → PR → merge。
+- 其他一律直推 base branch：沒下指令的改動、單獨跑的 `/impl:fix`、`/impl:feature`、`/impl:refactor`。
+  改 → 跑受影響的測試（`test:affected`，沒有就跑全部）+ typecheck → `/git:commit` → `/git:push`（跑全套後 push）。
+  不開分支、不開 PR、不寫 plan、不跑 verify。這段就是對 commit 與 push 的授權，不用每次再問。
+- 例外：沒下指令的改動會碰到 business rules、DB schema / migration、API 契約時，先停下來說明，
+  建議改走 `/domain:business-rules`、`/db:migrate` 或 `/api:contract`，不要直推。
+```
 
 | Plugin | Skill | 呼叫 | 說明 |
 |---|---|---|---|

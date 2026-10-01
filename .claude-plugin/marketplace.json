@@ -18,7 +18,7 @@
       "name": "arch",
       "source": "./arch",
       "description": "架構決策：/arch:tech-stack 透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/architecture/tech-stack.md；/arch:init 依該文件初始化專案骨架與工具鏈；/arch:test-strategy 決定規則類型 → 測試層的對照並建好測試資料庫與分層指令，輸出 docs/architecture/testing.md，開發中的專案（含零測試）先盤點現況、依風險補特徵測試",
-      "version": "0.11.0",
+      "version": "0.11.1",
       "category": "productivity"
     },
     {
