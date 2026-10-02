@@ -1,135 +1,222 @@
 /*
- * Tonal UI 的 design token。直接貼進全域樣式的 :root。
- * 規則與用途見 ../SKILL.md；這裡只放值。
+ * Tonal UI 的 design token。規則與用途見 ../SKILL.md；這裡只放值。
  *
- * 動它之前先讀 SKILL.md 的「顏色怎麼選」：底色階梯是中性灰、不帶藍，
- * 顏色留給狀態、chip 與導覽 icon。
+ * 上半部：Tailwind v4 的 @theme（接在 @import "tailwindcss"; 後面）＋元素基底。
+ * 下半部：同一組值的 :root 版本，給沒有 Tailwind 的專案。
+ * 改值時兩邊一起改。
+ *
+ * 動它之前先讀 SKILL.md 的「顏色怎麼選」：殼與面板是中性灰白，主色是 ink，
+ * 橘色只給連結、eyebrow 與唯一的強調色塊。
  */
 
+@theme {
+  /* ---- 底色 ---- */
+  --color-shell: #f7f7f7;           /* 殼：頂端列、側邊導覽、內容區同一色，不畫分隔線 */
+  --color-background: #ffffff;
+  --color-surface: #ffffff;         /* 面板、卡片、輸入框 */
+  --color-surface-muted: #fafafa;   /* 表頭色帶、面板裡的側欄清單、disabled */
+  --color-accent-soft: #fae6d9;     /* 唯一的強調色塊：推薦方案、合計列、選中的選項卡、最重要的數字 */
+  --color-fill: rgb(0 0 0 / 0.05);  /* 小元件的灰（chip、分頁軌道、行內 ID），白底灰底上都深一階 */
+  --color-fill-strong: rgb(0 0 0 / 0.08); /* fill 的 hover */
+  --color-fill-solid: #f2f2f2;      /* fill 的不透明版：sec 按鈕、info Note、疊在別的東西上的灰底 */
+  --color-accent-soft-solid: #fcf0e8; /* accent-soft 60% 疊白的不透明版 */
+
+  /* ---- 文字（也是主色） ---- */
+  --color-ink: #171717;   /* 主文字、實心主要按鈕、選中的 chip、focus ring */
+  --color-ink-2: #5a5a5a; /* 次要文字 */
+  --color-ink-3: #858585; /* 第三層、placeholder、表頭 */
+
+  /* ---- 框線（盡量少用，區塊靠色塊分開） ---- */
+  --color-border: #ebebeb;       /* 只給輸入框 */
+  --color-border-muted: #f2f2f2; /* 最淡的線：表格列線、兩塊同色區域不得不分開時 */
+  --color-border-hover: #c9c9c9; /* 輸入框 hover */
+
+  /* ---- 品牌／動作（橘色系，少量使用） ---- */
+  --color-action: #fa5d29;    /* 大面積強調填色（進度條超量） */
+  --color-link: #ce4118;      /* 文字連結、eyebrow 小標（白底 AA 4.78:1） */
+  --color-link-soft: #fff8f4; /* teal 徽章／提示的淡底 */
+  --color-peach: #ff9667;     /* 進度條接近上限 */
+
+  /* ---- 狀態：文字色 + soft 底色 ---- */
+  --color-success: #127a37;
+  --color-success-soft: #dcf5e3;
+  --color-danger: #c4241a;        /* 也是「必須馬上處理」警示的實心底、計數徽章 */
+  --color-danger-soft: #fde4e1;
+  --color-danger-strong: #a01d14; /* danger 按鈕 hover */
+  --color-warning: #9a5806;
+  --color-warning-soft: #fdefc8;
+
+  /* ---- 頭像底色（依名稱雜湊挑一個，都能放白字） ---- */
+  --color-avatar-1: #2f63c8;
+  --color-avatar-2: #1d7f52;
+  --color-avatar-3: #b8501a;
+  --color-avatar-4: #7446c2;
+  --color-avatar-5: #b8345f;
+  --color-avatar-6: #0f7480;
+
+  /* ---- 圓角 ---- */
+  --radius-sm: 4px;  /* 行內 code／ID 小色塊 */
+  --radius-md: 6px;  /* 輸入框、卡片裡的小色塊、分頁與側邊導覽項目 */
+  --radius-lg: 12px; /* 卡片、面板、modal、Note、分頁軌道 */
+  /* 按鈕、chip、徽章、頭像：rounded-full */
+
+  /* ---- 陰影：只給無框強調色塊與選中分頁（card）；浮層用 Tailwind 內建 shadow-lg ---- */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.03), 0 2px 8px -2px rgb(0 0 0 / 0.04);
+
+  /* ---- 容器寬（殼本身滿版） ---- */
+  --container-tight: 620px;  /* 單欄表單 */
+  --container-narrow: 880px; /* 設定頁、長說明 */
+
+  /* ---- 斷點（不是 Tailwind 預設） ---- */
+  --breakpoint-sm: 620px;   /* 手機堆疊 */
+  --breakpoint-md: 800px;
+  --breakpoint-lg: 880px;   /* 雙欄收單欄 */
+  --breakpoint-xl: 980px;   /* 側邊導覽收成橫列 */
+  --breakpoint-2xl: 1280px; /* 卡片格線 4 欄 */
+
+  /* ---- 字級（偏小偏密） ---- */
+  --text-2xs: 10.5px; --text-2xs--line-height: 1.5;    /* eyebrow、數字面板標籤、導覽群組標題 */
+  --text-xs: 11.5px;  --text-xs--line-height: 1.6;     /* 提示、徽章 */
+  --text-sm: 12.5px;  --text-sm--line-height: 1.5;     /* chip、次要小字、選單項目 */
+  --text-base: 13.5px; --text-base--line-height: 1.68; /* 主要介面文字：表格、KV、說明 */
+  --text-md: 14.5px;  --text-md--line-height: 1.5;     /* 輸入框、按鈕 */
+  --text-lg: 15px;    --text-lg--line-height: 1.7;     /* body */
+  --text-xl: 17px;    --text-xl--line-height: 1.68;    /* 引言 */
+  --text-2xl: 19px;   --text-2xl--line-height: 1.3;    /* 對話框標題 */
+  --text-3xl: 27px;   --text-3xl--line-height: 1.15;   /* 頁面標題、數字面板數值 */
+  --text-5xl: 44px;   --text-5xl--line-height: 1.05;   /* 特大數字 */
+
+  --tracking-tightest: -0.032em; /* 大數字 */
+  --tracking-widest: 0.14em;     /* 大寫小標 */
+
+  /* ---- 疊層：只用這幾階，不要寫 9999 ---- */
+  --z-index-side-sticky: 40;
+  --z-index-header: 60;
+  --z-index-dock: 120;
+  --z-index-modal: 150;
+  --z-index-popover: 170; /* 自製下拉的選單：要蓋過開它的 modal */
+  --z-index-toast: 200;
+
+  --font-sans: "Geist", "Inter", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --animate-toast-in: toast-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+  --animate-fade-in: fade-in 0.18s ease;
+  --animate-dialog-in: dialog-in 0.24s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes toast-in { from { opacity: 0; transform: translateY(12px); } }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(16px) scale(0.985); } }
+
+/* 不屬於 Tailwind theme 命名空間的值：safe area 與點擊區 */
 :root {
-  /* 底色分層：頂端列（白）→ 左側導覽（幾乎白）→ 頁面（最淺的灰）→ 面板（白）
-     → 面板裡的區塊（填色）。三個區域兩兩相鄰處都有色差，不必畫線。
-     這幾層都是中性灰（只留一點點冷調），畫面上唯一帶顏色的色塊是下面的「選中」，
-     它才會是一眼就看到的那一塊；底色也跟著藍就變成整片都在搶注意力 */
-  --color-background-layout: #f5f6f7;
-  --color-background-container: #ffffff;
-  --color-background-nav: #fafafa;
-  --color-background-nav-hover: #ebedef;
-  /* 填色區塊：輸入框、次要按鈕、標籤、程式碼。白色面板上用它就分得出來，不必畫框 */
-  --color-background-surface: #f1f3f4;
-  --color-background-surface-hover: #e6e8ea;
-  /* 清單裡的一個項目：跟卡片表頭同色（也就是卡片本身的白），整張卡片是一片乾淨的白，
-     一列一列靠 hover 分辨；hover 因此要夠深，壓在白底上一眼看得出來 */
-  --color-background-item: var(--color-background-container);
-  --color-background-item-hover: #e8eaed;
-  /* 選中：導覽項目、分頁。整個畫面就這一塊是藍的 */
-  --color-background-selected: #d3e3fd;
-  /* 行內 code 與程式碼區塊。比 surface 再深一點點，壓在白底或磚塊上都看得出來 */
-  --color-background-code: #e9ebed;
-
-  --color-text-body: #1f1f1f;
-  --color-text-heading: #1f1f1f;
-  --color-text-secondary: #5f6368;
-  --color-text-label: #444746;
-  --color-text-link: #0b57d0;
-  --color-text-link-hover: #0842a0;
-  --color-text-selected: #041e49;
-  --color-text-inverted: #ffffff;
-  --color-text-status-success: #0b8043;
-  --color-text-status-info: #0b57d0;
-  --color-text-status-warning: #b06000;
-  --color-text-status-danger: #b3261e;
-  --color-text-status-inactive: #5f6368;
-
-  /* 狀態色塊：alert 與 danger 按鈕的底色，全部只有底色沒有框 */
-  --color-background-status-info: #e8f0fe;
-  --color-background-status-warning: #fef7e0;
-  --color-background-status-danger: #fce8e6;
-  --color-background-status-danger-hover: #f7d7d3;
-  --color-background-status-success: #e6f4ea;
-
-  /* 左側導覽的 icon 各有各的顏色，像 Google 那套產品圖示一樣繽紛一點；
-     每個項目一個色，位置與顏色綁在一起，掃一眼就認得出是哪一項。
-     名稱照你的導覽項目改（projects／api／key 只是範例），色相從 chip 那四組挑 */
-  --color-icon-nav-projects: #1e8e3e;
-  --color-icon-nav-api: #e8710a;
-  --color-icon-nav-key: #9334e6;
-
-  /* chip 的四個色調，跟導覽 icon 同一組色相：淡底配同色系的深字，壓在白卡片上看得出來
-     又不會吵。用在標籤、HTTP method 徽章這種小色塊；紅色那一階直接用下面的 status-danger */
-  --color-chip-blue-background: #e8f0fe;
-  --color-chip-blue-text: #1967d2;
-  --color-chip-green-background: #e6f4ea;
-  --color-chip-green-text: #137333;
-  --color-chip-orange-background: #feefe3;
-  --color-chip-orange-text: #b06000;
-  --color-chip-purple-background: #f3e8fd;
-  --color-chip-purple-text: #7627bb;
-
-  /* app 切換器裡每個 app 的「產品圖示」：圓角方塊的漸層底，上面壓白色圖形。
-     兩個端點是同一個色相的淺、深各一階，色相沿用導覽 icon 那組（名稱照你的 app 改） */
-  --color-app-dashboard-from: #5b9dff;
-  --color-app-dashboard-to: #1a73e8;
-  --color-app-console-from: #3ec46d;
-  --color-app-console-to: #1e8e3e;
-
-  --border-radius-container: 16px;
-  --border-radius-block: 12px;
-  --border-radius-badge: 6px;
-  /* 按鈕、標籤、導覽項目的膠囊形 */
-  --border-radius-pill: 999px;
-
-  /* 浮起來的東西（選單、modal、toast）才有陰影，平鋪的區塊一律不畫框也不打陰影 */
-  --shadow-panel: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
-
-  /* 頂端導覽列的高度。app shell 與登入頁都要用 100vh 扣掉它，
-     所以寫成變數，改一個地方就好，不會有人忘了同步。 */
-  --top-nav-height: 56px;
-  /* 清單裡一個項目的列高。頁面上所有的清單共用同一個值，
-     幾份清單並排看起來才是同一套東西 */
-  --list-item-height: 54px;
-
-  --font-family-base: 'Open Sans', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei',
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-family-mono: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
-
-  /* 字級。名字講的是「用在哪一層」而不是尺寸，換算表在 ../SKILL.md 的「字級與粗細」。
-     頁面 CSS 一律用這些 token，不要再寫 px——多一個 15px 就多一種沒人說得出理由的大小。 */
-  --font-size-page-title: 24px;
-  /* 子系統名稱、登入卡片標題：一頁一個，比頁面標題小但比區塊標題大 */
-  --font-size-brand: 20px;
-  /* 卡片表頭、modal 標題、選單標題 */
-  --font-size-section-title: 18px;
-  /* 比內文大一階，用在需要先被讀到的一行（使用者選單裡的姓名） */
-  --font-size-lead: 15px;
-  /* 內文：表格、按鈕、輸入框、清單、alert，畫面上大多數的字 */
-  --font-size-body: 14px;
-  /* 內文的次一階：選單項目、清單裡的說明、程式碼區塊 */
-  --font-size-compact: 13px;
-  /* 說明文字、標籤、分區標題 */
-  --font-size-caption: 12px;
-  /* 最小的一階，只給徽章這種短到不能再短的東西（GET、POST…） */
-  --font-size-micro: 11px;
-
-  /* 粗細只有三階。中間那階（600）留給標題型的東西，內文要強調一律用 700 */
-  --font-weight-normal: 400;
-  --font-weight-medium: 600;
-  --font-weight-bold: 700;
-
   /* 觸控：每個可點的東西實際點擊區至少這麼大，視覺小的用透明內距補足 */
   --touch-target-min: 44px;
 
-  /* Safe area：靠邊的東西一律加上這些。
-     viewport 要有 viewport-fit=cover，否則 env() 永遠是 0 */
+  /* Safe area：靠邊的東西一律加上這些。viewport 要有 viewport-fit=cover，否則 env() 永遠是 0 */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
+}
 
-  /* 圖層：只用這幾階。互動元件永遠在裝飾層之上；不要寫 9999 */
-  --z-decoration: -1;  /* 背景、裝飾，而且要 pointer-events: none */
-  --z-sticky: 10;      /* 固定的頂列、底部列 */
-  --z-dropdown: 100;   /* 選單、下拉面板 */
-  --z-overlay: 200;    /* 對話框、底部面板與它們的遮罩 */
-  --z-toast: 300;
+/* ---- 元素基底（接在 @theme 後面） ---- */
+@layer base {
+  body { background: var(--color-shell); color: var(--color-ink); font-family: var(--font-sans);
+         font-size: 15px; line-height: 1.7; letter-spacing: -0.003em; -webkit-font-smoothing: antialiased; }
+  h1, h2 { font-size: var(--text-3xl); font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+  h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.012em; line-height: 1.4; }
+  h4 { font-size: 14px; font-weight: 600; letter-spacing: -0.008em; }
+  a { color: var(--color-link); text-decoration: none; transition: color 0.15s; }
+  a:hover { color: var(--color-ink); }
+  code, kbd, samp { font-family: var(--font-mono); }
+  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; border-radius: var(--radius-sm); }
+  ::selection { background: var(--color-accent-soft); color: var(--color-ink); }
+  label { display: block; font-size: 12px; font-weight: 500; color: var(--color-ink-2); margin-bottom: 6px; }
+
+  /* 輸入框（含自製下拉的觸發鈕 button[role=combobox]）：唯一畫框的東西 */
+  input:not([type=radio]):not([type=checkbox]), button[role="combobox"], textarea {
+    width: 100%; font: inherit; font-size: var(--text-md); color: var(--color-ink);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+    padding: 10px 13px; transition: 0.15s;
+  }
+  input:hover, button[role="combobox"]:hover, textarea:hover { border-color: var(--color-border-hover); }
+  input:focus, button[role="combobox"]:focus-visible, button[role="combobox"][aria-expanded="true"], textarea:focus {
+    outline: none; border-color: var(--color-ink-3); box-shadow: 0 0 0 3px rgb(0 0 0 / 0.08);
+  }
+  input:disabled, button[role="combobox"]:disabled, textarea:disabled {
+    background: var(--color-surface-muted); color: var(--color-ink-3); cursor: not-allowed;
+  }
+
+  /* 表格：表頭是淡灰色帶，不畫底線；列線最淡；自己不畫外框 */
+  table { width: 100%; min-width: 540px; border-collapse: collapse; font-size: var(--text-base);
+          font-variant-numeric: tabular-nums; }
+  th { text-align: left; font-weight: 500; font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase;
+       color: var(--color-ink-3); padding: 10px 14px; background: var(--color-surface-muted); white-space: nowrap; }
+  td { padding: 13px 14px; border-bottom: 1px solid var(--color-border-muted); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+}
+
+/* ==================================================================
+ * 沒有 Tailwind 的專案：同一組值的 :root 版本
+ * ================================================================== */
+:root {
+  --color-shell: #f7f7f7;
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-muted: #fafafa;
+  --color-accent-soft: #fae6d9;
+  --color-accent-soft-solid: #fcf0e8;
+  --color-fill: rgb(0 0 0 / 0.05);
+  --color-fill-strong: rgb(0 0 0 / 0.08);
+  --color-fill-solid: #f2f2f2;
+  --color-ink: #171717;
+  --color-ink-2: #5a5a5a;
+  --color-ink-3: #858585;
+  --color-border: #ebebeb;
+  --color-border-muted: #f2f2f2;
+  --color-border-hover: #c9c9c9;
+  --color-action: #fa5d29;
+  --color-link: #ce4118;
+  --color-link-soft: #fff8f4;
+  --color-peach: #ff9667;
+  --color-success: #127a37;
+  --color-success-soft: #dcf5e3;
+  --color-danger: #c4241a;
+  --color-danger-soft: #fde4e1;
+  --color-danger-strong: #a01d14;
+  --color-warning: #9a5806;
+  --color-warning-soft: #fdefc8;
+  --color-avatar-1: #2f63c8;
+  --color-avatar-2: #1d7f52;
+  --color-avatar-3: #b8501a;
+  --color-avatar-4: #7446c2;
+  --color-avatar-5: #b8345f;
+  --color-avatar-6: #0f7480;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.03), 0 2px 8px -2px rgb(0 0 0 / 0.04);
+  --shadow-float: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --font-size-2xs: 10.5px;
+  --font-size-xs: 11.5px;
+  --font-size-sm: 12.5px;
+  --font-size-base: 13.5px;
+  --font-size-md: 14.5px;
+  --font-size-lg: 15px;
+  --font-size-xl: 17px;
+  --font-size-2xl: 19px;
+  --font-size-3xl: 27px;
+  --font-size-5xl: 44px;
+  --z-side-sticky: 40;
+  --z-header: 60;
+  --z-dock: 120;
+  --z-modal: 150;
+  --z-popover: 170;
+  --z-toast: 200;
+  --font-sans: "Geist", "Inter", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  /* --touch-target-min 與 --safe-* 見上方，兩種專案共用 */
 }
