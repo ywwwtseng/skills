@@ -16,6 +16,7 @@ ywwwtseng 的個人 Claude Code plugins。
 /plugin install ui@skills
 /plugin install git@skills
 /plugin install security@skills
+/plugin install docs@skills
 ```
 
 本機開發時可直接用路徑：
@@ -74,6 +75,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | git | push | `/git:push [base]` | 不走 `/impl:ship` 時的交付出口：確認在 base branch 上且工作區乾淨、`fetch` 後落後就 `rebase origin/<base>`（只重排沒推出去的 commit，衝突就 abort 停下）、跑全套閘門（typecheck / lint / 全部測試 / build，有畫面加 `test:smoke`——直推沒有 PR 與合併前 CI，這是唯一的閘門，所以不用 `test:affected`）、檢查外送 diff 的 secrets 與 build 產物、`git push origin HEAD:<base>`（不 force，被 branch protection 擋就建議 `/git:pr`），推完用 `gh run watch` 看 base 上的 CI，紅了建議 `/impl:fix` 不自動 revert |
 | git | pr | `/git:pr [--merge] [base]` | **只給 `/impl:ship` 用**的交付出口，其他情況用 `/git:push`；把 feature 的 commit 變成可審查的 PR：commit 留在預設分支時先安全搬到 `feat/<feature>`（先建分支確認 commit 都在，再把本地 base 指回 `origin/<base>`，全程不 reset / rebase / cherry-pick）、跑驗證閘門（有 `verification.md` 就採信其 verdict，`fail` 直接停；沒有就實跑 typecheck / lint / test / build）、檢查外送 diff 有沒有 secrets 與 build 產物、`push -u` 後用 `gh` 開 PR，body 帶 task 表 / BR 覆蓋表 / 驗收結果 / 待處理 / 審查重點；plan 還有未完成 task 或有 findings 就開 draft；加 `--merge`（一人開發的無人看守模式，`/impl:verify` 是唯一閘門）時，在「非 draft + verdict 為 `pass` + CI 綠 + 無衝突 + 無 CHANGES_REQUESTED」全部成立下用 `--rebase --delete-branch` 合併（保留每個 task 的還原點，不 squash），再 `switch` 回 base 並 `pull --ff-only`，讓下一個 feature 從乾淨起點開始；沒有 `--merge` 就只開 PR，不 force push、不推預設分支 |
 | security | audit | `/security:audit`（僅手動執行，不會自動載入） | 依序跑五類掃描再由 Claude 分析：Secrets（Gitleaks，掃 git 全部歷史與工作目錄，一律 `--redact`）→ Dependencies（依 lockfile 選 npm / pnpm / yarn / bun audit，非 JS 專案用 Trivy fs）→ Source Code（Semgrep，`--metrics=off`、不用 `--config auto`）→ IaC（Trivy config，含 Terraform 與 tfvars）→ Docker（Trivy image，只掃本機已有的 image，不自動 build）→ Review（統一嚴重度、合併重複、**每條 HIGH 以上都打開原始碼確認**、誤報移到「已排除」、依框架列出全部對外入口後依風險深讀，照九類清單人工檢查掃描器看不到的問題（IDOR / mass assignment / RLS、JWT 與 session、跨檔案注入、SSRF / open redirect / CSRF / CORS / webhook 驗簽、檔案上傳、前端算的金額 / 負數 / 狀態跳步 / race condition、資料外洩、可預測的 token），有 business rules 時拿權限與約束規則當正確答案，報告寫明入口總數與深讀數），輸出 CRITICAL / HIGH / MEDIUM / LOW 計數、掃描涵蓋表（沒跑的標 `skipped`，絕不寫成「未發現問題」）與逐條 finding（File / Source / Fix）；原始報告放 repo 外的暫存目錄；只讀不改，不跑 `npm audit fix`、不 commit |
+| docs | tidy | `/docs:tidy`（僅手動執行，不會自動載入） | 替 `docs/` 瘦身但**不改寫任何規則的語意**，只做收合、搬移（`git mv` 到 `docs/archive/`）、改成引用三種動作，三類各一個 commit 後 `/git:push`：(1) **做完的東西**——只碰**已合併**的 feature（backlog `done`，或直推流程下 plan 全 `done` 且最後一個 commit 已在 `origin/<base>`），進行中的一行都不動；`plan.md` 的 `done` task 收成一張表（ID / 標題 / **來源** / commit / 狀態——保留來源讓 `/domain:feedback` 的漣漪仍追得到，被標回 `todo` 的列先由 `/impl:plan` 展開再實作），`verification.md`、`debt.md` 已處理的列、舊的 audit 報告移到 `docs/archive/`；移走前先把備註裡的技術債與 `low` findings 追加進 `debt.md`，否則 `/impl:refactor` 再也掃不到；上游回饋表整張不動；(2) **互相複製**——依擁有者表（規則歸 business-rules、元素歸 model、table 歸 schema、端點歸 contract），用重複行偵測找出被整段貼到下游的內文，一字不差的改成 ID 加一行摘要，內容已分岔的不改、交給第 3 類；執行協議等刻意的重複不動；(3) **過時內容**——懸空引用、孤兒元素、分岔的複本、「舊版 / 已棄用」段落，附 `git log -S` 證據用 `AskUserQuestion` 一次問完，裁定後 `docs/impl/` 自己改、上游文件交回 `/domain:business-rules`、`/domain:model`、`/db:schema`、`/api:contract`、`/ui:screens`；報告整理前後行數，單檔仍過大的建議拆檔（不在本 skill 範圍）；偵測腳本在 `docs/skills/tidy/references/detect.md`、格式在 `formats.md` |
 
 ## 結構
 
@@ -90,6 +92,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ├── ui/                               # UI：screens、tonal-ui、calm-ui
 ├── git/                              # git 工作流：commit、push、pr
 ├── security/                         # 資安掃描：audit
+├── docs/                             # 文件整理：tidy
 └── <plugin>/
     ├── .claude-plugin/plugin.json    # plugin 名稱、版本
     ├── commands/<command>.md         # slash command（可選）

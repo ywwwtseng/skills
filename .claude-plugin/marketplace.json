@@ -4,7 +4,7 @@
     "name": "ywwwtseng"
   },
   "metadata": {
-    "description": "ywwwtseng's personal Claude Code plugins: reusable skills for domain modeling, architecture decisions, database schema design, UI styling, and git workflow."
+    "description": "ywwwtseng's personal Claude Code plugins: reusable skills for domain modeling, architecture decisions, database schema design, UI styling, and git workflow, and docs housekeeping."
   },
   "plugins": [
     {
@@ -62,6 +62,13 @@
       "description": "資安掃描：audit 依序跑 Gitleaks（secrets，含 git 歷史）→ npm / pnpm / yarn / bun audit（套件漏洞）→ Semgrep（原始碼）→ Trivy config（Terraform 等 IaC）→ Trivy image（Docker），再由 Claude 讀程式碼排除誤報、合併重複、統一嚴重度並補查授權與注入，輸出 CRITICAL / HIGH / MEDIUM / LOW 計數與逐條 finding；只掃描與回報，不修改任何檔案",
       "version": "0.2.0",
       "category": "security"
+    },
+    {
+      "name": "docs",
+      "source": "./docs",
+      "description": "文件整理：tidy 替 docs/ 瘦身但不改寫任何規則的語意——已合併 feature 的 plan.md 把做完的 task 收成一行（保留來源與 commit，漣漪仍追得到）、verification.md 與舊 audit 報告移到 docs/archive/、被整段貼到下游文件的規則內文改成引用 ID、找出懸空引用與孤兒元素等過時內容列成清單一次問完；做完、搬走、改引用是機械性的直接做，過時與否由人裁定，上游文件的內容變更交回各自的 skill",
+      "version": "0.1.0",
+      "category": "productivity"
     }
   ]
 }

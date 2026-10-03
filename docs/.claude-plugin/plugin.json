@@ -1,0 +1,17 @@
+{
+  "name": "docs",
+  "description": "文件整理：tidy 替 docs/ 瘦身但不改寫任何規則的語意——已合併 feature 的 plan.md 把做完的 task 收成一行（保留來源與 commit，漣漪仍追得到）、verification.md 與舊 audit 報告移到 docs/archive/、被整段貼到下游文件的規則內文改成引用 ID、找出懸空引用與孤兒元素等過時內容列成清單一次問完；做完、搬走、改引用是機械性的直接做，過時與否由人裁定，上游文件的內容變更交回各自的 skill",
+  "version": "0.1.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "docs",
+    "tidy",
+    "archive",
+    "dedup",
+    "stale",
+    "traceability",
+    "context"
+  ]
+}
