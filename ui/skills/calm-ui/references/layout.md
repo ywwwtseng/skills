@@ -326,7 +326,7 @@ Sign in with Apple、Sign in with Google 這類按鈕照**提供者的規範**�
 
 - **文字**：提供者的官方用語，「Sign in with Apple」「Sign in with Google」（或該語系的官方譯法，例如「透過 Apple 登入」）；進行中換成「Opening Apple…」這類短句，不換成轉圈
 - **形狀**：全圓角膠囊 `--radius-full`，高 `--control-height-lg`（44），行動端與表單欄同寬
-- **顏色**：跟背景反差的實心底——深色畫面 `--color-text` 底、`--color-bg` 字（白底黑字），淺色畫面反過來（黑底白字）；這是提供者規範裡的白色／黑色款，不是 `--color-accent`
+- **顏色**：`--color-surface` 底、`--color-text` 字（同一般按鈕的表面色，按下 `--color-surface-pressed`），不用 `--color-accent`，也不做成反差的白底——白底在深色畫面上太搶，蓋過畫面上其他東西；Apple 標誌跟文字同色
 - **標誌**：放在文字左邊，跟文字一起置中（不是貼左緣）；標誌與文字間距 `--space-2`、左右內距 `--space-5`
   - Apple：系統的 Apple 標誌（iOS 用 SF Symbol `apple.logo`），跟文字同色
   - Google：官方四色的 G，**不換成單色**
@@ -418,4 +418,4 @@ Sign in with Apple、Sign in with Google 這類按鈕照**提供者的規範**�
 - [ ] 每個可點的東西點擊區 ≥ 44 × 44、彼此不重疊、不壓到系統 UI？
 - [ ] 每個看得到的按鈕都按得到？上面沒有透明層或沒卸載的 overlay？
 - [ ] 把所有顏色換成灰階，層級還看得出來嗎？
-- [ ] 第三方登入按鈕：官方用語、膠囊、反差實心底、所有提供者一模一樣、標誌實際等高（量過截圖）、Apple 在最上面？
+- [ ] 第三方登入按鈕：官方用語、膠囊、表面色底、所有提供者一模一樣、標誌實際等高（量過截圖）、Apple 在最上面？
