@@ -221,6 +221,7 @@ API 文件                                     執行中 · 80%
 - 欄位高 `--control-height-lg`（44）、底色 `--color-surface`、圓角 `--radius-md`、無框線；focus 時 2px `--color-focus` 外框
 - 欄位與欄位 `--space-5`；一組相關欄位與下一組 `--space-7`，組有自己的 heading
 - 送出按鈕在表單最後：桌面靠左對齊欄位（跟著左緣），行動端全寬貼齊底部
+- **送出中按鈕文字不變、只停用**：不換成「建立中…」「儲存中…」「正在等〇〇確認…」，也不換成轉圈；停用本身就說明「已經按了、在處理」。要等比較久的（外部確認、驗證網址）用按鈕旁的說明文字講清楚在等什麼、最多多久。適用所有會送出請求的按鈕與設定列（登出、恢復、加入、接受……）
 
 ### 設定與設定列
 
@@ -324,7 +325,7 @@ ming@example.com                               ←      信箱 small / secondary
 
 Sign in with Apple、Sign in with Google 這類按鈕照**提供者的規範**做，不套一般按鈕的規則——審核（App Store）與品牌授權都看這個，而且使用者靠樣式認出它。所有提供者的按鈕長得一模一樣，只差標誌與文字：
 
-- **文字**：提供者的官方用語，「Sign in with Apple」「Sign in with Google」（或該語系的官方譯法，例如「透過 Apple 登入」）；進行中換成「Opening Apple…」這類短句，不換成轉圈
+- **文字**：提供者的官方用語，「Sign in with Apple」「Sign in with Google」（或該語系的官方譯法，例如「透過 Apple 登入」）；進行中文字不變、只停用（見「表單」的送出中）
 - **形狀**：全圓角膠囊 `--radius-full`，高 `--control-height-lg`（44），行動端與表單欄同寬
 - **顏色**：`--color-surface` 底、`--color-text` 字（同一般按鈕的表面色，按下 `--color-surface-pressed`），不用 `--color-accent`，也不做成反差的白底——白底在深色畫面上太搶，蓋過畫面上其他東西；Apple 標誌跟文字同色
 - **標誌**：放在文字左邊，跟文字一起置中（不是貼左緣）；標誌與文字間距 `--space-2`、左右內距 `--space-5`
