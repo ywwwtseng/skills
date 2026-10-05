@@ -45,7 +45,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 
 - 只有 `/impl:ship`（通常是 `/loop /impl:ship`）走完整流程：plan → feature → verify → PR → merge。
 - 其他一律直推 base branch：沒下指令的改動、單獨跑的 `/impl:fix`、`/impl:feature`、`/impl:refactor`。
-  改 → 跑受影響的測試（`test:affected`，沒有就跑全部）+ typecheck → `/git:commit` → `/git:push`（跑全套後 push）。
+  改 → 跑受影響的測試（`test:affected`，沒有就跑日常測試指令）+ typecheck → `/git:commit` → `/git:push`（跑全套後 push）。全套只在交付前跑一次，每個 task 不跑。
   不開分支、不開 PR、不寫 plan、不跑 verify。這段就是對 commit 與 push 的授權，不用每次再問。
 - 例外：沒下指令的改動會碰到 business rules、DB schema / migration、API 契約時，先停下來說明，
   建議改走 `/domain:business-rules`、`/db:migrate` 或 `/api:contract`，不要直推。

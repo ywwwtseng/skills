@@ -136,7 +136,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 1. **接手**：讀 plan.md → 找執行序上第一個非 `done` 的 task。有 `blocked` 擋在前面且未解，先處理它，不要跳過去做後面的。狀態是 `doing` 表示上一輪被中斷：先看 `git status` 有沒有未提交的產出，據此判斷接續還是重來；判斷不出來就問使用者，不要自行丟棄。
 2. **開工**：把狀態改成 `doing` 並存檔，再開始寫程式。這樣中途被中斷，下一個 session 知道這個 task 做到一半。
 3. **只做這一個 task**。看到順手可以改的其他東西，寫進備註或新增 task，不要順手改——順手改會讓這次 commit 不可回溯。
-4. **驗收**：跑該 task 的驗收指令，**外加**受影響的既有測試（驗證指令表的「受影響測試」）不能壞。這個 task 動到 migration、ORM schema、測試 setup / fixture / factory、設定檔（`package.json`、lockfile、`tsconfig`、測試設定），或是最後一個 task，或「受影響測試」不存在、報錯、找不到任何測試 → 改跑「全部測試」。沒過就修；修不掉改成 `blocked`，在備註寫「卡在哪、試過什麼、需要什麼才能解」，然後停下來問使用者，不要硬幹也不要跳下一個。
+4. **驗收**：跑該 task 的驗收指令，**外加**受影響的既有測試（驗證指令表的「受影響測試」；不存在、報錯或找不到任何測試時改跑日常測試指令）、typecheck、lint 不能壞。**每個 task 都不跑全部測試**——即使動到 migration、ORM schema、測試 setup / fixture / factory、設定檔或共用模組，也只加跑最可能波及的測試檔，並在備註寫「動到共用的 X」；全部測試只在交付前跑一次（`/git:push` 推之前、`/git:pr` 開 PR 前、`/impl:verify`）。沒過就修；修不掉改成 `blocked`，在備註寫「卡在哪、試過什麼、需要什麼才能解」，然後停下來問使用者，不要硬幹也不要跳下一個。
 5. **標記**：驗收過了才改成 `done`。「動到」與預估不符時在備註更正，這是給後續 task 的情報。
 6. **commit**：呼叫 `/git:commit`，commit message 的 scope 或 body 帶上 task ID（`feat(order): 加入狀態轉換 (T-003)`）。程式碼與 plan.md 的狀態更新放在**同一個 commit**，狀態與產出要一起前進。commit 完才算這個 task 結束，才可以開始下一個。每個 task 不 push；全部 `done` 後才交付：單獨執行時呼叫 `/git:push` 直推 base branch，由 `/impl:ship` 調度時交回 ship（它走 PR）。
 7. **不改 plan 以外的規劃決策**：發現整個切法錯了，停下來說明並建議重跑 `/impl:plan`，不要邊做邊改執行序。

@@ -19,9 +19,9 @@
 
 `/impl:feature`、`/impl:fix` 每次驗收的「既有測試不能壞」跑「受影響」那一條；「全部」留給 `/git:push` 推之前、`/impl:verify` 與 CI。`test:smoke` 不含在「全部」裡（要建置、要模擬器），由 `/impl:verify`、`/git:push` 與 UI task 的驗收另外跑。
 
-### 改跑全部的情況
+### 交付前全套會抓的改動
 
-改動碰到下列任一項時，「受影響」追不到（它靠 import 關係找測試），驗收改跑「全部」：
+改動碰到下列任一項時，「受影響」追不到（它靠 import 關係找測試）。每個 task 仍**不**改跑「全部」（全部只在交付前跑一次），而是加跑最可能波及的測試檔，並在 plan 備註寫明動到什麼，交付前的全套紅了時從這些 task 找起：
 
 - migration、ORM schema
 - 測試的 setup / fixture / factory：`<路徑>`

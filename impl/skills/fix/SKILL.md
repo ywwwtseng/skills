@@ -28,7 +28,7 @@ description: 修一個已經存在的缺陷——先分流這到底是「實作�
 3. **修 root cause，不修症狀。** 在錯誤發生的地方補一個 `if` 擋掉，通常只是把問題推到下一層。說得出「為什麼會變成這樣」才動手。
 4. **最小改動。** 順手重構、順手改名、順手補型別，會讓「這個 commit 造成了什麼」無法辨識——而修復的 commit 正是之後最常被回溯的那種。看到該改的寫進報告（之後由 `/impl:refactor` 收）或開一條上游回饋，不要順手。
 5. **不改既有測試的預期值。** 既有測試紅了，代表你的修正破壞了別的規則，不是那個測試寫錯了。真的是測試寫錯，那是一條 `規則矛盾` 的上游回饋，停下來提出。
-6. **驗收三件事全綠**：新的 regression test 綠、受影響的既有測試全綠（碰到共用的東西就跑全部，見 Step 5）、typecheck / lint 綠。缺一不可。全套留給 `/git:push` 推之前跑。
+6. **驗收三件事全綠**：新的 regression test 綠、受影響的既有測試全綠（碰到共用的東西加跑最可能波及的測試檔，見 Step 5）、typecheck / lint 綠。缺一不可。全套只在交付前跑一次（`/git:push` 推之前、`/git:pr` 開 PR 前）。
 7. **同一個 root cause 要查別處有沒有。** 一個誤用的 helper、一個少檢查的邊界，通常不會只犯一次。查一次，同源的一起修（同一個 root cause 算一個邏輯變更）；不同源的記下來，不要一起修。
 8. **卡住三次就停。** 同一個錯誤試過 3 次仍無解，或需要外部資訊（帳號、金鑰、線上資料、第三方行為），停下來問，附「卡在哪 / 試過什麼 / 需要什麼才能解」。
 9. **root cause 寫進 commit body，不另開文件。** 修復的歷史就是 git 歷史。另開一份 `fixes.md` 只會變成沒有人讀的第二份真相。
@@ -77,7 +77,7 @@ description: 修一個已經存在的缺陷——先分流這到底是「實作�
 ### Step 5：驗收
 
 1. 新的 regression test → 綠。
-2. 受影響的既有測試（`docs/architecture/testing.md` 的 `test:affected`）→ 綠。紅了看核心規則 5。修正動到 migration、ORM schema、測試 setup / fixture、設定檔或 `testing.md` 列的共用模組，或 `test:affected` 不存在、報錯、找不到任何測試 → 改跑全部測試。
+2. 受影響的既有測試（`docs/architecture/testing.md` 的 `test:affected`）→ 綠。紅了看核心規則 5。`test:affected` 不存在、報錯、找不到任何測試 → 改跑日常測試指令。修正動到 migration、ORM schema、測試 setup / fixture、設定檔或 `testing.md` 列的共用模組 → 不跑全套，加跑最可能波及的測試檔，並在收尾寫明動到什麼（交付前的全套會抓其餘的）。
 3. typecheck / lint → 綠。
 4. 修不掉就如實說修不掉，附失敗指令與錯誤訊息。試過 3 次 → 核心規則 8。
 

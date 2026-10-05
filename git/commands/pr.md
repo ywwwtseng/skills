@@ -79,7 +79,7 @@ A pull request must never be opened on red code.
 1. Look for `docs/impl/<feature>/verification.md`. If it exists and is newer than the last commit, use its verdict as the evidence.
    - Verdict `fail` → stop. Report the failing findings and tell the user to address them (`/impl:feature` for missing tasks, `/impl:fix` for defects) before opening the pull request.
    - Verdict `pass with findings` → continue, and carry the findings into the pull request body.
-2. If there is no usable verification report, run the project's validation commands yourself — take them from the plan's validation table, otherwise from `docs/architecture/tech-stack.md`, otherwise from `package.json` scripts or the CI workflow. Run type check, lint, tests, and build.
+2. If there is no usable verification report, run the project's validation commands yourself — take them from the plan's validation table, otherwise from `docs/architecture/tech-stack.md`, otherwise from `package.json` scripts or the CI workflow. Run type check, lint, the full test suite (the 「全部」 command in `docs/architecture/testing.md`, e.g. `pnpm test:full`; individual tasks only ran the affected tests, so this is where cross-module breakage is caught), and build.
    - Anything red → stop and report the failing command and its output. Do not open the pull request. Do not "fix" it here.
    - Recommend running `/impl:verify` first, since a green test run does not prove the business rules are covered.
 
