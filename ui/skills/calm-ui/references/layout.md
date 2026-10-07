@@ -364,10 +364,13 @@ Sign in with Apple、Sign in with Google 這類按鈕照**提供者的規範**�
 
 | 用途 | token | 值 |
 |---|---|---|
-| 小圖示鈕 | `--control-height-sm` | 32 |
+| 小圖示鈕（正圓） | `--control-height-sm` | 32 |
+| 圖示鈕（正圓，頁首「＋」、浮動控制） | `--control-height` | 36 |
 | 桌面按鈕、側欄列、選單項 | `--control-height` | 36 |
 | 輸入欄位、行動端按鈕 | `--control-height-lg` | 44 |
 | 圖示 | `--icon-size-sm` / `--icon-size` | 16 / 20 |
+
+只有圖示的按鈕寬等於高、`--radius-full`，一律正圓並有淡底（`--color-surface` 或浮動控制的半透明底）；不做寬高不等的膠囊，也不用沒有底的裸圖示當按鈕。帶文字的按鈕才是膠囊。
 
 行動端所有可點的東西點擊區至少 `--touch-target-min`（44），視覺上小的圖示用透明內距補足，細節見下一節。
 
