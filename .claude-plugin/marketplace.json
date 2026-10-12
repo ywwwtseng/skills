@@ -10,8 +10,8 @@
     {
       "name": "domain",
       "source": "./domain",
-      "description": "領域建模：business-rules 從問題與功能描述推導可驗證的 business rules（docs/domain/business-rules/<主題>.md）；model 把規則累積成概念層 domain model，依聚合分檔輸出 docs/domain/model/<聚合>.md；feedback 收齊實作階段累積的上游回饋，分類後路由回對應 skill 修正，並追 BR → model → schema → task 的漣漪",
-      "version": "0.5.2",
+      "description": "領域建模：business-rules 從問題與功能描述推導可驗證的 business rules（docs/domain/business-rules/<主題>.md）；model 把規則累積成概念層 domain model，依聚合分檔輸出 docs/domain/model/<聚合>.md；feedback 收齊實作階段累積的上游回饋，分類後路由回對應 skill 修正，並追 BR → model → schema → task 的漣漪；review 逐條審查一份規則文件（含 AI 另外寫好的），一次只拿一條給使用者裁定，附判斷（出處 / 邊界 / 衝突 / 牽動），裁定後把整份文件的連帶修改一次改完",
+      "version": "0.6.0",
       "category": "productivity"
     },
     {
