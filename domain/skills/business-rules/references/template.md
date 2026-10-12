@@ -2,10 +2,20 @@
 
 寫入 `docs/domain/business-rules/<slug>.md`。段落順序固定；沒有內容的段落寫「無」而不是刪掉，讓讀者知道是確認過而非遺漏。
 
+標頭的「狀態」只有三個值，代表審查進度：
+
+| 狀態 | 意思 | 誰寫 |
+|---|---|---|
+| `待審查` | 新產出，還沒有人逐條確認過 | `/domain:business-rules` 建立新檔時 |
+| `審查中` | `/domain:review` 已開始、還沒審完 | `/domain:review` |
+| `已審查（YYYY-MM-DD）` | 每條規則都被使用者裁定過；之後不再審 | `/domain:review` 審完最後一條時 |
+
+`/impl:plan` 只接受 `已審查`。舊文件寫 `已確認` 的視同 `已審查`；寫 `草稿` 或沒有狀態的視同 `待審查`。
+
 ```markdown
 # Business Rules — <功能名>
 
-> 產生日期：YYYY-MM-DD ｜ 版本：1 ｜ 狀態：草稿 / 已確認
+> 產生日期：YYYY-MM-DD ｜ 版本：1 ｜ 狀態：待審查
 
 ## 問題與目標
 <一段話：要解決什麼問題、功能做到什麼算成功。直接引用使用者原話為主，不擴寫。>
@@ -88,11 +98,12 @@ stateDiagram-v2
 文件寫完後，在對話中輸出：
 
 ```
-已寫入 docs/domain/business-rules/<slug>.md
+已寫入 docs/domain/business-rules/<slug>.md（狀態：待審查）
 規則 N 條：定義 a ／ 約束 b ／ 計算 c ／ 狀態 d ／ 權限 e ／ 時間 f ／ 觸發 g ／ 例外 h
 假設 M 條，最值得確認的三個：
 1. BR-XXX-nnn …
 2. …
 3. …
 未決事項 K 項。
+開始實作前必須先跑一次 /domain:review。
 ```

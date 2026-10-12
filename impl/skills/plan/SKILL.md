@@ -40,7 +40,8 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
    - 工作區有未提交的變更 → 停下來，建議先跑 `/git:commit`。
 
    漏掉這一步，新 feature 的 commit 會疊在上一個 feature 的分支上，最後被捲進上一個 PR。無人看守時沒有人會發現。
-4. **讀上游，缺什麼就停。** 沒有 `docs/domain/business-rules/<feature>.md` 時不要憑一句話排 task——說明需要先有規則，建議先跑 `/domain:business-rules`，然後停止。模型或 schema 缺席時可以繼續（有些 feature 不碰資料庫），但要在 plan 的「上游狀態」記明是在缺什麼的情況下排的。
+4. **讀上游，缺什麼就停。** 沒有 `docs/domain/business-rules/<feature>.md` 時不要憑一句話排 task——說明需要先有規則，建議先跑 `/domain:business-rules`，然後停止。
+   規則文件標頭的狀態不是 `已審查`（舊格式的 `已確認` 視同已審查）時也停：說明這份規則還沒被使用者逐條確認過，裡面的假設可能是錯的，建議先跑 `/domain:review`。審查只需要一次，審過的文件之後再被 `/domain:business-rules` 合併新規則也不必重審。模型或 schema 缺席時可以繼續（有些 feature 不碰資料庫），但要在 plan 的「上游狀態」記明是在缺什麼的情況下排的。
    有客戶端要呼叫這個 feature（web / 行動端 / 第三方）卻沒有 `docs/api/contract.md` 時，**不要自己發明端點與錯誤碼**——伺服器端與客戶端的 task 會各自發明一份，而且兩邊測試都會綠。建議先跑 `/api:contract`，然後停止。
    這個 feature 有畫面卻沒有 `docs/ui/screens/` 時同理：UI task 的驗收會寫不出來（只能寫「開起來看看」），空狀態與錯誤呈現會由每個 task 各自發明。建議先跑 `/ui:screens`。
    有畫面時再讀 `CLAUDE.md` 或 tech-stack 的 **UI 風格對照**，記下這個 feature 動到的每個介面用哪一套（`/ui:tonal-ui` / `/ui:calm-ui`），以及該介面的 token 是否已落進程式碼（theme 檔存在、既有畫面有引用）。對照沒寫就停，建議先補——少了它，每個 UI task 會各自決定畫面長相，而且在迴圈裡視覺語言 skill 幾乎不會自己被觸發。
@@ -175,7 +176,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 
 | 文件 | 路徑 | 最後更新 | 備註 |
 |---|---|---|---|
-| Business rules | `docs/domain/business-rules/<feature>.md` | <日期> | 共 N 條 BR |
+| Business rules | `docs/domain/business-rules/<feature>.md` | <日期> | 共 N 條 BR，已審查（<日期>） |
 | Domain model | `docs/domain/model/<聚合>.md` | <日期> | |
 | DB schema | `docs/db/schema.md` | <日期> | 相關 table：<列出> |
 

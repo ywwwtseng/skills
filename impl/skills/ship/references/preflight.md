@@ -21,6 +21,7 @@
 | # | 檢查 | 通過條件 | 沒過會在哪裡爆 | 怎麼補 |
 |---|---|---|---|---|
 | B1 | `docs/domain/business-rules/` | 至少一份 | `/impl:ship` 的 Step 0 建不出佇列，直接停 | `/domain:business-rules` |
+| B1a | B1 每份規則文件的狀態 | 全部是 `已審查`（舊格式 `已確認` 視同） | `/impl:plan` 的 Step 0 停，迴圈卡在第一個未審的 feature | `/domain:review`（每份只審一次） |
 | B2 | `docs/domain/model/` | 存在且涵蓋 B1 的規則 | `/impl:plan` 排得出 task 但沒有不變量可依據，規則會散進 controller | `/domain:model` |
 | B3 | `docs/architecture/tech-stack.md` | 存在，且有「約束與慣例」與可跑的驗證指令 | `/impl:plan` 的 Step 0 抓不到 typecheck / lint / test 就停下來問 | `/arch:tech-stack` |
 | B4 | `docs/db/schema.md` | **有資料庫時**必要 | `/impl:feature` 不知道不變量該由 DB 還是應用層守，兩邊都不做 | `/db:schema` |
@@ -71,6 +72,8 @@ C3 不是硬性阻塞——第一個 feature 的 T-001 本來就該是貫穿切�
 /arch:init              C1、C2、D4（落各介面的 token）
       ↓
 /domain:business-rules  B1（每個 feature 一份）
+      ↓
+/domain:review          B1a（每份規則審一次）
       ↓
 /domain:model           B2
       ↓
