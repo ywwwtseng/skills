@@ -11,8 +11,8 @@ Current git status:
 Current branch:
 !`git branch --show-current`
 
-Recent commits:
-!`git log --oneline -10`
+Recent commits (empty means the repository has no commits yet):
+!`git log --oneline -10 --ignore-missing HEAD`
 
 ## Task
 
