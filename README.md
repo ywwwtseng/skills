@@ -4,31 +4,32 @@ ywwwtseng 的個人 Claude Code plugins。
 
 ## 核心概念
 
-這套 plugin 想解決一件事：**讓 AI 從「我想要一個取消訂單的功能」一路做到程式碼上線，而且每一步都有依據、出錯時查得到是哪一步錯。**
+這套 plugin 想解決一件事：**讓 AI 從「我想做一個二手書交易平台」一路做到 MVP 上線，而且每一步都有依據、出錯時查得到是哪一步錯。** 上線之後再加的每個功能，也走同一條路。
 
 做法只有一個原則：**每一步的結果都寫成文件，下一步只照文件做，不靠對話裡的記憶。** 對話會被壓縮、session 會中斷、換一台電腦就什麼都沒了；文件不會。
 
-### 一個例子：加「取消訂單」功能
+### 一個例子：從零做一個二手書交易平台的 MVP
 
 ```mermaid
 flowchart LR
-  A["你說：<br/>買家可以取消訂單"] --> B["規則文件<br/>待審查"]
+  A["你說：<br/>MVP 要能刊登、<br/>下單、付款、取消"] --> B["幾份規則文件<br/>待審查"]
   B -->|你逐條確認| C["規則文件<br/>已審查"]
-  C --> D["模型 / schema / API 契約"]
-  D --> E["實作計畫 plan.md"]
-  E --> F["程式碼<br/>一個 task 一個 commit"]
-  F --> G["稽核 verification.md"]
-  G --> H["推上去"]
+  C --> D["一套模型 / schema /<br/>API 契約 / 畫面"]
+  D --> E["feature 佇列<br/>backlog.md"]
+  E --> F["每個 feature：<br/>plan → 實作 → 稽核"]
+  F -->|下一個 feature| E
+  F --> G["MVP 上線"]
 ```
 
-1. **你只描述問題**：「買家下單後可以取消，已出貨的不行，取消要退款。」`/domain:business-rules` 把它推導成一條一條可以驗證的規則，你沒講到的地方（部分出貨算不算已出貨？）寫成「假設」，文件標成 `待審查`。
-2. **你逐條確認**：`/domain:review` 一次拿一條問你，確認、修改或刪除。全部看過才變成 `已審查`。**沒審過的規則不能拿去寫程式**——裡面有 AI 自己補的假設。
-3. **往下展開設計**：規則變成概念模型（`/domain:model`）、資料表（`/db:schema`）、API 格式（`/api:contract`）、畫面規格（`/ui:screens`）。每一份都標明它來自哪一條規則。
-4. **排計畫**：`/impl:plan` 把設計切成一個個做得完、驗得了的小任務，每個任務寫好「改哪些檔案、怎麼驗收」。
-5. **一個一個做**：`/impl:feature` 每次只做一個任務，做完跑測試、commit，再做下一個。中途斷掉，新的 session 讀 plan.md 就知道做到哪。
-6. **交付前稽核**：`/impl:verify` 逐條檢查每條規則有沒有測試在驗，最後推上去。
+1. **你只描述產品**：「賣家刊登二手書，買家下單付款；賣家三天內沒出貨就自動取消退款；MVP 先不做評價和聊天。」`/domain:business-rules` 依主題拆成幾份規則文件——`listing.md`（刊登）、`order.md`（下單與狀態）、`payment.md`（付款與退款）、`account.md`（註冊登入）——每份都是一條一條可以驗證的規則。你沒講到的地方（同一本書兩個人同時下單誰拿到？退款要退運費嗎？）寫成「假設」，文件標成 `待審查`。
+2. **你逐條確認**：`/domain:review` 一次拿一條問你，確認、修改或刪除。全部看過才變成 `已審查`。**沒審過的規則不能拿去寫程式**——裡面有 AI 自己補的假設。MVP 的範圍也在這一步定下來：「不做評價」會寫進文件的「不包含」，之後不會被順手做出來。
+3. **選技術、建骨架**：`/arch:tech-stack` 一題一題問你要用什麼技術，寫成 `tech-stack.md`；`/arch:init` 照它把專案建起來；`/arch:test-strategy` 決定哪類規則用哪一層測試驗。
+4. **往下展開成一套設計**：所有規則文件一起變成**一套**概念模型（`/domain:model`，依聚合分檔：`book`、`order`、`payment`）、**一份**資料表設計（`/db:schema`）、**一份** API 格式（`/api:contract`）、各畫面的規格（`/ui:screens`）。不是一份規則對一份設計：訂單和付款共用同一張表、同一組錯誤碼。每個元素都標明它來自哪一條規則。
+5. **排 feature 佇列**：`/impl:ship` 把規則文件排進 `backlog.md`，依相依決定順序——先帳號，再刊登，再下單與付款；伺服器端先於 App 端。
+6. **一個 feature 一個 feature 做**：每個 feature 由 `/impl:plan` 切成一個個做得完、驗得了的小任務，`/impl:feature` 每次只做一個任務，做完跑測試、commit；`/impl:verify` 逐條檢查每條規則有沒有測試在驗，通過才合併，然後取佇列的下一個。中途斷掉，新的 session 讀 `backlog.md` 和 `plan.md` 就知道做到哪。
+7. **上線之後照樣走這條路**：要加「買家可以在出貨前取消」，就是改 `order.md` 加一條規則、再審一次，模型、schema、API 跟著改，排進佇列做成下一個 feature。實作中發現規則寫錯，記成「上游回饋」交給 `/domain:feedback`，不在程式裡偷偷改。
 
-整條可以一個一個指令手動跑，也可以 `/loop /impl:ship` 讓它自己一路跑完。
+整條可以一個一個指令手動跑，也可以 `/loop /impl:ship` 讓它把佇列一路跑完。
 
 ### 四種文件，各放各的
 
@@ -48,8 +49,15 @@ flowchart LR
 ```
 docs/
 ├── domain/
-│   ├── business-rules/order-cancellation.md   ← 你確認過的規則（來源）
-│   └── model/order.md                          ← 概念模型
+│   ├── business-rules/                         ← 你確認過的規則（來源），依主題分檔
+│   │   ├── account.md
+│   │   ├── listing.md
+│   │   ├── order.md
+│   │   └── payment.md
+│   └── model/                                  ← 一套概念模型，依聚合分檔
+│       ├── book.md
+│       ├── order.md
+│       └── payment.md
 ├── architecture/
 │   ├── tech-stack.md                           ← 技術選擇與約束（規則）
 │   └── testing.md                              ← 哪類規則用哪層測試
@@ -58,9 +66,10 @@ docs/
 ├── ui/screens/                                 ← 畫面規格
 ├── impl/
 │   ├── backlog.md                              ← 要做的 feature 佇列（/impl:ship）
-│   └── order-cancellation/
-│       ├── plan.md                             ← 實作計畫與進度
-│       └── verification.md                     ← 稽核結果
+│   ├── listing/
+│   │   ├── plan.md                             ← 實作計畫與進度
+│   │   └── verification.md                     ← 稽核結果
+│   └── order/ …                                ← 每個 feature 一個資料夾
 └── security/audit-2026-10-13.md                ← 安全報告與修復紀錄（不要 commit 到公開 repo）
 ```
 
