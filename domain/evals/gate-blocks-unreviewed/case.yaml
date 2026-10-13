@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: gate-blocks-unreviewed
+description: 規則文件還是待審查時，要求寫範圍內的程式碼會被 br-review-gate 擋下，Claude 停下並建議 /domain:review，而不是自己改狀態或換方法寫
+tags: [hook]
+context:
+  scaffold_script: scaffold.sh

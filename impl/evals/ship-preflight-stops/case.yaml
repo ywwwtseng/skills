@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: ship-preflight-stops
+description: 沒有 origin 遠端、也沒有 tech-stack 等上游文件時，/impl:ship 在起飛前檢查就停下並說明缺什麼，不建 backlog.md、不排 plan、不寫程式碼
+tags: [ship, preflight]
+context:
+  scaffold_script: scaffold.sh

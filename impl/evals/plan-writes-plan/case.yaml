@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: plan-writes-plan
+description: 規則已審查時，/impl:plan 產出 docs/impl/order-cancellation/plan.md，含執行協議、T-001 起的 task、上游狀態、規則覆蓋與可執行的驗收指令，且不寫產品程式碼
+tags: [plan]
+context:
+  scaffold_script: scaffold.sh

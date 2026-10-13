@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: plan-stops-unreviewed
+description: 規則文件還是待審查時，/impl:plan 要停下並建議 /domain:review，不能產出 plan.md
+tags: [plan, gate]
+context:
+  scaffold_script: scaffold.sh
