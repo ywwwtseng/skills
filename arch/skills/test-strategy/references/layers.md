@@ -94,7 +94,7 @@ API 層與整合層通常共用同一套測試資料庫與 setup，差別只在�
 - 斷言用首頁**一定會出現**的元素（標題、登入按鈕），不要用需要資料才出現的東西——那是 E2E 的範圍，而且會讓冒煙依賴後端。
 - 首頁需要登入時，斷言登入畫面出現即可。
 - **Expo 一律用 dev build 跑，不用 Expo Go**：Expo Go 裡沒有專案自己的原生模組，冒煙會在它身上假紅；反過來，專案沒有原生模組時 Expo Go 會假綠，等於沒驗到真正會出貨的 binary。
-- 新增或升級原生依賴後，啟動段要先重建 binary 再跑（原生依賴的判斷見 tech-stack 的 `references/mobile.md`）。
+- 新增或升級原生依賴後，啟動段要先重建 binary 再跑（原生依賴的判斷：套件目錄下有 `ios/`、`android/`、`*.podspec`、`expo-module.config.json` 或 `app.plugin.js` 其中之一）。
 - CI 預設只跑打包段；啟動段需要 macOS runner，有才加，沒有就在 `testing.md` 寫明「啟動段只在本機由 `/impl:verify` 跑」。
 
 打亂順序的旗標：Vitest `--sequence.shuffle`、Jest `--randomize`、pytest `-p random_order`（需 `pytest-random-order`）、`go test -shuffle=on`。

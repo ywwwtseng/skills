@@ -25,6 +25,19 @@ ywwwtseng 的個人 Claude Code plugins。
 /plugin marketplace add /Users/yw/Devlopment/skills
 ```
 
+### Plugin 之間的依賴
+
+有些 plugin 在流程中會呼叫別的 plugin 的指令，這些依賴寫在各自 `plugin.json` 的 `dependencies`，安裝時會自動一起裝：
+
+| Plugin | 依賴 | 原因 |
+|---|---|---|
+| impl | git、domain、ui | 每個 task 呼叫 `/git:commit`，交付呼叫 `/git:push` / `/git:pr`；`/impl:ship` 呼叫 `/domain:feedback`；UI task 呼叫 `/ui:tonal-ui` / `/ui:calm-ui` |
+| domain | db | `/domain:feedback` 會直接呼叫 `/db:schema` 補 schema |
+| arch | ui | `/arch:init` 呼叫選定的 UI 風格 skill 落 design token |
+| docs | git | `/docs:tidy` 每類整理完呼叫 `/git:commit`，最後 `/git:push` |
+
+只「建議使用者去跑」的指令（例如 `/impl:plan` 建議先跑 `/api:contract`）不算依賴。用 `claude --plugin-dir` 單獨載入某個 plugin 時，要把它的依賴一起用 `--plugin-dir` 帶上，否則整個 plugin 不會載入。
+
 ## Plugins
 
 Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
@@ -95,18 +108,18 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ├── git/                              # git 工作流：commit、push、pr
 ├── security/                         # 資安掃描：audit
 ├── docs/                             # 文件整理：tidy
+├── evals/                            # 行為測試，見「測試 skill 的行為」
 └── <plugin>/
     ├── .claude-plugin/plugin.json    # plugin 名稱、版本
     ├── commands/<command>.md         # slash command（可選）
     ├── hooks/hooks.json              # hook 註冊（可選，啟用 plugin 就自動載入）
     ├── skills/<skill-name>/SKILL.md  # skill 本體（可選）
-    ├── skills/<skill-name>/references/
-    └── evals/<case>/                 # 行為測試（可選），見「測試 skill 的行為」
+    └── skills/<skill-name>/references/
 ```
 
 ## 測試 skill 的行為
 
-`domain` 與 `impl` 有用 `claude plugin eval` 寫的行為測試，放在各自的 `evals/`。每個情境會在空白環境開一個 Claude Code session，只載入該 plugin，送出一句使用者會講的話，再檢查 Claude 做了什麼（產生了哪些檔案、檔案內容、有沒有呼叫對的 skill、有沒有停下來）。同一個情境預設跑 3 次，並對照不裝 plugin 的結果，差距（`Δ`）就是 plugin 的貢獻。
+`domain` 與 `impl` 有用 `claude plugin eval` 寫的行為測試，放在 repo 根目錄的 `evals/<plugin>/`。每個情境會在空白環境開一個 Claude Code session，只載入受測的 plugin 與它宣告的依賴（寫在每個情境 `prompt.md` 的 `plugins:`），送出一句使用者會講的話，再檢查 Claude 做了什麼（產生了哪些檔案、檔案內容、有沒有呼叫對的 skill、有沒有停下來）。同一個情境預設跑 3 次，並對照不裝 plugin 的結果，差距（`Δ`）就是 plugin 的貢獻。
 
 | Plugin | 情境 | 檢查什麼 |
 |---|---|---|
@@ -119,21 +132,23 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 
 **什麼時候跑**：改了 `domain` 或 `impl` 的 SKILL.md、references、hook 之後，升版本號之前跑一次；換新模型之後也值得跑一次。
 
-在 plugin 資料夾裡執行（需要 Claude Code v2.1.269 以上）：
+在 **repo 根目錄**執行（需要 Claude Code v2.1.269 以上）：
 
 ```bash
-cd domain   # 或 impl
-claude plugin eval . --allow-tools Write Edit --scaffold
+claude plugin eval . --eval-dir evals --allow-tools Write Edit --scaffold          # 全部
+claude plugin eval . --eval-dir evals/domain --allow-tools Write Edit --scaffold   # 只跑 domain
 ```
+
+為什麼放在根目錄、不放在各 plugin 底下：`claude plugin eval` 只允許載入執行目錄底下的 plugin，而 `domain`、`impl` 有宣告依賴（見 `plugin.json` 的 `dependencies`），缺了依賴的 plugin 會整個不載入。在根目錄執行，情境才能把依賴的 plugin 一起載入。
 
 - `--allow-tools Write Edit`：讓 Claude 可以寫檔，不給的話它只能讀
 - `--scaffold`：執行情境裡的 `scaffold.sh`，先建好測試用的規則文件與 git repo（腳本都是本 repo 自己寫的）
 - 每次執行都是真的模型呼叫，算在你的用量裡。兩個 plugin 完整跑一輪（各 3 次＋不裝 plugin 的對照）約 $3.5；改單一情境時用 `--case <名稱> --runs 1 --ablation none`，一次約 $0.05–0.25
-- 結果寫在 `<plugin>/evals/results/`（已加入 `.gitignore`），`report.html` 可看每次執行的細節
+- 結果寫在 `evals/results/` 或 `evals/<plugin>/results/`（已加入 `.gitignore`），`report.html` 可看每次執行的細節
 
 **怎麼讀結果**：`WITH` 是裝 plugin 的分數，要維持 1.00。「應該停下來」的情境（`plan-stops-unreviewed`、`ship-preflight-stops`）不裝 plugin 也會拿到不少分，因為 Claude 什麼都不做也符合「沒寫檔案」，`Δ` 小是正常的；這類情境是防止日後改 skill 時把「該停」改壞。`br-ignores-unrelated` 的 `Δ` 本來就是 0。
 
-**新增情境**：在 `<plugin>/evals/` 新增一個資料夾，放 `prompt.md`（要說的話）與 `graders/*.md`（檢查項目），需要預先準備檔案就加 `case.yaml` + `scaffold.sh`。照現有情境的寫法即可；格式說明見 [Claude Code 文件](https://code.claude.com/docs/en/plugin-evals)。
+**新增情境**：在 `evals/<plugin>/` 新增一個資料夾，放 `prompt.md`（要說的話，frontmatter 的 `plugins:` 照同組其他情境寫，列出受測 plugin 與它的依賴）與 `graders/*.md`（檢查項目），需要預先準備檔案就加 `case.yaml` + `scaffold.sh`。照現有情境的寫法即可；格式說明見 [Claude Code 文件](https://code.claude.com/docs/en/plugin-evals)。
 
 ## 新增 skill
 

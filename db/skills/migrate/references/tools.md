@@ -54,7 +54,7 @@ Step 0 判定工具後只讀對應段。判定順序：repo 既有的 migration 
 
 - 有 `upgrade()` / `downgrade()` 兩段，down 一定要寫（這是少數原生支援回滾的工具，別浪費）。
 - **會漏掉**：`--autogenerate` 偵測不到欄位改名（判成 drop + add）、CHECK 的變更、部分索引、伺服器端預設值。產出的 revision 一律打開改。
-- 約束命名用 `naming_convention` 設定，對齊 `db/skills/schema/references/conventions.md` 的命名段。
+- 約束命名用 `naming_convention` 設定，對齊 schema skill 慣例（同一個 db plugin 內，從本檔所在資料夾算起的 `../../schema/references/conventions.md`）的命名段。
 
 ## goose / sqlc
 

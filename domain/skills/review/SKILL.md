@@ -92,5 +92,5 @@ AI 產生的規則文件，真正的問題通常不在單條規則寫錯，而�
 
 ## 判斷準則
 
-- 規則格式、ID 規範、陳述句寫法：沿用 `/domain:business-rules` 的 `references/writing-rules.md`。改寫規則時照那份的寫法，不另立格式。
+- 規則格式、ID 規範、陳述句寫法：沿用 `/domain:business-rules` 的寫法（`${CLAUDE_PLUGIN_ROOT}/skills/business-rules/references/writing-rules.md`）。改寫規則時照那份的寫法，不另立格式。
 - 文件不是 `/domain:business-rules` 格式時，保留原文件的格式，只改內容；不要趁審查把整份改成另一種格式，除非使用者要求。

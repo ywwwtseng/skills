@@ -1,4 +1,5 @@
 ---
+plugins: ["../../../domain", "../../../db"]
 description: 從一段功能描述推導 business rules，產出狀態待審查、帶影響範圍與規則編號的規則文件，並提醒實作前要 /domain:review
 tags: [business-rules]
 max_turns: 40

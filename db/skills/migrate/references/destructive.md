@@ -64,7 +64,7 @@ down 寫不出來（資料已經沒了），照 SKILL 核心規則 4 標成**不
 
 既有資料一定有重複的可能，直接加約束會失敗。「怎麼處理重複」是業務決策（保留哪一筆？合併？），用 `AskUserQuestion` 問（SKILL 核心規則 10）。
 
-有軟刪除時照 `db/skills/schema/references/conventions.md`：唯一約束要排除已刪除列（部分索引或把 `deleted_at` 併進複合唯一）。
+有軟刪除時照 schema skill 的慣例（同一個 db plugin 內，從本檔所在資料夾算起的 `../../schema/references/conventions.md`）：唯一約束要排除已刪除列（部分索引或把 `deleted_at` 併進複合唯一）。
 
 ## 收緊 CHECK
 
@@ -86,7 +86,7 @@ PostgreSQL 可以先 `ADD CONSTRAINT ... NOT VALID`（只擋新資料、不檢�
 | migrate | 雙寫兩套鍵，確認一致 |
 | contract | 切換主鍵與全部外鍵約束、刪舊欄位 |
 
-走到這一步前先確認：真的要改主鍵，還是加一個唯一的 `number` 欄位就夠了（`conventions.md` 的主鍵段）。
+走到這一步前先確認：真的要改主鍵，還是加一個唯一的 `number` 欄位就夠了（`../../schema/references/conventions.md` 的主鍵段）。
 
 ## 拆表 / 併表
 

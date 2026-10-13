@@ -57,7 +57,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 2. **後續切片依什麼分**：預設依**業務規則群組**分（一組相關的 BR 一個 task），不是依技術層分。狀態機類的 feature 依「狀態轉換」分；CRUD 類的依「命令」分（建立 / 修改 / 取消各一個）。
 3. **例外與邊界何時做**：預設 happy path 的 task 完成後，緊接著補它的例外分支，不要把所有例外堆到最後——堆到最後的東西在 long-running 裡最容易被截斷。
 4. **哪些不在這次範圍**：明確列「不做」，避免 agent 在跑的時候自行擴張。
-5. **畫面的地基**：這個 feature 動到的介面還沒有 token（Step 0 查到的）→ 在第一個 UI task 之前排一個 design foundation task：把該介面選定那套的 `references/tokens.css` 落成 theme（Web：CSS variables / Tailwind `theme.extend`；React Native：`theme.ts`），來源寫 `/ui:<風格>`，驗收是 typecheck + 一個引用 token 的畫面截圖。沒有這個 task，每個 UI task 會各自寫死顏色，web 與 mobile 各長各的。
+5. **畫面的地基**：這個 feature 動到的介面還沒有 token（Step 0 查到的）→ 在第一個 UI task 之前排一個 design foundation task：用 Skill 呼叫該介面選定的 `/ui:tonal-ui` 或 `/ui:calm-ui`，把它的 `references/tokens.css` 落成 theme（Web：CSS variables / Tailwind `theme.extend`；React Native：`theme.ts`），來源寫 `/ui:<風格>`，驗收是 typecheck + 一個引用 token 的畫面截圖。沒有這個 task，每個 UI task 會各自寫死顏色，web 與 mobile 各長各的。
 
 ### Step 2：定義 task
 
@@ -86,7 +86,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 - UI task → 除了 typecheck，寫明用 `/run` 開起來要看到什麼畫面；有 `docs/ui/screens/` 時，驗收直接引用規格的狀態（「在空狀態顯示 X、在離線顯示 Y」），不要只寫「畫面正常」。
 - UI task 的「來源」**一定要寫所屬介面與視覺語言**（`介面：apps/web → /ui:calm-ui`，用到版型時加上 `patterns.md#Agent Feed` 這種指向）——這是 `/impl:feature` 決定要載入哪一套的唯一依據。「看到什麼算過」再加兩條：截圖逐項過該 skill 的交件前檢查清單；畫面檔的 diff 裡沒有寫死的色碼或任意值（`#RRGGBB`、`rgb(`、`bg-[#…]`）。
 - 行動端的 UI task → **驗收指令寫成開 iOS 模擬器的那一條**（`npx expo start --dev-client --ios`、`flutter run -d ios`……，以 `CLAUDE.md` 或 `docs/architecture/tech-stack.md` 的「約束與慣例」為準），並加跑 `test:smoke`（`docs/architecture/testing.md` 有這條時）。不要寫成 `npx expo start` 讓執行的 agent 自己選平台——它會選到沒裝模擬器的那一個然後卡住。Android 專屬的行為（返回鍵、權限對話框差異）才另外開一個 task 標明要用 Android 驗。
-- **會新增或升級原生依賴的 task**（例如裝 Google 登入、IAP、原生推播 SDK；判斷方式見 tech-stack 的 `references/mobile.md`）→ 驗收第一步是重建 binary（Expo：`npx expo run:ios`），再在模擬器啟動、看到首頁。JS 測試與 typecheck 對這類錯誤全綠，只有真的開 App 才會崩。
+- **會新增或升級原生依賴的 task**（例如裝 Google 登入、IAP、原生推播 SDK；判斷方式照 `docs/architecture/tech-stack.md` 的約束與慣例，沒寫的話：套件目錄下有 `ios/`、`android/`、`*.podspec`、`expo-module.config.json` 或 `app.plugin.js` 其中之一，就是原生依賴）→ 驗收第一步是重建 binary（Expo：`npx expo run:ios`），再在模擬器啟動、看到首頁。JS 測試與 typecheck 對這類錯誤全綠，只有真的開 App 才會崩。
 - 專案的開發指令還是 Expo Go（沒有 `expo-dev-client`，`dev` 是 `expo start --ios`），而這個 feature 會引入原生依賴 → **排一個前置 task 切到 dev build**：裝 `expo-dev-client`、改 `dev` / `ios` scripts、更新 `CLAUDE.md` 的開發指令，驗收是 `npx expo run:ios` 後 App 開得起來。放在引入原生依賴的那個 task 之前。
 - **每個 task 的驗收都隱含包含「受影響的既有測試不能壞」**，這條寫在執行協議裡，不用每個 task 重複。全套測試不在每個 task 跑，留給交付前（`/git:push` 或 `/impl:verify`）。
 

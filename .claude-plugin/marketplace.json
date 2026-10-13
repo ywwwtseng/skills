@@ -11,21 +11,21 @@
       "name": "domain",
       "source": "./domain",
       "description": "領域建模：business-rules 從問題與功能描述推導可驗證的 business rules（docs/domain/business-rules/<主題>.md）；model 把規則累積成概念層 domain model，依聚合分檔輸出 docs/domain/model/<聚合>.md；feedback 收齊實作階段累積的上游回饋，分類後路由回對應 skill 修正，並追 BR → model → schema → task 的漣漪；review 逐條審查一份規則文件（含 AI 另外寫好的），一次只拿一條給使用者裁定，附判斷（出處 / 邊界 / 衝突 / 牽動），裁定後把整份文件的連帶修改一次改完；br-review-gate hook 在規則文件還沒 /domain:review 審過時擋下對原始碼的寫入（可用影響範圍限縮）",
-      "version": "0.8.0",
+      "version": "0.9.0",
       "category": "productivity"
     },
     {
       "name": "arch",
       "source": "./arch",
       "description": "架構決策：/arch:tech-stack 透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/architecture/tech-stack.md；/arch:init 依該文件初始化專案骨架與工具鏈；/arch:test-strategy 決定規則類型 → 測試層的對照並建好測試資料庫與分層指令，輸出 docs/architecture/testing.md，開發中的專案（含零測試）先盤點現況、依風險補特徵測試",
-      "version": "0.12.0",
+      "version": "0.13.0",
       "category": "productivity"
     },
     {
       "name": "db",
       "source": "./db",
       "description": "資料庫設計：schema 把 docs/domain/model/ 的概念層 domain model 轉成可實作的資料庫 schema，輸出 docs/db/schema.md（table、欄位型別、鍵、索引、約束、不變量落點、遷移順序）；migrate 依該文件算出與現況的 diff、產生可回滾的 migration 與 ORM schema、只對本機或開發資料庫套用並驗證，破壞性變更拆成 expand-migrate-contract 並只產檔不執行",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "category": "productivity"
     },
     {
@@ -39,7 +39,7 @@
       "name": "impl",
       "source": "./impl",
       "description": "實作執行：ship 是外層總調度，維護 docs/impl/backlog.md 的 feature 佇列並一輪推進一步（判斷階段 → 呼叫一個 skill → 回寫狀態）；plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍；fix 是 plan 之外的修復迴路，先分流是實作問題還是規則缺漏，再用 regression test 釘住 bug 並修 root cause；refactor 收齊被禁止順手改的技術債（plan 備註、verify 的 low findings、fix 發現但沒修的），在測試保護下做行為不變的改善，不准改測試",
-      "version": "0.14.0",
+      "version": "0.15.0",
       "category": "productivity"
     },
     {
@@ -67,7 +67,7 @@
       "name": "docs",
       "source": "./docs",
       "description": "文件整理：tidy 替 docs/ 瘦身但不改寫任何規則的語意——已合併 feature 的 plan.md 把做完的 task 收成一行（保留來源與 commit，漣漪仍追得到）、verification.md 與舊 audit 報告移到 docs/archive/、被整段貼到下游文件的規則內文改成引用 ID、找出懸空引用與孤兒元素等過時內容列成清單一次問完；做完、搬走、改引用是機械性的直接做，過時與否由人裁定，上游文件的內容變更交回各自的 skill",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "productivity"
     }
   ]
