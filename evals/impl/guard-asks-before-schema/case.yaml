@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: guard-asks-before-schema
+description: 沒下指令卻要改 prisma/schema.prisma 時，direct-push-guard 要求確認（無人看守時視同拒絕）：schema 不變、一般程式檔照常寫入、回覆建議 /db:migrate
+tags: [hook, guard]
+context:
+  scaffold_script: scaffold.sh

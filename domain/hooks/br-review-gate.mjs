@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// business rules review gate（PreToolUse：Write / Edit / MultiEdit / NotebookEdit）
+// business rules review gate（PreToolUse：Write / Edit / MultiEdit / NotebookEdit / Bash）
 //
 // 規則：business rules 在開始實作前必須經過一次 /domain:review。
 // 本 hook 把這條從「靠模型自律」改成機械檢查：
@@ -13,12 +13,14 @@
 // 不擋：任何 .md / .mdx 檔、docs/ 與 .claude/ 底下、專案目錄以外的檔案。
 // 沒有 docs/domain/business-rules/ 的專案：完全不檢查。
 //
-// 擋不到的：用 Bash 寫檔（sed -i、cat >、腳本）。這是防忘記的閘，不是防繞過的閘：
-//   模型直接把狀態改成「已審查」或自己補影響範圍，hook 分不出來。
+// Bash：用 bash-targets.mjs 找出指令會寫入的檔案（重導向、tee、sed -i、cp / mv、rm、touch…）再套同樣的判斷。
+// 擋不到的：腳本內部寫檔（python -c、node -e、npm script）、git apply / patch。這是防忘記的閘，不是防繞過的閘：
+//   模型直接把狀態改成「已審查」或自己補影響範圍，hook 也分不出來。
 // 失敗方向：hook 本身出錯（讀不到輸入、例外）一律放行（fail open），不讓壞掉的閘卡住所有工作。
 
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import { bashWriteTargets } from './bash-targets.mjs';
 
 const RULES_DIR = path.join('docs', 'domain', 'business-rules');
 const HEADER_LINES = 15;
@@ -148,9 +150,15 @@ function main() {
     allow();
   }
   const ti = input.tool_input ?? {};
-  const filePath = ti.file_path ?? ti.notebook_path;
   const projectDir = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
-  const reason = evaluate(projectDir, filePath);
+  if (input.tool_name === 'Bash') {
+    for (const target of bashWriteTargets(ti.command ?? '', input.cwd || projectDir)) {
+      const reason = evaluate(projectDir, target);
+      if (reason) deny(`${reason}\n（這次是 Bash 指令要寫入該檔案；改用別的指令或腳本寫入同樣會被擋。）`);
+    }
+    allow();
+  }
+  const reason = evaluate(projectDir, ti.file_path ?? ti.notebook_path);
   if (reason) deny(reason);
   allow();
 }

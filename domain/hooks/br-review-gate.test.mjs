@@ -96,6 +96,24 @@ test('整支 hook：擋下時輸出 deny JSON，放行時沒有輸出', () => {
   assert.equal(allowed.stdout, '');
 });
 
+test('整支 hook：Bash 寫入範圍內的檔案也會被擋', () => {
+  const dir = project({ 'order.md': `${pending}\n> 影響範圍：\`src/orders/**\`` });
+  const run = (command) =>
+    spawnSync('node', [HOOK], {
+      input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', cwd: dir, tool_input: { command } }),
+      env: { ...process.env, CLAUDE_PROJECT_DIR: dir },
+      encoding: 'utf8',
+    });
+  for (const cmd of ["cat > src/orders/cancel.ts <<'EOF'\nexport {}\nEOF", "sed -i 's/a/b/' src/orders/order.ts", 'cd src/orders && touch x.ts']) {
+    const r = run(cmd);
+    assert.equal(JSON.parse(r.stdout).hookSpecificOutput.permissionDecision, 'deny', cmd);
+    assert.match(r.stdout, /Bash/);
+  }
+  for (const cmd of ['npm test 2>&1 | tail', 'echo x > src/billing/a.ts', 'cat src/orders/order.ts', 'echo x > docs/note.md']) {
+    assert.equal(run(cmd).stdout, '', cmd);
+  }
+});
+
 test('整支 hook：輸入壞掉 → 放行（fail open）', () => {
   const r = spawnSync('node', [HOOK], { input: 'not json', encoding: 'utf8' });
   assert.equal(r.status, 0);
