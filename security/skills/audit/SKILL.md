@@ -14,7 +14,7 @@ disable-model-invocation: true
 
 - **輸入**：目前的 repo（工作目錄 + git 歷史）、lockfile、IaC 檔、Dockerfile 與本機已建好的 image。
 - **輸出**：對話中的 Security Audit Report（格式見 `references/report.md`）。原始 JSON 放在 repo 外的暫存目錄。
-- **不做**：修程式碼、`npm audit fix` / 升級套件、改 Terraform、刪 secrets、改寫 git 歷史、`git commit`。修補交給使用者或 `/impl:fix`。
+- **不做**：修程式碼、`npm audit fix` / 升級套件、改 Terraform、刪 secrets、改寫 git 歷史、`git commit`。修補交給 `/security:fix`（照報告逐條問、修、commit、記錄）。
 
 ## 核心規則
 
@@ -95,6 +95,8 @@ disable-model-invocation: true
 **歷史裡找到的 secret 一律列在最前面**，修法固定是「先到服務商撤銷並換發，再考慮改寫歷史」——刪檔案或改寫歷史都救不回已經外流的 key。
 
 使用者要求存檔時，才寫成 `docs/security/audit-<YYYY-MM-DD>.md`，並提醒：這份檔案列出了尚未修補的弱點，公開 repo 不該 commit 它。
+
+有任何 finding 時，報告最後加一行：「要逐條修復，跑 `/security:fix`——它會每條先問你、修完直接 commit，並把處理結果記回報告（報告會存成 `docs/security/audit-<YYYY-MM-DD>.md`）。」
 
 最後刪掉 `$OUT`，或告訴使用者它在哪裡、裡面有未遮蔽的路徑資訊。
 

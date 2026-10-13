@@ -93,6 +93,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | git | push | `/git:push [base]` | 不走 `/impl:ship` 時的交付出口：確認在 base branch 上且工作區乾淨、`fetch` 後落後就 `rebase origin/<base>`（只重排沒推出去的 commit，衝突就 abort 停下）、跑全套閘門（typecheck / lint / 全部測試 / build，有畫面加 `test:smoke`——直推沒有 PR 與合併前 CI，這是唯一的閘門，所以不用 `test:affected`）、檢查外送 diff 的 secrets 與 build 產物、`git push origin HEAD:<base>`（不 force，被 branch protection 擋就建議 `/git:pr`），推完用 `gh run watch` 看 base 上的 CI，紅了建議 `/impl:fix` 不自動 revert |
 | git | pr | `/git:pr [--merge] [base]` | **只給 `/impl:ship` 用**的交付出口，其他情況用 `/git:push`；把 feature 的 commit 變成可審查的 PR：commit 留在預設分支時先安全搬到 `feat/<feature>`（先建分支確認 commit 都在，再把本地 base 指回 `origin/<base>`，全程不 reset / rebase / cherry-pick）、跑驗證閘門（有 `verification.md` 就採信其 verdict，`fail` 直接停；沒有就實跑 typecheck / lint / test / build）、檢查外送 diff 有沒有 secrets 與 build 產物、`push -u` 後用 `gh` 開 PR，body 帶 task 表 / BR 覆蓋表 / 驗收結果 / 待處理 / 審查重點；plan 還有未完成 task 或有 findings 就開 draft；加 `--merge`（一人開發的無人看守模式，`/impl:verify` 是唯一閘門）時，在「非 draft + verdict 為 `pass` + CI 綠 + 無衝突 + 無 CHANGES_REQUESTED」全部成立下用 `--rebase --delete-branch` 合併（保留每個 task 的還原點，不 squash），再 `switch` 回 base 並 `pull --ff-only`，讓下一個 feature 從乾淨起點開始；沒有 `--merge` 就只開 PR，不 force push、不推預設分支 |
 | security | audit | `/security:audit`（僅手動執行，不會自動載入） | 依序跑五類掃描再由 Claude 分析：Secrets（Gitleaks，掃 git 全部歷史與工作目錄，一律 `--redact`）→ Dependencies（依 lockfile 選 npm / pnpm / yarn / bun audit，非 JS 專案用 Trivy fs）→ Source Code（Semgrep，`--metrics=off`、不用 `--config auto`）→ IaC（Trivy config，含 Terraform 與 tfvars）→ Docker（Trivy image，只掃本機已有的 image，不自動 build）→ Review（統一嚴重度、合併重複、**每條 HIGH 以上都打開原始碼確認**、誤報移到「已排除」，判「上游已有保護」時必須指出那道檢查的檔案行號並讀過實作，講不出利用路徑的（缺 header、一般性 DoS 等）寫進「其他觀察」而不列 finding、依框架列出全部對外入口後依風險深讀，照九類清單人工檢查掃描器看不到的問題（IDOR / mass assignment / RLS、JWT 與 session、跨檔案注入、SSRF / open redirect / CSRF / CORS / webhook 驗簽、檔案上傳、前端算的金額 / 負數 / 狀態跳步 / race condition、資料外洩、可預測的 token），再從六個攻擊者角度找信任缺口（失敗路徑、模組間隱含的信任、解析不一致、資訊洩漏、自稱的身分、驗過的物件與實際使用的不同），有 LLM 功能時加查模型輸出當不可信輸入、prompt 不是權限邊界、prompt injection、agent 權限、RAG 分租戶、無上限呼叫，有 business rules 時拿權限與約束規則當正確答案，報告寫明入口總數與深讀數），輸出 CRITICAL / HIGH / MEDIUM / LOW 計數、掃描涵蓋表（沒跑的標 `skipped`，絕不寫成「未發現問題」）與逐條 finding（File / Source / Fix；程式碼類 HIGH 以上另附 CWE、根因、證據鏈、對照、反證、證據缺口、升降條件與回歸測試寫法，可直接交給 `/impl:fix`）；原始報告放 repo 外的暫存目錄；只讀不改，不跑 `npm audit fix`、不 commit |
+| security | fix | `/security:fix`（僅手動執行，不會自動載入） | 照 `/security:audit` 的報告逐條修復：依「建議處理順序」一次拿一條，**動手前用 `AskUserQuestion` 問**（`修` / `跳過` / `之後再說` / `誤報`，Other 輸入「停」結束；指令後可事先帶處理方式，例如 `/security:fix 1 修 2 跳過`），選「修」就先寫報告裡的回歸測試並確認它失敗、做最小修改、確認測試通過且既有測試與 typecheck 沒壞，然後**直接 commit**（一條一個 `fix(security): …` commit，只 stage 這一條動到的檔案，報告檔不進 commit）並接著問下一條；驗收沒過就還原這一條的改動、標 `修復失敗`。套件漏洞升到報告寫的版本（major 先講明）、工作目錄的 secret 改讀環境變數、git 歷史裡的 secret 只記錄使用者是否已到服務商撤銷換發（不改寫歷史）、IaC 只改檔不套用。每條處理完立刻寫回報告檔：最前面的「處理紀錄」表（狀態 / commit / 回歸測試 / 日期）與每條底下的「處理」區塊，中斷後再跑會從沒處理完的接著做；沒有人能回答時不修任何東西。不 push（收尾建議 `/git:push`，再跑一次 `/security:audit` 驗證）；紀錄格式在 `security/skills/fix/references/record.md` |
 | docs | tidy | `/docs:tidy`（僅手動執行，不會自動載入） | 替 `docs/` 瘦身但**不改寫任何規則的語意**，只做收合、搬移（`git mv` 到 `docs/archive/`）、改成引用三種動作，三類各一個 commit 後 `/git:push`：(1) **做完的東西**——只碰**已合併**的 feature（backlog `done`，或直推流程下 plan 全 `done` 且最後一個 commit 已在 `origin/<base>`），進行中的一行都不動；`plan.md` 的 `done` task 收成一張表（ID / 標題 / **來源** / commit / 狀態——保留來源讓 `/domain:feedback` 的漣漪仍追得到，被標回 `todo` 的列先由 `/impl:plan` 展開再實作），`verification.md`、`debt.md` 已處理的列、舊的 audit 報告移到 `docs/archive/`；移走前先把備註裡的技術債與 `low` findings 追加進 `debt.md`，否則 `/impl:refactor` 再也掃不到；上游回饋表整張不動；(2) **互相複製**——依擁有者表（規則歸 business-rules、元素歸 model、table 歸 schema、端點歸 contract），用重複行偵測找出被整段貼到下游的內文，一字不差的改成 ID 加一行摘要，內容已分岔的不改、交給第 3 類；執行協議等刻意的重複不動；(3) **過時內容**——懸空引用、孤兒元素、分岔的複本、「舊版 / 已棄用」段落，附 `git log -S` 證據用 `AskUserQuestion` 一次問完，裁定後 `docs/impl/` 自己改、上游文件交回 `/domain:business-rules`、`/domain:model`、`/db:schema`、`/api:contract`、`/ui:screens`；報告整理前後行數，單檔仍過大的建議拆檔（不在本 skill 範圍）；偵測腳本在 `docs/skills/tidy/references/detect.md`、格式在 `formats.md` |
 
 ## 結構
@@ -109,7 +110,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ├── impl/                             # 實作執行：ship、plan、feature、verify、fix、refactor
 ├── ui/                               # UI：screens、tonal-ui、calm-ui
 ├── git/                              # git 工作流：commit、push、pr
-├── security/                         # 資安掃描：audit
+├── security/                         # 資安：audit、fix
 ├── docs/                             # 文件整理：tidy
 ├── evals/                            # 行為測試，見「測試 skill 的行為」
 └── <plugin>/
@@ -122,7 +123,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 
 ## 測試 skill 的行為
 
-`domain` 與 `impl` 有用 `claude plugin eval` 寫的行為測試，放在 repo 根目錄的 `evals/<plugin>/`。每個情境會在空白環境開一個 Claude Code session，只載入受測的 plugin 與它宣告的依賴（寫在每個情境 `prompt.md` 的 `plugins:`），送出一句使用者會講的話，再檢查 Claude 做了什麼（產生了哪些檔案、檔案內容、有沒有呼叫對的 skill、有沒有停下來）。同一個情境預設跑 3 次，並對照不裝 plugin 的結果，差距（`Δ`）就是 plugin 的貢獻。
+`domain`、`impl`、`security` 有用 `claude plugin eval` 寫的行為測試，放在 repo 根目錄的 `evals/<plugin>/`。每個情境會在空白環境開一個 Claude Code session，只載入受測的 plugin 與它宣告的依賴（寫在每個情境 `prompt.md` 的 `plugins:`），送出一句使用者會講的話，再檢查 Claude 做了什麼（產生了哪些檔案、檔案內容、有沒有呼叫對的 skill、有沒有停下來）。同一個情境預設跑 3 次，並對照不裝 plugin 的結果，差距（`Δ`）就是 plugin 的貢獻。
 
 | Plugin | 情境 | 檢查什麼 |
 |---|---|---|
@@ -133,6 +134,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | impl | `plan-writes-plan` | 規則已審查時產出 plan.md：有執行協議、`T-001`、上游狀態、兩條 BR 都在規則覆蓋表、驗收是可執行的指令，且沒有改產品程式碼 |
 | impl | `ship-preflight-stops` | 沒有 origin、沒有 tech-stack 時 `/impl:ship` 在起飛前檢查就停，不建 backlog、不排 plan、不寫程式碼 |
 | impl | `guard-asks-before-schema` | 沒下指令要改 `prisma/schema.prisma` 與一般程式檔：schema 沒被改（無人看守時確認視同拒絕）、一般程式檔照常寫入、回覆建議 `/db:migrate` |
+| security | `fix-waits-for-consent` | 沒有人回答確認問題時，`/security:fix` 不改任何程式碼、不新增測試，兩條 finding 都記成 `待處理` |
 
 **什麼時候跑**：改了 `domain` 或 `impl` 的 SKILL.md、references、hook 之後，升版本號之前跑一次；換新模型之後也值得跑一次。
 
