@@ -50,6 +50,13 @@
       "category": "design"
     },
     {
+      "name": "motion",
+      "source": "./motion",
+      "description": "動效：取自 Emil Kowalski 的 animation skills（MIT）——animate 依序決定要不要動、目的、工具、屬性、曲線與時長、中斷與退場後寫出 web 動畫；animate-expo 是 React Native / Expo 版（Reanimated、Gesture Handler、haptics）；animation-performance 找掉幀原因；review-animations 用嚴格標準審查動畫程式碼（只手動執行）；improve-animations 稽核整個 codebase 的動效並寫成可交辦的修正計畫；find-animation-opportunities 找該動與不該動的地方；animation-vocabulary 把模糊描述對應到動效術語。只管動效，視覺風格交給 /ui:tonal-ui 或 /ui:calm-ui",
+      "version": "0.1.0",
+      "category": "design"
+    },
+    {
       "name": "git",
       "source": "./git",
       "description": "git 工作流：commit 檢視變更、把待提交內容切成多個邏輯變更，逐一建立 Conventional Commit 格式的 commit 直到沒有可提交的檔案，不推送；push 是日常交付出口，在 base branch 上跑全套閘門、檢查外送 diff 後直推，再看 base 上的 CI；pr 只給 /impl:ship 用，把 feature 的 commit 移到分支、跑驗證閘門、push 並開帶追溯表的 pull request，加 --merge 時在 CI 綠且 verdict 為 pass 後以 rebase 合併並切回 base branch",

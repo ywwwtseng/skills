@@ -1,0 +1,19 @@
+{
+  "name": "motion",
+  "description": "動效：取自 Emil Kowalski 的 animation skills（MIT）——animate 依序決定要不要動、目的、工具、屬性、曲線與時長、中斷與退場後寫出 web 動畫；animate-expo 是 React Native / Expo 版（Reanimated、Gesture Handler、haptics）；animation-performance 找掉幀原因；review-animations 用嚴格標準審查動畫程式碼（只手動執行）；improve-animations 稽核整個 codebase 的動效並寫成可交辦的修正計畫；find-animation-opportunities 找該動與不該動的地方；animation-vocabulary 把模糊描述對應到動效術語。只管動效，視覺風格交給 /ui:tonal-ui 或 /ui:calm-ui",
+  "version": "0.1.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "motion",
+    "animation",
+    "easing",
+    "spring",
+    "react-native",
+    "expo",
+    "reanimated",
+    "performance",
+    "emil-kowalski"
+  ]
+}

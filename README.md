@@ -108,6 +108,7 @@ docs/
 /plugin install api@skills
 /plugin install impl@skills
 /plugin install ui@skills
+/plugin install motion@skills
 /plugin install git@skills
 /plugin install security@skills
 /plugin install docs@skills
@@ -183,6 +184,13 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | ui | screens | `/ui:screens` | 把規則、模型與契約轉成畫面規格，依畫面分檔輸出 `docs/ui/screens/<畫面>.md` + 含畫面地圖與導航規則的 `README.md`：每個畫面的用途、進入點、顯示什麼（逐項追溯到模型元素）、可觸發哪些命令（對應端點與權限）、版面骨架；**狀態是規格的主體**——逐條走完通用狀態（初次載入 / 空：從來沒有 vs 篩選後沒結果要分開 / 錯誤 / 部分失敗 / 權限不足 / 資料已被刪除）、表單狀態（送出中 / 送出失敗要保留使用者填的內容 / 重複送出對應冪等鍵）、以及行動端特有的離線、送出中斷網、弱網、背景喚醒後過期、推播與深連結進入的返回堆疊、系統權限被拒、鍵盤遮擋、登入過期；契約的每個錯誤碼都要有畫面行為（出現在哪 / 訊息 / 使用者能做什麼）；動作不可用時在隱藏 / disabled 加說明 / 可按才報錯之間三選一並寫理由；每份畫面規格標明所屬介面；不做視覺設計（顏色字級間距交給該介面選定的 `/ui:tonal-ui` 或 `/ui:calm-ui`）；細則在 `ui/skills/screens/references/`（`states.md`、`template.md`） |
 | ui | tonal-ui | `/ui:tonal-ui`（也會自動載入；`/impl:feature` 做 UI task 時會明確呼叫） | **console・後台／內部系統**的視覺語言：中性黑白灰色票與偏密字級、膠囊按鈕、中性深色主色（ink），框線盡量少用——頂端列、側邊導覽、內容區共用一片淺灰殼不畫線，白色面板浮在上面；橘色只給連結與唯一的強調色塊。做新畫面、新元件、改版或 design review 時套用；token 在 `ui/skills/tonal-ui/references/tokens.css`（Tailwind v4 `@theme` 與 `:root` 兩版） |
 | ui | calm-ui | `/ui:calm-ui`（也會自動載入；`/impl:feature` 做 UI task 時會明確呼叫） | **消費級 AI-native 產品**（使用者端 web 與 mobile）的視覺與互動語言：深色優先、極少裝飾，資訊層級靠排版與留白而不是卡片與框線；核心是「智慧用行為表達」——主動偵測、已完成的工作、明確的下一步，而不是發光球體、紫藍漸層、閃亮圖示、機器人圖示這些 AI 陳腔濫調；介面要三秒內回答「什麼需要我注意 / Agent 在做什麼 / 它需要我做什麼決定」；含 Agent Feed 首頁（不是 widget 牆）、輕量對話（不是每則訊息一張卡片）、任務的「已完成 / 進行中 / 接下來」（不是 Jira）、八種 Agent 狀態、通知、3–4 項導航的版型與文案，以及改版時「最後才處理顏色」的 13 步順序；排版參考企業級產品（ChatGPT、Claude、Linear、Notion 這一類）的共通點——三種欄寬（閱讀欄 720）、每頁同一個「頁首 → 區塊」結構、一條左緣、一個畫面最多三種字級且用途固定、間距從垂直節奏表查、數字與中文排版規則、四個斷點，細則在 `layout.md`；**同一個介面內跟 `/ui:tonal-ui` 二選一不可混用，同一個專案的不同介面可以各用一套**；token 在 `ui/skills/calm-ui/references/tokens.css`、版面在 `layout.md`、版型在 `patterns.md` |
+| motion | animate | `/motion:animate`（也會自動載入） | 從零做一個 web 動畫，照順序決定：要不要動（依使用頻率，鍵盤觸發與一天 100 次以上的一律不動）→ 目的 → 最便宜的工具（CSS transition → `@starting-style` → CSS animation → WAAPI → Motion）→ 只動 `transform` / `opacity` → 曲線與時長（UI 一律 300ms 內、不用 `ease-in`）或 spring → 可中斷與退場；reduced motion 與 hover 限定一起交付；常見元件的寫法在 `RECIPES.md` |
+| motion | animate-expo | `/motion:animate-expo`（也會自動載入） | `animate` 的 React Native / Expo 版：Reanimated 不用核心 `Animated`、動畫留在 UI thread（手勢與捲動裡不 `setState`）、手指碰過的一律用 spring、換頁與 sheet 用原生 stack、haptics 每個動作一次且跟畫面同一幀；感覺只在 release build 與最慢的支援機型上判斷 |
+| motion | animation-performance | `/motion:animation-performance`（也會自動載入） | 動畫掉幀時先說出原因再改：動到 layout 屬性、主執行緒忙、React 每幀 re-render、繼承的 CSS 變數、`blur()` 過大，`will-change` 擺最後 |
+| motion | review-animations | `/motion:review-animations`（僅手動執行，不會自動載入） | 用十條硬標準審查動畫程式碼，預設挑錯；輸出 Before / After / Why 表與 Block / Approve 判定 |
+| motion | improve-animations | `/motion:improve-animations`（也會自動載入） | 稽核整個 codebase 的動效（偵察 → 八類稽核 → 自己複查 → 等你選），把選中的寫成 `plans/` 底下可交給任何 agent 執行的修正計畫；不改原始碼 |
+| motion | find-animation-opportunities | `/motion:find-animation-opportunities`（也會自動載入） | 找還沒動但該動的地方，每個候選都要過頻率 / 目的 / 時長 / 功能四關，最多 5–7 條，並列出刻意不建議的地方；不改原始碼 |
+| motion | animation-vocabulary | `/motion:animation-vocabulary`（也會自動載入） | 把「popover 從按鈕長出來那種」這類模糊描述對應到正確的動效術語 |
 | git | commit | `/git:commit` | 檢視 `git status` / `git diff`，把待提交內容切成多個邏輯變更，逐一 stage（絕不 `git add -A` / `.` / `-u`，排除 `node_modules`、`dist`、`.env`、secrets）並建立 Conventional Commit 格式的 commit，直到沒有可提交的檔案，不 push |
 | git | push | `/git:push [base]` | 不走 `/impl:ship` 時的交付出口：確認在 base branch 上且工作區乾淨、`fetch` 後落後就 `rebase origin/<base>`（只重排沒推出去的 commit，衝突就 abort 停下）、跑全套閘門（typecheck / lint / 全部測試 / build，有畫面加 `test:smoke`——直推沒有 PR 與合併前 CI，這是唯一的閘門，所以不用 `test:affected`）、檢查外送 diff 的 secrets 與 build 產物、`git push origin HEAD:<base>`（不 force，被 branch protection 擋就建議 `/git:pr`），推完用 `gh run watch` 看 base 上的 CI，紅了建議 `/impl:fix` 不自動 revert |
 | git | pr | `/git:pr [--merge] [base]` | **只給 `/impl:ship` 用**的交付出口，其他情況用 `/git:push`；把 feature 的 commit 變成可審查的 PR：commit 留在預設分支時先安全搬到 `feat/<feature>`（先建分支確認 commit 都在，再把本地 base 指回 `origin/<base>`，全程不 reset / rebase / cherry-pick）、跑驗證閘門（有 `verification.md` 就採信其 verdict，`fail` 直接停；沒有就實跑 typecheck / lint / test / build）、檢查外送 diff 有沒有 secrets 與 build 產物、`push -u` 後用 `gh` 開 PR，body 帶 task 表 / BR 覆蓋表 / 驗收結果 / 待處理 / 審查重點；plan 還有未完成 task 或有 findings 就開 draft；加 `--merge`（一人開發的無人看守模式，`/impl:verify` 是唯一閘門）時，在「非 draft + verdict 為 `pass` + CI 綠 + 無衝突 + 無 CHANGES_REQUESTED」全部成立下用 `--rebase --delete-branch` 合併（保留每個 task 的還原點，不 squash），再 `switch` 回 base 並 `pull --ff-only`，讓下一個 feature 從乾淨起點開始；沒有 `--merge` 就只開 PR，不 force push、不推預設分支 |
@@ -203,6 +211,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ├── api/                              # 介面契約：contract
 ├── impl/                             # 實作執行：ship、plan、feature、verify、fix、refactor
 ├── ui/                               # UI：screens、tonal-ui、calm-ui
+├── motion/                           # 動效：取自 emilkowalski/skills，來源與同步方式見 motion/UPSTREAM.md
 ├── git/                              # git 工作流：commit、push、pr
 ├── security/                         # 資安：audit、fix
 ├── docs/                             # 文件整理：tidy
