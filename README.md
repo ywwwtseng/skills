@@ -57,6 +57,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | domain | model | `/domain:model`（也會自動載入） | 把 `docs/domain/business-rules/` 的 business rules 累積成一套概念層 domain model（實體 / 值物件 / 列舉 / 不變量 / 關聯 / 狀態機 / 命令 / 領域事件），每個元素追溯到規則 ID；規則依功能分檔、模型依聚合分檔，輸出 `docs/domain/model/<聚合>.md` + `shared.md` + `README.md`；只做領域概念、不做 table / 欄位 / 索引等 DB schema；對應細則在 `domain/skills/model/references/mapping.md` |
 | domain | review | `/domain:review` | 逐條審查一份 business rules 文件（`/domain:business-rules` 產出的，或 AI / 他人另外寫好、格式不一的），先審會牽動大量規則的決策題，再依序一條一條用 `AskUserQuestion` 給使用者裁定（確認 / 修改 / 刪除 / 待確認），每題附 Claude 的判斷：出處、邊界、與其他規則的衝突、這個決定會牽動哪些章節；使用者回答選項以外的內容時當作修改，先說連帶影響再寫；裁定後立刻寫回，並在整份文件搜尋把同一個決定的連帶修改一次改完；被否決的概念從正文完全移除、歷史只留在變更紀錄；決定開出新漏洞時提問而不自己補規則；每 10 條停一次，可中斷續審（狀態 `審查中`）；全部裁定完把文件標成 `已審查`，`/impl:plan` 只接受這個狀態，而且**每份只審一次**，已審查的文件不再審；不改 model / schema / 程式碼 |
 | domain | feedback | `/domain:feedback` | 把實作階段累積在 `docs/impl/*/plan.md` 與 `verification.md` 的「上游回饋」一次收齊（**全部 feature**，同一問題跨檔去重）、逐條分類成規則矛盾 / 規則缺漏 / 模型缺概念 / schema 缺欄位或落點錯 / 誤報，不需裁定的直接呼叫 `/domain:business-rules`、`/domain:model`、`/db:schema` 補，需要產品決策的整理成清單一次問完（不在第一條就停下來等人），再順著 `BR → model → schema → task` 追漣漪，把受影響且已 `done` 的 task 標回 `todo`；狀態寫回原處不另開總帳、不自己編規則、不自己改上游文件 |
+| domain | br-review-gate（hook） | 自動：每次 Write / Edit / MultiEdit / NotebookEdit 前執行，不用呼叫 | 把「實作前必須經 `/domain:review` 審一次」從靠模型自律改成機械檢查：`docs/domain/business-rules/` 有狀態不是 `已審查`（舊格式 `已確認` 視同已審查）的文件時，擋下對原始碼的寫入並請 Claude 停下、建議先跑 `/domain:review`；文件標頭寫了 `> 影響範圍：\`src/orders/**\`` 就只擋範圍內的檔案，沒寫或寫 `未定` 就擋所有原始碼；`.md` / `.mdx`、`docs/`、`.claude/`、專案外的檔案不擋，沒有規則目錄的專案完全不檢查。**擋不到 Bash 寫檔**（`sed -i`、`cat >`），也分不出模型自己把狀態改成 `已審查`——這是防忘記的閘，不是防繞過的閘；hook 本身出錯一律放行。程式與測試在 `domain/hooks/`（`node --test domain/hooks/br-review-gate.test.mjs`） |
 | arch | tech-stack | `/arch:tech-stack` | 多輪問答選型 frontend / mobile / backend / database / infra、架構模式與 **UI 風格**（**依介面**各選 `tonal-ui` / `calm-ui` / 既有設計系統，預設 console → tonal-ui、使用者端 web 與 mobile → calm-ui；同一個介面內兩套互斥，所以在這裡寫成「介面路徑 → 風格」對照），輸出 `docs/architecture/tech-stack.md`；UI 風格對照同時進「約束與慣例」第一條，有 App 時再加一條「行動端本機開發預設開 iOS 模擬器」並附該技術棧的開發指令；選 Expo 時一律用 dev build 不用 Expo Go，新增或升級原生依賴後先重建 binary（Expo Go 裡沒有專案自己的原生模組，一啟動就崩，而 JS 測試全綠） |
 | arch | init | `/arch:init` | 讀 `docs/architecture/tech-stack.md`，把專案實際建起來：repo 骨架、官方 scaffold 指令、lint / test / 型別檢查、`.env.example`、CI、`CLAUDE.md` 約束段落（**UI 風格對照那一條一定要寫進去**——`CLAUDE.md` 每個 session 自動載入，視覺語言 skill 被觸發前答案就已在 context 裡）、有 UI 時把各介面選定那套的 design token 落成 theme（先有 token 再有第一個畫面），最後跑一次 typecheck / lint / test / build 驗證；不 commit、不建雲端資源、不寫 secrets；scaffold 指令表在 `arch/skills/init/references/scaffold.md` |
 | arch | test-strategy | `/arch:test-strategy` | 決定「哪一類規則用哪一層測試驗」並把那一層的環境建起來，輸出 `docs/architecture/testing.md`：規則類型 → 測試層對照（**落點是 DB 約束的不變量一定打真的測試資料庫**，權限與契約錯誤碼從 HTTP 進去驗，E2E 只走關鍵流程，**有畫面就一定有冒煙層**：打包 + 真的 binary 啟動看到首頁）、`test:unit` / `test:integration` / `test:e2e` / `test:smoke` / `test:affected`（日常驗收只跑受影響的，全部留給 `/git:push` 與 verify）指令、測試資料庫隔離（交易回滾 / worker schema / 測試容器，只允許本機或容器）、fixture 慣例、mock 邊界、CI 步驟，並把測試慣例寫進 `CLAUDE.md`；三種模式——新專案（只定策略建環境）、開發中已有測試（盤點現況找分層差距）、開發中零測試（先建框架，再由外往內補特徵測試）；先跑既有測試量基準、紅的就停，依風險補而不追覆蓋率，新測試連跑兩次（第二次打亂順序）都綠才算；不改產品程式碼、不改或搬既有測試、不換框架、不修 bug——補測試時發現與 BR 不符的記成「疑似缺陷」交 `/impl:fix`，不寫成斷言現況的測試把 bug 鎖死；`/impl:plan`、`/impl:feature`、`/impl:verify` 依 `testing.md` 決定與檢查測試層級；細則在 `arch/skills/test-strategy/references/`（`layers.md`、`template.md`） |
@@ -85,7 +86,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ```
 .
 ├── .claude-plugin/marketplace.json   # 列出所有 plugin，source 指向分類資料夾
-├── domain/                           # 領域建模：business-rules、review、model、feedback
+├── domain/                           # 領域建模：business-rules、review、model、feedback；hooks/ 放 review gate
 ├── arch/                             # 架構決策：tech-stack、init、test-strategy
 ├── db/                               # 資料庫設計：schema、migrate
 ├── api/                              # 介面契約：contract
@@ -97,6 +98,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 └── <plugin>/
     ├── .claude-plugin/plugin.json    # plugin 名稱、版本
     ├── commands/<command>.md         # slash command（可選）
+    ├── hooks/hooks.json              # hook 註冊（可選，啟用 plugin 就自動載入）
     ├── skills/<skill-name>/SKILL.md  # skill 本體（可選）
     └── skills/<skill-name>/references/
 ```

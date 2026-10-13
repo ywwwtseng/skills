@@ -99,7 +99,7 @@ options:
 
 ### Step 4：輸出文件
 
-寫入 `docs/domain/business-rules/<slug>.md`，格式見 `references/template.md`。新檔的狀態寫 `待審查`（核心規則 9）。
+寫入 `docs/domain/business-rules/<slug>.md`，格式見 `references/template.md`。新檔的狀態寫 `待審查`（核心規則 9）。標頭的「影響範圍」只填指得出的既有程式碼路徑（或使用者明說的路徑），指不出來就寫 `未定`；這一行決定 review gate hook 在審完前擋哪些檔案（見模板說明）。
 
 若檔案已存在，用 `AskUserQuestion` 單獨問一題（同樣每個選項要寫影響）：「合併：新增與修改規則，保留其餘 (Recommended)」/「覆蓋」/「另存為 `<slug>-YYYY-MM-DD.md`」。合併時保留既有 ID，新規則接續編號，被修改的規則在「變更紀錄」列出。狀態維持原值：原本 `已審查` 的仍是 `已審查`（審查只做一次），原本 `待審查` / `審查中` 的不變。
 
@@ -108,7 +108,7 @@ options:
 1. 摘要規則數量（各類別幾條）與假設數量
 2. 列出最需要使用者確認的 3 個假設（含 ID）
 3. 提醒可再呼叫本 skill 針對某條規則或某個例外情境擴充
-4. 狀態是 `待審查` 時，提醒開始實作前必須先跑一次 `/domain:review`
+4. 狀態是 `待審查` 時，提醒開始實作前必須先跑一次 `/domain:review`；審完之前，影響範圍內的原始碼寫入會被 review gate hook 擋下（範圍 `未定` 時是全部原始碼）
 
 ## 判斷準則
 
