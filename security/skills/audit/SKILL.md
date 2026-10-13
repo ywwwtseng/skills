@@ -1,6 +1,6 @@
 ---
 name: audit
-description: 對目前專案依序跑一輪安全掃描再由 Claude 分析結果——Secrets（Gitleaks，含 git 歷史）→ Dependencies（npm / pnpm / yarn / bun audit，非 JS 專案用 Trivy fs）→ Source Code（Semgrep，關閉 metrics）→ IaC（Trivy config，含 Terraform / Kubernetes / Dockerfile）→ Docker（Trivy image）→ Review（讀程式碼排除誤報、合併重複、統一嚴重度、再依入口清單人工檢查掃描器看不到的存取控制、業務邏輯、SSRF、認證與資料外洩），最後輸出 CRITICAL / HIGH / MEDIUM / LOW 計數與逐條 finding（檔案:行號、套件、修法）。只由使用者以 /security:audit 手動執行，不會被自動觸發。本 skill 只掃描與回報，不修程式、不升級套件、不改設定、不 commit。
+description: 對目前專案依序跑一輪安全掃描再由 Claude 分析結果——Secrets（Gitleaks，含 git 歷史）→ Dependencies（npm / pnpm / yarn / bun audit，非 JS 專案用 Trivy fs）→ Source Code（Semgrep，關閉 metrics）→ IaC（Trivy config，含 Terraform / Kubernetes / Dockerfile）→ Docker（Trivy image）→ Review（讀程式碼排除誤報、合併重複、統一嚴重度、再依入口清單人工檢查掃描器看不到的存取控制、業務邏輯、SSRF、認證、資料外洩與 AI / LLM 功能，並從攻擊者角度找信任缺口），最後輸出 CRITICAL / HIGH / MEDIUM / LOW 計數與逐條 finding（檔案:行號、套件、修法）。只由使用者以 /security:audit 手動執行，不會被自動觸發。本 skill 只掃描與回報，不修程式、不升級套件、不改設定、不 commit。
 disable-model-invocation: true
 ---
 
@@ -28,6 +28,7 @@ disable-model-invocation: true
 8. **套件漏洞以「是否被用到」調整，不以「是否存在」刪除。** dev-only、不可達的漏洞可以降級並註明理由，但不能從報告消失。
 9. **不自己裝工具。** 缺工具時用 `AskUserQuestion` **一次問完**：列出缺哪些、安裝指令（`references/tools.md`）、選項是「我裝好了，繼續」/「跳過這幾項」。無人看守（例如包在 `/loop` 裡跑）時不問，直接標 `skipped`。
 10. **不自動 build image。** `docker build` 會執行 Dockerfile 裡的任意指令。本機已經有這個專案的 image 才掃；沒有就問要不要 build，無人看守時標 `skipped`。
+11. **列一條要舉證，放過一條也要舉證。** 判「上游已經擋了」要指出那道檢查的 `檔案:行號`，而且讀過它的實作；部分路徑有擋、隔壁入口有擋、預設為空的白名單都不算擋住（`references/review.md`「放過也要舉證」）。證明不了就列成信心 `中` 並寫缺什麼，不要當成沒事。反過來，講不出具體利用路徑的「類別存在」不列 finding（`references/review.md`「預設不報」）。
 
 ## 流程
 
@@ -75,19 +76,21 @@ disable-model-invocation: true
 2. **合併重複**：同一個檔案同一行被兩個工具報，合成一條，來源寫兩個。同一個套件漏洞被 npm audit 和 Trivy image 都報，合成一條。
 3. **逐條確認 HIGH / CRITICAL**（核心規則 7）：打開檔案讀前後文。判定：
    - `確認` → 保留
-   - `誤報`（測試 fixture、文件裡的範例 key、已被參數化的查詢）→ 移到報告末尾「已排除」段，寫一句理由
-   - `只在測試 / 開發環境` → 降一級並註明
+   - `誤報`（測試 fixture、文件裡的範例 key、已被參數化的查詢）→ 移到報告末尾「已排除」段，寫一句理由；理由是「已經有檢查」時要寫出那道檢查的 `檔案:行號`（核心規則 11）
+   - `只在測試 / 開發環境` → 降一級並註明；判斷靠 repo 證據（有沒有進 build、被 CI / 排程 / route 引用），不靠資料夾名稱
 4. **套件漏洞看可達性**（核心規則 8）：是直接還是間接依賴、是不是 devDependency、有沒有修補版本、升級是 patch 還是 major。
-5. **補掃描器看不到的**：照 `references/review.md` 做人工檢查。先列出**全部**對外入口（依框架找 route、server action、controller），再依風險深讀：金額 → 認證 → 帶資源 ID 的寫入 → 檔案 → 對外請求 → 管理後台。對每個深讀的入口走九類清單：存取控制（IDOR、mass assignment、RLS）、認證與 session、注入、請求偽造與重導（SSRF、open redirect、CSRF、CORS、webhook 驗簽）、檔案上傳、業務邏輯（前端算的金額、負數、狀態跳步、race condition）、資料外洩、密碼學與隨機、設定。另外確認 `.env*` 有被 `.gitignore` 擋住。
+5. **補掃描器看不到的**：照 `references/review.md` 做人工檢查。先列出**全部**對外入口（依框架找 route、server action、controller），再依風險深讀：金額 → 認證 → 帶資源 ID 的寫入 → 檔案 → 對外請求 → LLM / agent → 管理後台。對每個深讀的入口走九類清單（A–I）：存取控制（IDOR、mass assignment、RLS）、認證與 session、注入、請求偽造與重導（SSRF、open redirect、CSRF、CORS、webhook 驗簽）、檔案上傳、業務邏輯（前端算的金額、負數、狀態跳步、race condition）、資料外洩、密碼學與隨機、設定；再從六個攻擊者角度（J）過一遍：失敗路徑、隱含的互相信任、解析不一致、洩漏內部資訊、自稱的身分、驗的與用的不同。專案有呼叫 LLM、組 prompt、讓 agent 使用工具或做 RAG 時，加走 K（模型輸出當不可信輸入、prompt 不是權限邊界、prompt injection、agent 權限、RAG 分租戶、無上限呼叫）。另外確認 `.env*` 有被 `.gitignore` 擋住。
 
    有 `docs/domain/business-rules/` 時，權限與約束類規則就是正確答案，逐條對照 handler 有沒有真的擋。
 
    找到的標來源 `Claude review` 與信心（`高`：從入口讀到 sink 且確認中間沒有檢查；`中`：檢查可能在沒讀到的地方）。只讀入口到資料存取這條路徑，不通讀整個 repo；報告寫明入口總數與深讀了幾個。
-6. **每條 finding 寫修法**：一句話、可執行（升到哪一版、改成參數化查詢、CIDR 收窄到什麼）。
+6. **找到一個，回頭找同類。** 同一個 helper、同一種寫法的其他呼叫點逐一確認，成立的位置全部列出（`references/review.md`「信心與證據」）。
+7. **每條 finding 寫修法**：一句話、可執行（升到哪一版、改成參數化查詢、CIDR 收窄到什麼）。程式碼類的 HIGH 以上再補根因、證據、反證、升降條件、CWE 與一條回歸測試寫法（`references/report.md`）。
+8. **講不出利用路徑的**（缺 header、一般性 DoS、沒有串接影響的 open redirect…）不列 finding，寫進報告的「其他觀察」（`references/review.md`「預設不報」）。
 
 ### Step 7：輸出報告
 
-照 `references/report.md` 的格式在對話中輸出。順序：總計 → 掃描涵蓋 → findings（CRITICAL 到 LOW）→ 已排除 → 建議的處理順序。
+照 `references/report.md` 的格式在對話中輸出。順序：總計 → 掃描涵蓋 → findings（CRITICAL 到 LOW）→ 已排除 → 其他觀察 → 建議的處理順序。
 
 **歷史裡找到的 secret 一律列在最前面**，修法固定是「先到服務商撤銷並換發，再考慮改寫歷史」——刪檔案或改寫歷史都救不回已經外流的 key。
 
@@ -98,7 +101,7 @@ disable-model-invocation: true
 ## 判斷準則
 
 - `references/tools.md`：各工具的安裝指令、依版本區分的掃描指令、JSON 欄位怎麼摘要、各工具嚴重度對照 CRITICAL / HIGH / MEDIUM / LOW 的規則（Step 0–6 必讀）
-- `references/review.md`：人工檢查的入口清單做法（依框架）、深讀順序、九類檢查項目（每項的找法、成立條件、預設嚴重度）、信心與證據的標準（Step 6.5 必讀）
+- `references/review.md`：人工檢查的入口清單做法（依框架）、深讀順序、九類檢查項目（每項的找法、成立條件、預設嚴重度）、攻擊者角度（J）、AI / LLM 功能（K）、預設不報、信心與證據、放過也要舉證（Step 6.5 必讀）
 - `references/report.md`：報告格式與範例、已排除段與掃描涵蓋表的寫法（Step 7 必讀）
 
 ## 常見失敗模式
@@ -117,3 +120,8 @@ disable-model-invocation: true
 | 沒列入口清單就開始挑檔案讀 | 漏掉的永遠是沒想到的那個 route（`references/review.md`） |
 | 人工檢查只看了三個 route，報告寫「未發現授權問題」 | 沒深讀的入口不算檢查過；要寫「入口 N 個，深讀 M 個」（核心規則 5） |
 | Semgrep 乾淨就跳過業務邏輯 | 前端算的金額、負數、race condition，掃描器一條都抓不到 |
+| 「上游有 middleware，應該有擋」就不列 | 沒讀過那道檢查的實作，不知道它擋不擋得住這個輸入（核心規則 11） |
+| 隔壁的 route 有檢查擁有者，所以這個也沒問題 | 安全的鄰居只能當對照，證明這裡少了，不能拿來放過這裡 |
+| 報告列了 12 條「缺少 rate limit」「缺少 header」 | 講不出利用路徑的類別會淹沒真正要修的那幾條，寫進「其他觀察」 |
+| 權限只寫在 system prompt 裡，報告沒提 | prompt 可以被注入繞過，權限要在程式碼裡擋（`references/review.md` K） |
+| finding 的根因寫「第 42 行有 SQL injection」 | 那是位置不是根因；要寫被破壞的規則與破壞它的程式碼 |
