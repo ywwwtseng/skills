@@ -2,6 +2,91 @@
 
 ywwwtseng 的個人 Claude Code plugins。
 
+## 核心概念
+
+這套 plugin 想解決一件事：**讓 AI 從「我想要一個取消訂單的功能」一路做到程式碼上線，而且每一步都有依據、出錯時查得到是哪一步錯。**
+
+做法只有一個原則：**每一步的結果都寫成文件，下一步只照文件做，不靠對話裡的記憶。** 對話會被壓縮、session 會中斷、換一台電腦就什麼都沒了；文件不會。
+
+### 一個例子：加「取消訂單」功能
+
+```mermaid
+flowchart LR
+  A["你說：<br/>買家可以取消訂單"] --> B["規則文件<br/>待審查"]
+  B -->|你逐條確認| C["規則文件<br/>已審查"]
+  C --> D["模型 / schema / API 契約"]
+  D --> E["實作計畫 plan.md"]
+  E --> F["程式碼<br/>一個 task 一個 commit"]
+  F --> G["稽核 verification.md"]
+  G --> H["推上去"]
+```
+
+1. **你只描述問題**：「買家下單後可以取消，已出貨的不行，取消要退款。」`/domain:business-rules` 把它推導成一條一條可以驗證的規則，你沒講到的地方（部分出貨算不算已出貨？）寫成「假設」，文件標成 `待審查`。
+2. **你逐條確認**：`/domain:review` 一次拿一條問你，確認、修改或刪除。全部看過才變成 `已審查`。**沒審過的規則不能拿去寫程式**——裡面有 AI 自己補的假設。
+3. **往下展開設計**：規則變成概念模型（`/domain:model`）、資料表（`/db:schema`）、API 格式（`/api:contract`）、畫面規格（`/ui:screens`）。每一份都標明它來自哪一條規則。
+4. **排計畫**：`/impl:plan` 把設計切成一個個做得完、驗得了的小任務，每個任務寫好「改哪些檔案、怎麼驗收」。
+5. **一個一個做**：`/impl:feature` 每次只做一個任務，做完跑測試、commit，再做下一個。中途斷掉，新的 session 讀 plan.md 就知道做到哪。
+6. **交付前稽核**：`/impl:verify` 逐條檢查每條規則有沒有測試在驗，最後推上去。
+
+整條可以一個一個指令手動跑，也可以 `/loop /impl:ship` 讓它自己一路跑完。
+
+### 四種文件，各放各的
+
+借用「來源 / 規則 / 範本 / 輸出」的分法，這套 plugin 在專案裡是這樣分的：
+
+| 區域 | 是什麼 | 在專案的哪裡 | AI 怎麼用 |
+|---|---|---|---|
+| **來源** | 事實：你說的需求、現有程式碼、審過的規則 | `docs/domain/business-rules/`（`已審查` 的）、程式碼本身 | 當作正確答案。AI 不能自己改規則；實作時發現規則有問題，記成「上游回饋」交回 `/domain:feedback` 讓你決定 |
+| **規則** | AI 該怎麼做事 | 各個 skill 本身、`CLAUDE.md`（交付流程、UI 風格對照）、`docs/architecture/tech-stack.md` 的約束與慣例 | 照著做。最重要的幾條另外用 hook 機械檢查（見下方） |
+| **範本** | 文件長什麼樣子 | 各 skill 的 `references/template.md` | 只學結構與格式，內容一律來自來源 |
+| **輸出** | 每一步的產物 | `docs/domain/model/`、`docs/db/schema.md`、`docs/api/contract.md`、`docs/ui/screens/`、`docs/impl/<feature>/plan.md`、`verification.md`、`docs/security/audit-*.md`、git commit | 上一步的輸出就是下一步的來源，所以每份都標明它依據哪一條規則，出錯時可以一路往回追 |
+
+跟一般「把資料分資料夾放」最大的不同是**關卡**：輸出不會自動變成下一步的來源。規則文件要從 `待審查` 變成 `已審查` 才能拿去實作；實作計畫要每個任務都 `done` 才進稽核；稽核要 `pass` 才能合併。
+
+一個專案跑過一輪之後，`docs/` 大概長這樣：
+
+```
+docs/
+├── domain/
+│   ├── business-rules/order-cancellation.md   ← 你確認過的規則（來源）
+│   └── model/order.md                          ← 概念模型
+├── architecture/
+│   ├── tech-stack.md                           ← 技術選擇與約束（規則）
+│   └── testing.md                              ← 哪類規則用哪層測試
+├── db/schema.md                                ← 資料表設計
+├── api/contract.md                             ← API 格式與錯誤碼
+├── ui/screens/                                 ← 畫面規格
+├── impl/
+│   ├── backlog.md                              ← 要做的 feature 佇列（/impl:ship）
+│   └── order-cancellation/
+│       ├── plan.md                             ← 實作計畫與進度
+│       └── verification.md                     ← 稽核結果
+└── security/audit-2026-10-13.md                ← 安全報告與修復紀錄（不要 commit 到公開 repo）
+```
+
+### 重要的規則不靠 AI 記得
+
+寫在文件裡的規則，AI 有時候會忘。最怕出錯的幾條，另外用 hook 在 AI 寫檔前自動檢查：
+
+| 保護 | 擋什麼 | 擋法 |
+|---|---|---|
+| review gate（domain） | 規則還沒審過就開始寫程式 | 直接擋下，請 AI 先建議你跑 `/domain:review` |
+| 直推 guard（impl） | 你沒下指令，AI 卻要改資料庫、API 格式或規則文件 | 跳出確認，由你決定放不放行 |
+| 修復前確認（`/security:fix`） | 安全修復沒經過你同意就動手 | 每一條修之前都問你，沒人回答就不改 |
+
+這些都是「防忘記」，不是「防故意繞過」——AI 真要繞（例如自己把狀態改成 `已審查`）還是做得到，所以審查本身仍然要你來。
+
+### 每一步都留得下來
+
+- 每個實作任務、每條安全修復都各自一個 commit，出問題可以精確回溯是哪一步造成的。
+- 文件裡記的是「現在的狀態」，git 記的是「怎麼變成這樣」。
+- 平常的小改動直接推上去；只有 `/impl:ship` 走開分支、開 PR 的完整流程（見「交付流程」）。
+
+### 不適合用在哪
+
+- 一次性的小腳本、試驗性的 prototype：寫規則、審查、排計畫的成本比直接寫還高。
+- 規則還在劇烈變動、你自己也還沒想清楚的功能：先把想法聊清楚，再進 `/domain:business-rules`。
+
 ## 安裝
 
 在 Claude Code 中：
