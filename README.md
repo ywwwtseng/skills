@@ -24,7 +24,7 @@ flowchart LR
 1. **你只描述產品**：「賣家刊登二手書，買家下單付款；賣家三天內沒出貨就自動取消退款；MVP 先不做評價和聊天。」`/domain:business-rules` 依主題拆成幾份規則文件——`listing.md`（刊登）、`order.md`（下單與狀態）、`payment.md`（付款與退款）、`account.md`（註冊登入）——每份都是一條一條可以驗證的規則。你沒講到的地方（同一本書兩個人同時下單誰拿到？退款要退運費嗎？）寫成「假設」，文件標成 `待審查`。
 2. **你逐條確認**：`/domain:review` 一次拿一條問你，確認、修改或刪除。全部看過才變成 `已審查`。**沒審過的規則不能拿去寫程式**——裡面有 AI 自己補的假設。MVP 的範圍也在這一步定下來：「不做評價」會寫進文件的「不包含」，之後不會被順手做出來。
 3. **選技術、建骨架**：`/arch:tech-stack` 一題一題問你要用什麼技術，寫成 `tech-stack.md`；`/arch:init` 照它把專案建起來；`/arch:test-strategy` 決定哪類規則用哪一層測試驗。
-4. **往下展開成一套設計**：所有規則文件一起變成**一套**概念模型（`/domain:model`，依聚合分檔：`book`、`order`、`payment`）、**一份**資料表設計（`/db:schema`）、**一份** API 格式（`/api:contract`）、各畫面的規格（`/ui:screens`）。不是一份規則對一份設計：訂單和付款共用同一張表、同一組錯誤碼。每個元素都標明它來自哪一條規則。
+4. **往下展開成一套設計**：所有規則文件一起變成**一套**概念模型（`/domain:model`，依聚合分檔：`book`、`order`、`payment`）、**一份**資料表設計（`/db:schema`）、**一份** API 格式（`/api:contract`）、各畫面的規格（`/ui:screens`），關鍵畫面再用 `/ui:preview` 做成看得到的確認稿、改到你點頭才往下。不是一份規則對一份設計：訂單和付款共用同一張表、同一組錯誤碼。每個元素都標明它來自哪一條規則。
 5. **排 feature 佇列**：`/impl:ship` 把規則文件排進 `backlog.md`，依相依決定順序——先帳號，再刊登，再下單與付款；伺服器端先於 App 端。
 6. **一個 feature 一個 feature 做**：每個 feature 由 `/impl:plan` 切成一個個做得完、驗得了的小任務，`/impl:feature` 每次只做一個任務，做完跑測試、commit；`/impl:verify` 逐條檢查每條規則有沒有測試在驗，通過才合併，然後取佇列的下一個。中途斷掉，新的 session 讀 `backlog.md` 和 `plan.md` 就知道做到哪。
 7. **上線之後照樣走這條路**：要加「買家可以在出貨前取消」，就是改 `order.md` 加一條規則、再審一次，模型、schema、API 跟著改，排進佇列做成下一個 feature。實作中發現規則寫錯，記成「上游回饋」交給 `/domain:feedback`，不在程式裡偷偷改。
@@ -64,6 +64,7 @@ docs/
 ├── db/schema.md                                ← 資料表設計
 ├── api/contract.md                             ← API 格式與錯誤碼
 ├── ui/screens/                                 ← 畫面規格
+├── ui/preview/                                 ← 你確認過的畫面截圖（UI 的驗收依據）
 ├── impl/
 │   ├── backlog.md                              ← 要做的 feature 佇列（/impl:ship）
 │   ├── listing/
@@ -182,6 +183,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | impl | fix | `/impl:fix` | plan 之外的修復迴路：先分流「規則說 A 程式做 B」（是 bug，修）/「規則沒寫這情況」（是缺規則，回 `/domain:business-rules`）/「程式照規則做但期望不同」（是規則變更），再寫一個**會紅的** regression test 釘住 bug（重現不出來就停，不准憑症狀猜）、找 root cause 而非症狀、做最小改動（不順手重構）、驗收新測試綠且受影響的既有測試不變紅、查一次同源問題（同一個 root cause 的其他呼叫點）、成因屬設計問題就開一條上游回饋，最後由 `/git:commit` 提交並把 root cause 與「既有測試為什麼沒抓到」寫進 body，單獨執行時再由 `/git:push` 直推（由 `/impl:ship` 調度時交回 ship）；動到超過 3 個檔案或要改介面就回 `/impl:plan` |
 | impl | refactor | `/impl:refactor` | 技術債的出口：`/impl:feature` 與 `/impl:fix` 都禁止順手改，那些被擋下來的東西全寫進備註後沒有人消費。本 skill 掃各 `plan.md` 的備註、`verification.md` 的 `low` findings、fix 報告裡「發現但沒修」的、程式碼的 TODO / FIXME，彙整成 `docs/impl/debt.md`（開總帳是刻意的——plan 的生命週期到 feature 做完為止，債是跨 feature 累積的），依 `收益 × 風險 × 有沒有測試保護` 排序後逐個執行。最硬的規則是**不准改測試**：既有測試全綠且 `git diff --stat` 裡看不到測試檔，才叫重構；要改測試才能過的那是改行為，退回 `/impl:plan`。沒有測試保護的標「需先補測試」不做（盲改）；一個重構一個 `refactor:` commit，body 寫收益、行為不變的證據與債的來源；**不進 `/impl:ship` 的自動迴圈**，人工觸發；債的分類與各自的安全改法在 `impl/skills/refactor/references/catalog.md` |
 | ui | screens | `/ui:screens` | 把規則、模型與契約轉成畫面規格，依畫面分檔輸出 `docs/ui/screens/<畫面>.md` + 含畫面地圖與導航規則的 `README.md`：每個畫面的用途、進入點、顯示什麼（逐項追溯到模型元素）、可觸發哪些命令（對應端點與權限）、版面骨架；**狀態是規格的主體**——逐條走完通用狀態（初次載入 / 空：從來沒有 vs 篩選後沒結果要分開 / 錯誤 / 部分失敗 / 權限不足 / 資料已被刪除）、表單狀態（送出中 / 送出失敗要保留使用者填的內容 / 重複送出對應冪等鍵）、以及行動端特有的離線、送出中斷網、弱網、背景喚醒後過期、推播與深連結進入的返回堆疊、系統權限被拒、鍵盤遮擋、登入過期；契約的每個錯誤碼都要有畫面行為（出現在哪 / 訊息 / 使用者能做什麼）；動作不可用時在隱藏 / disabled 加說明 / 可按才報錯之間三選一並寫理由；每份畫面規格標明所屬介面；不做視覺設計（顏色字級間距交給該介面選定的 `/ui:tonal-ui` 或 `/ui:calm-ui`）；細則在 `ui/skills/screens/references/`（`states.md`、`template.md`） |
+| ui | preview | `/ui:preview <畫面>`、`/ui:preview tweak <畫面>`（也會自動載入） | 在接資料、寫邏輯之前先看到畫面：照 `docs/ui/screens/<畫面>.md` 的狀態矩陣，把畫面做成**只吃 props 的正式元件**（不是丟掉的 mockup，之後 `/impl:feature` 只接資料）、每個狀態一組像真的假資料加一組最壞情況（超長名字、0 筆、999+），放進 dev-only 的 `/dev-preview/<畫面>?state=<狀態>` 路由；用 Playwright（Web：mobile 390 / desktop 1440，calm-ui 截深色）或 iOS 模擬器截每個狀態 × 寬度，先自己照視覺語言檢查清單與 safe area / 44pt 修掉明顯問題，再產生一頁對照圖用瀏覽器打開；照回饋迭代到你確認，確認稿鎖進 `docs/ui/preview/<畫面>/` 並寫紀錄（決定、例外、轉給 `/ui:screens` 的內容改動）。只改外觀：要多顯示一個欄位或多一個動作是規格改動，回 `/ui:screens`；「淡一點」換相鄰 token，不寫死色碼。`tweak` 對已實作的畫面做改前 / 改後對照。有裝 Figma MCP 時可選擇把畫面丟進 Figma 直接改、再讀回來翻成 token 層級的改動。`/impl:plan` 把有確認稿的畫面排成「接資料到已確認元件」，`/impl:feature`、`/impl:verify` 拿確認稿比對截圖；寫法與截圖指令在 `ui/skills/preview/references/setup.md` |
 | ui | tonal-ui | `/ui:tonal-ui`（也會自動載入；`/impl:feature` 做 UI task 時會明確呼叫） | **console・後台／內部系統**的視覺語言：中性黑白灰色票與偏密字級、膠囊按鈕、中性深色主色（ink），框線盡量少用——頂端列、側邊導覽、內容區共用一片淺灰殼不畫線，白色面板浮在上面；橘色只給連結與唯一的強調色塊。做新畫面、新元件、改版或 design review 時套用；token 在 `ui/skills/tonal-ui/references/tokens.css`（Tailwind v4 `@theme` 與 `:root` 兩版） |
 | ui | calm-ui | `/ui:calm-ui`（也會自動載入；`/impl:feature` 做 UI task 時會明確呼叫） | **消費級 AI-native 產品**（使用者端 web 與 mobile）的視覺與互動語言：深色優先、極少裝飾，資訊層級靠排版與留白而不是卡片與框線；核心是「智慧用行為表達」——主動偵測、已完成的工作、明確的下一步，而不是發光球體、紫藍漸層、閃亮圖示、機器人圖示這些 AI 陳腔濫調；介面要三秒內回答「什麼需要我注意 / Agent 在做什麼 / 它需要我做什麼決定」；含 Agent Feed 首頁（不是 widget 牆）、輕量對話（不是每則訊息一張卡片）、任務的「已完成 / 進行中 / 接下來」（不是 Jira）、八種 Agent 狀態、通知、3–4 項導航的版型與文案，以及改版時「最後才處理顏色」的 13 步順序；排版參考企業級產品（ChatGPT、Claude、Linear、Notion 這一類）的共通點——三種欄寬（閱讀欄 720）、每頁同一個「頁首 → 區塊」結構、一條左緣、一個畫面最多三種字級且用途固定、間距從垂直節奏表查、數字與中文排版規則、四個斷點，細則在 `layout.md`；**同一個介面內跟 `/ui:tonal-ui` 二選一不可混用，同一個專案的不同介面可以各用一套**；token 在 `ui/skills/calm-ui/references/tokens.css`、版面在 `layout.md`、版型在 `patterns.md` |
 | motion | animate | `/motion:animate`（也會自動載入） | 從零做一個 web 動畫，照順序決定：要不要動（依使用頻率，鍵盤觸發與一天 100 次以上的一律不動）→ 目的 → 最便宜的工具（CSS transition → `@starting-style` → CSS animation → WAAPI → Motion）→ 只動 `transform` / `opacity` → 曲線與時長（UI 一律 300ms 內、不用 `ease-in`）或 spring → 可中斷與退場；reduced motion 與 hover 限定一起交付；常見元件的寫法在 `RECIPES.md` |
@@ -210,7 +212,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 ├── db/                               # 資料庫設計：schema、migrate
 ├── api/                              # 介面契約：contract
 ├── impl/                             # 實作執行：ship、plan、feature、verify、fix、refactor
-├── ui/                               # UI：screens、tonal-ui、calm-ui
+├── ui/                               # UI：screens、preview、tonal-ui、calm-ui
 ├── motion/                           # 動效：取自 emilkowalski/skills，來源與同步方式見 motion/UPSTREAM.md
 ├── git/                              # git 工作流：commit、push、pr
 ├── security/                         # 資安：audit、fix

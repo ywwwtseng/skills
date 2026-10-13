@@ -115,7 +115,7 @@ description: 把 business rules、domain model 與 API 契約轉成畫面規格�
 3. 覆蓋統計：模型命令 N 個，能在畫面觸發 M 個（未落地逐條列原因）
 4. 最值得確認的 3 個流程假設
 5. 上游回饋（若有），建議跑 `/domain:feedback`
-6. 下一步：`/impl:plan` 讀本文件排 UI 的 task（驗收欄可以直接寫「在 X 狀態下顯示 Y」）；視覺套用各畫面所屬介面選定的那一套（`/ui:tonal-ui` 或 `/ui:calm-ui`）
+6. 下一步：新介面或關鍵畫面（首頁、onboarding、付款、狀態很多的畫面）先跑 `/ui:preview <畫面>` 做出看得到的確認稿，改到使用者確認；`/impl:plan` 讀本文件排 UI 的 task（驗收欄可以直接寫「在 X 狀態下顯示 Y」）；視覺套用各畫面所屬介面選定的那一套（`/ui:tonal-ui` 或 `/ui:calm-ui`）
 
 ## 判斷準則
 
