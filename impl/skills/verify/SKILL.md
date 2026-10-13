@@ -79,7 +79,7 @@ plan 的規則覆蓋表寫「未覆蓋 — <原因>」的，確認那個原因�
 
 1. **寫死的值**：對 diff 裡的畫面檔 grep 色碼與任意值（`#[0-9a-fA-F]{3,8}`、`rgb(`、`bg-[`、`text-[`、StyleSheet 裡的色碼字串），token 定義檔除外。有 → `medium`，接一個「改用 token」的 task。
 2. **混用**：同一個介面引用了另一套的 token 或元件（calm-ui 的介面出現淺色階梯與白卡片、tonal-ui 的介面出現近黑表面）→ `high`，接 task。
-3. **截圖對照**：Step 4 啟動時把這個 feature 的主要畫面截圖，逐項走該 skill 的交件前檢查清單；每一條不符合是一個 `medium` finding，附截圖路徑與條目（「首頁是四張卡片疊成的 widget 牆，違反 Agent Feed」），接一個「依 `/ui:<風格>` 修正 <畫面>」的 task。不要寫「不夠 calm」這種修不了的描述。
+3. **截圖對照**：畫面有 `docs/ui/preview/<畫面>.md`（狀態 `已確認`）時，先拿同狀態、同寬度的截圖跟 `docs/ui/preview/<畫面>/` 的確認稿比：版面、層級、間距、元件不一致是 `medium` finding（附兩張圖的路徑），接一個「依確認稿修正 <畫面>」的 task；紀錄「例外」表裡的項目不算 finding。沒有確認稿的畫面照下面做。Step 4 啟動時把這個 feature 的主要畫面截圖，逐項走該 skill 的交件前檢查清單；每一條不符合是一個 `medium` finding，附截圖路徑與條目（「首頁是四張卡片疊成的 widget 牆，違反 Agent Feed」），接一個「依 `/ui:<風格>` 修正 <畫面>」的 task。不要寫「不夠 calm」這種修不了的描述。
 
 ### Step 4：跑全套驗證
 

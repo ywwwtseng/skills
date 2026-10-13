@@ -9,7 +9,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 
 ## 定位：設計文件與程式碼之間的那一層
 
-- **輸入**：`docs/domain/business-rules/<feature>.md`（要做什麼、每條規則的驗收）、`docs/domain/model/`（概念與不變量）、`docs/db/schema.md`（table 與落點）、`docs/api/contract.md`（端點與錯誤碼，存在的話）、`docs/ui/screens/`（畫面與狀態，存在的話）、`docs/architecture/tech-stack.md`（技術選擇、約束與慣例、驗證指令），以及**既有程式碼**（目錄結構、既有 feature 的實作與測試慣例）。
+- **輸入**：`docs/domain/business-rules/<feature>.md`（要做什麼、每條規則的驗收）、`docs/domain/model/`（概念與不變量）、`docs/db/schema.md`（table 與落點）、`docs/api/contract.md`（端點與錯誤碼，存在的話）、`docs/ui/screens/`（畫面與狀態，存在的話）、`docs/ui/preview/`（`/ui:preview` 已確認的畫面元件與截圖，存在的話）、`docs/architecture/tech-stack.md`（技術選擇、約束與慣例、驗證指令），以及**既有程式碼**（目錄結構、既有 feature 的實作與測試慣例）。
 - **輸出**：單一檔案 `docs/impl/<feature>/plan.md`。一個 feature 一份；跨 feature 不合併，因為 plan 的生命週期到這個 feature 做完為止。
 - **不做**：寫產品程式碼、改上游文件、下 git 指令。本 skill 只產出 task 清單與執行協議，實作交給 `/impl:feature`，提交交給 `/git:commit`。
 
@@ -84,6 +84,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 - 測試層照 `docs/architecture/testing.md` 的分層對照：落點是 DB 約束的不變量、權限、契約錯誤碼，驗收要跑整合 / API 層的指令（`pnpm test:integration tests/integration/order.test.ts`），不要寫成 mock 掉資料庫的單元測試。沒有 `testing.md` 時照既有慣例，並在「上游狀態」記明。
 - 純型別 / 設定類的 task → `pnpm typecheck` 或 `pnpm build`。
 - UI task → 除了 typecheck，寫明用 `/run` 開起來要看到什麼畫面；有 `docs/ui/screens/` 時，驗收直接引用規格的狀態（「在空狀態顯示 X、在離線顯示 Y」），不要只寫「畫面正常」。
+- 畫面在 `docs/ui/preview/<畫面>.md` 有狀態 `已確認` 的紀錄 → 元件與假資料已經存在，UI task 改成「**把資料接到已確認的 `<元件>`**」（寫容器：抓資料、算出 `state`、接 callback），不要排「做畫面」的 task；「來源」加上 `docs/ui/preview/<畫面>.md`，「動到」不含元件本身；「看到什麼算過」寫成「各狀態截圖與 `docs/ui/preview/<畫面>/` 的確認稿一致（同狀態、同寬度；資料內容不同不算差異）」，紀錄裡的「例外」照紀錄的。紀錄是 `草稿` 或沒有紀錄的畫面照下一條排；這個 feature 有新介面或首頁、onboarding、付款這類關鍵畫面卻沒有確認稿 → 在摘要建議先跑 `/ui:preview`，不擋。
 - UI task 的「來源」**一定要寫所屬介面與視覺語言**（`介面：apps/web → /ui:calm-ui`，用到版型時加上 `patterns.md#Agent Feed` 這種指向）——這是 `/impl:feature` 決定要載入哪一套的唯一依據。「看到什麼算過」再加兩條：截圖逐項過該 skill 的交件前檢查清單；畫面檔的 diff 裡沒有寫死的色碼或任意值（`#RRGGBB`、`rgb(`、`bg-[#…]`）。
 - 行動端的 UI task → **驗收指令寫成開 iOS 模擬器的那一條**（`npx expo start --dev-client --ios`、`flutter run -d ios`……，以 `CLAUDE.md` 或 `docs/architecture/tech-stack.md` 的「約束與慣例」為準），並加跑 `test:smoke`（`docs/architecture/testing.md` 有這條時）。不要寫成 `npx expo start` 讓執行的 agent 自己選平台——它會選到沒裝模擬器的那一個然後卡住。Android 專屬的行為（返回鍵、權限對話框差異）才另外開一個 task 標明要用 Android 驗。
 - **會新增或升級原生依賴的 task**（例如裝 Google 登入、IAP、原生推播 SDK；判斷方式照 `docs/architecture/tech-stack.md` 的約束與慣例，沒寫的話：套件目錄下有 `ios/`、`android/`、`*.podspec`、`expo-module.config.json` 或 `app.plugin.js` 其中之一，就是原生依賴）→ 驗收第一步是重建 binary（Expo：`npx expo run:ios`），再在模擬器啟動、看到首頁。JS 測試與 typecheck 對這類錯誤全綠，只有真的開 App 才會崩。

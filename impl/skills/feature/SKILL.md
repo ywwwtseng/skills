@@ -79,7 +79,7 @@ plan 回答「照什麼順序做、做完怎麼算過」；本 skill 只回答�
    - `testing.md`「交付前全套會抓的改動」列出的共用模組
 
    動到其中任一項時，除了受影響測試，再跑一次這個改動最可能波及的測試檔（例如改 fixture → 用到它的幾個測試檔；改 migration → `db-invariants` 一類的約束測試），並在備註寫「動到共用的 X」，交付前的全套失敗時從這些 task 找起。
-3. UI 類的 task 依驗收欄的描述用 `/run` 實際開起來確認。**行動端預設開 iOS 模擬器**（指令以 `CLAUDE.md` 或 `docs/architecture/tech-stack.md` 的「約束與慣例」為準），除非該 task 的驗收明確指定 Android。「開起來」指的是 App 畫出首頁、沒有紅屏或 `Uncaught Error`——Metro 或模擬器起來不算。有 `test:smoke` 就跑它。畫得出來之後截圖，照該視覺語言 skill 的交件前檢查清單逐項看，不符合就修——這是驗收的一部分，不是之後再打磨的事。
+3. UI 類的 task 依驗收欄的描述用 `/run` 實際開起來確認。**行動端預設開 iOS 模擬器**（指令以 `CLAUDE.md` 或 `docs/architecture/tech-stack.md` 的「約束與慣例」為準），除非該 task 的驗收明確指定 Android。「開起來」指的是 App 畫出首頁、沒有紅屏或 `Uncaught Error`——Metro 或模擬器起來不算。有 `test:smoke` 就跑它。畫得出來之後截圖，照該視覺語言 skill 的交件前檢查清單逐項看，不符合就修——這是驗收的一部分，不是之後再打磨的事。task 來源有 `docs/ui/preview/<畫面>.md`（已確認）時，另外把每個狀態截成跟確認稿同寬度的圖，用 Read 並排比對 `docs/ui/preview/<畫面>/` 的確認稿：版面、層級、間距、元件要一樣，資料內容不同不算差異；不一樣就改容器或接法，**不要改已確認的元件外觀**——要改外觀是 `/ui:preview tweak` 的事，在備註寫明並回報。
 4. 這個 task 新增或升級了**原生依賴**（`git diff` 的 lockfile / `package.json` 裡有帶 `ios/`、`android/`、`*.podspec`、`expo-module.config.json` 的套件）→ 不論是不是 UI task，都要先重建 binary（Expo：`npx expo run:ios`）再啟動確認。舊 binary 或 Expo Go 裡沒有這個模組，App 會在 import 時就崩，而 typecheck 與 Jest 都看不到。開發指令還是 Expo Go 的話，這是 plan 漏排了切換 dev build 的前置 task：改 `blocked`，備註寫明，不要自己順手切。
 5. 沒過就修，修完重跑整組。試過 3 次仍無解 → 進 Step 6 的 `blocked` 分支（核心規則 10）。
 6. **如實回報**：修不掉就說修不掉，附上失敗指令與錯誤訊息，不要宣稱完成。
