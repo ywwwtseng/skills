@@ -271,6 +271,47 @@ function DangerConfirm({ open, title, children, actionLabel, confirmText, pendin
 - 觸發按鈕本身維持 `sec`（或列裡的 `ghost`），不要是紅色實心——紅色實心留給 Modal 裡真正執行的那顆。
 - 前置條件不滿足（例：AI 正在跑）時觸發按鈕 `disabled`，旁邊一行次要色說明原因。
 
+## 操作回饋
+
+每個操作都要有結果可看。照「結果出現在哪」選一種：就地、toast、畫面本身。不要就地 ✓ 又跳 toast。
+
+### 複製：就地換成 ✓
+
+```tsx
+function CopyButton({ text, label = '複製' }) {
+  const [state, setState] = useState<'idle' | 'done' | 'fail'>('idle');
+  useEffect(() => { if (state === 'idle') return; const t = setTimeout(() => setState('idle'), 1500); return () => clearTimeout(t); }, [state]);
+  async function copy() {
+    try { await navigator.clipboard.writeText(text); setState('done'); }
+    catch { setState('fail'); }                                    // 沒有剪貼簿權限：講出來，並讓使用者手動選
+  }
+  return (
+    <button type="button" onClick={copy} aria-label={label}
+      className={buttonVariants({ variant: 'ghost', size: 'sm' }) + ' active:scale-[0.97]'}>
+      {state === 'done' ? <CheckIcon className="size-4 text-ink" /> : <CopyIcon className="size-4" />}
+      <span aria-live="polite" className={state === 'idle' ? 'sr-only' : ''}>
+        {state === 'done' ? '已複製' : state === 'fail' ? '複製失敗' : ''}
+      </span>
+    </button>
+  );
+}
+```
+
+- 按鈕寬度在 idle 與「已複製」之間會變：只有圖示的版本用 tooltip 顯示「已複製」，或給文字預留寬度，不要讓旁邊的東西跳動。
+- 從選單項目複製：選單收起後就地看不到，改跳 toast「已複製〇〇」。
+
+### 開關、星號：樂觀更新，失敗退回
+
+```tsx
+const prev = value; setValue(!prev);                                  // 立刻變
+try { await save(!prev); } catch { setValue(prev); toast.error('沒有儲存成功', { action: { label: '重試', onClick: retry } }); }
+```
+
+### 刪除一列：先拿掉，toast 給復原
+
+能復原的刪除（軟刪除、延後送出）不跳確認 Modal：列立刻消失，toast「已刪除〇〇」附「復原」，約 5 秒後才真的送出。
+不可復原的照上方「破壞性確認」。
+
 ## 自製下拉（取代原生 select）
 
 - 觸發鈕是 `<button role="combobox">`，吃跟輸入框同一套基底樣式。
