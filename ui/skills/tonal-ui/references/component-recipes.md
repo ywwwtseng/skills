@@ -236,6 +236,41 @@ const avatarInitial = (s) => ([...(s || '')][0] || '').toUpperCase();
 
 動作列靠右：次要（sec）在左、主要（實心）在右。
 
+### 破壞性確認
+
+不可復原的動作一律走這個 Modal，不在原地展開輸入框。`confirmText` 只在影響範圍大時傳。
+
+```tsx
+function DangerConfirm({ open, title, children, actionLabel, confirmText, pending, error, onConfirm, onClose }) {
+  const [typed, setTyped] = useState('');
+  useEffect(() => { if (!open) setTyped(''); }, [open]);
+  const ready = !confirmText || typed.trim() === confirmText;
+  const close = pending ? undefined : onClose;          // 執行中關不掉（✕、背景、Esc 都一樣）
+  return (
+    <Modal open={open} onClose={close} labelledBy="danger-title">
+      <form className="flex flex-col gap-4 p-6.5" onSubmit={e => { e.preventDefault(); if (ready && !pending) onConfirm(); }}>
+        <h2 id="danger-title" className="text-2xl font-semibold text-ink">{title}</h2>   {/* 「重置 esign？」 */}
+        <div className="text-base leading-relaxed text-ink-2">{children}</div>          {/* 會失去什麼；最後一句「無法復原」 */}
+        {confirmText && (
+          <label className="flex flex-col gap-2 text-sm text-ink-2">
+            <span>輸入 <code className="font-mono text-ink">{confirmText}</code> 確認</span>
+            <input autoFocus value={typed} onChange={e => setTyped(e.target.value)} autoComplete="off" spellCheck={false} />
+          </label>
+        )}
+        {error && <p role="alert" className="text-sm text-danger">{error}</p>}           {/* 失敗留在 Modal 裡 */}
+        <div className="flex justify-end gap-2.5">
+          <button type="button" className={buttonVariants({ variant: 'sec' })} onClick={onClose} disabled={pending}>取消</button>
+          <button type="submit" className={buttonVariants({ variant: 'danger' })} disabled={!ready || pending}>{actionLabel}</button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+```
+
+- 觸發按鈕本身維持 `sec`（或列裡的 `ghost`），不要是紅色實心——紅色實心留給 Modal 裡真正執行的那顆。
+- 前置條件不滿足（例：AI 正在跑）時觸發按鈕 `disabled`，旁邊一行次要色說明原因。
+
 ## 自製下拉（取代原生 select）
 
 - 觸發鈕是 `<button role="combobox">`，吃跟輸入框同一套基底樣式。

@@ -398,7 +398,7 @@ Sign in with Apple、Sign in with Google 這類按鈕照**提供者的規範**�
 
 | 元件 | 尺寸 | 樣式 |
 |---|---|---|
-| 確認對話框 | 寬 `--dialog-width-sm`（480） | `--color-surface-elevated`、`--radius-lg`、內距 `--space-5`、`--shadow-overlay`；標題 heading、內文 body；按鈕列靠右，主要動作最右 |
+| 確認對話框 | 寬 `--dialog-width-sm`（480） | `--color-surface-elevated`、`--radius-lg`、內距 `--space-5`、`--shadow-overlay`；標題 heading、內文 body；按鈕列靠右，主要動作最右。**不可復原的動作一律用它（行動端用底部面板），不在原地展開確認區**；標題寫動作與對象、內文最後一句寫「無法復原」；影響範圍大時加輸入確認（輸入名稱或固定字才啟用確認鈕，開啟時游標在輸入框）；確認鈕用 danger 色、是唯一的實心按鈕；執行中關不掉，失敗留在對話框裡顯示 |
 | 內容對話框 | 寬 `--dialog-width-md`（640），高 ≤ 85vh | 同上；內容區自己捲動，標題與按鈕列固定 |
 | 選單 | 寬 200–280 | `--color-surface-elevated`、`--radius-md`、內距 `--space-1`；每項高 36、small |
 | 底部面板（行動） | 高 ≤ 90vh | 頂部圓角 `--radius-lg`、上方把手、`--shadow-sheet`；取代桌面的對話框與選單 |
@@ -467,6 +467,7 @@ Sign in with Apple、Sign in with Google 這類按鈕照**提供者的規範**�
 - [ ] 在有動態島的 iPhone（或模擬器）與有手勢列的 Android 上看過：頂端的按鈕都在狀態列下方、底部的按鈕都在 home indicator 上方？沒有寫死的 `top` / `bottom` 偏移？
 - [ ] 每個可點的東西點擊區 ≥ 44 × 44、彼此不重疊、不壓到系統 UI？
 - [ ] 每個看得到的按鈕都按得到？上面沒有透明層或沒卸載的 overlay？
+- [ ] 不可復原的動作是跳確認對話框（行動端底部面板）、不是在原地展開？確認鈕在最右、danger 色？
 - [ ] 把所有顏色換成灰階，層級還看得出來嗎？
 - [ ] 列上的動作（刪除、完成）是左滑露出的固定正方形、按了才執行？沒有在每一列放常駐的按鈕或勾選框？
 - [ ] 新增排版元素的「＋」只在編輯模式出現？
