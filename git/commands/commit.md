@@ -166,5 +166,6 @@ After the last commit, run `git log --oneline -<number of commits created>` and 
 - Each commit hash and message, in the order they were created.
 - Which files were included in each commit.
 - Any changes that were intentionally left uncommitted, and why.
+- That the commits are local only: to publish them run `/git:push`, which fetches and rebases onto the remote first so nothing already on it is lost. Do not run `git push` by hand, not even when the user later just says "push".
 
 Do not push. Do not amend previous commits.

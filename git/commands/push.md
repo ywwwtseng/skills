@@ -49,6 +49,8 @@ git fetch origin <base>
 - Local is behind or diverged → `git rebase origin/<base>`. This only replays commits that were never pushed, so no one else's history changes.
   - Conflicts → `git rebase --abort`, report the conflicting files, and stop. Do not resolve them here.
 
+Nothing that is already on the remote may disappear: commits and files pushed from another computer or by someone else must all be in the history that goes out. Before moving on, confirm `git merge-base --is-ancestor origin/<base> HEAD` succeeds; if it does not, stop and report instead of pushing. Never skip this step and run `git push` by hand, even when the local branch looks like it is simply ahead — only the fetch shows what the remote really has.
+
 ### 3. Gate: run the full suite
 
 Take the commands from `docs/architecture/testing.md`, otherwise the plan's validation table, otherwise `docs/architecture/tech-stack.md`, otherwise `package.json` scripts or the CI workflow. Run them on the rebased commits:
