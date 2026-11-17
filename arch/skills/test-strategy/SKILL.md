@@ -1,6 +1,6 @@
 ---
 name: test-strategy
-description: 決定專案「哪一類規則用哪一層測試驗」並把測試基礎設施建起來，輸出 docs/architecture/testing.md——規則類型 → 測試層對照表、測試資料庫與隔離方式、fixture / factory 慣例、mock 邊界、test:unit / test:integration / test:e2e / test:smoke 指令、CI 步驟，有畫面的專案一定建「App 開得起來」的冒煙測試；新專案、已有測試的開發中專案、完全沒有測試的開發中專案三種情況都能用，後兩者會先盤點現況、依風險補上保護網，其餘列成差距清單交給既有流程。當使用者說「測試策略」「測試要怎麼分層」「專案沒有測試」「補測試」「測試資料庫怎麼建」「整合測試 / E2E 怎麼做」「為什麼測試都綠但上線還是壞」「測試都過但 App 打開就壞 / 白屏 / 載入失敗」，或 /arch:init 之後、第一個 feature 開工之前、/impl:refactor 回報「需先補測試」時使用。本 skill 不改產品程式碼、不改既有測試、不修 bug。
+description: 決定「哪一類規則用哪一層測試驗」並建好測試基礎設施（測試資料庫、fixture、分層指令、冒煙測試、CI），輸出 docs/architecture/testing.md；新專案與開發中專案（含零測試）都能用。當使用者說「測試策略」「測試怎麼分層」「專案沒有測試」「補測試」「測試資料庫怎麼建」「整合測試 / E2E 怎麼做」「測試都綠但上線還是壞 / App 打開就白屏」，或 /arch:init 之後、第一個 feature 開工前、/impl:refactor 回報需先補測試時使用。不改產品程式碼與既有測試、不修 bug。
 ---
 
 # Test Strategy
@@ -72,25 +72,20 @@ Step 0 偵測後決定走哪一條，在報告裡寫明判定結果與依據：
 
 ### Step 1：決定分層策略
 
-建立「規則類型 → 測試層」對照表，這是 `testing.md` 的核心。依 `references/layers.md` 的預設，逐項走：
+建立「規則類型 → 測試層」對照表，這是 `testing.md` 的核心。逐項套 `references/layers.md` 的「規則類型 → 預設測試層」表：`docs/db/schema.md` 落點表的每一條不變量與並行策略、`docs/domain/model/` 的每個狀態機、BR 的每個類別、`docs/api/contract.md` 的每個錯誤碼（至少一條 API 層測試）、`docs/ui/screens/` 的關鍵流程與其餘狀態。另外兩項不靠上游文件：
 
-1. **不變量**：`docs/db/schema.md` 落點表的每一條。落點 DB → 整合層（真的資料庫）；落點應用層 → 單元層（模型）+ 至少一條整合層確認沒被繞過。
-2. **狀態機**：`docs/domain/model/` 的每個狀態機。合法與非法轉換在單元層；持久化後的狀態與並行轉換在整合層。
-3. **BR 類別**：計算 / 約束 → 單元層；權限 → API 層（要經過真的認證中介層）；時間 → 單元層並注入時鐘；副作用（寄信、推播、webhook）→ 整合層並替換外部邊界。
-4. **契約錯誤碼**：`docs/api/contract.md` 每個錯誤碼至少一條 API 層測試。
-5. **畫面狀態**：`docs/ui/screens/` 的關鍵流程（通常是每個 feature 的 happy path 加一個錯誤路徑）走 E2E；其餘狀態用元件測試。E2E 刻意少，因為它慢而且最容易不穩定。
-6. **啟動**：`tech-stack.md` 有 Web 或 App → 一定有冒煙層（打包 + 真的 binary / 瀏覽器啟動），不看有沒有 `docs/ui/screens/`。元件測試在 Node 裡 render，原生模組沒編進 binary、打包失敗、啟動時丟例外，其他層全綠照樣白屏。做法見 `references/layers.md` 的「冒煙測試做法」。
-7. **mock 邊界**：只替換「不是我們的、而且測試時不能真的呼叫」的東西——金流、寄信、第三方 API、系統時間。資料庫、自己的模組、自己的 HTTP 層一律不 mock。
+- **啟動**：`tech-stack.md` 有 Web 或 App → 一定有冒煙層，不看有沒有 `docs/ui/screens/`。做法見 `references/layers.md` 的「冒煙測試做法」。
+- **mock 邊界**：照 `references/layers.md` 的「mock 邊界」，資料庫、自己的模組、自己的 HTTP 層一律不 mock。
 
 沒有上游文件時從程式碼推：migration 裡的 `UNIQUE` / `CHECK` / 外鍵就是 DB 不變量，錯誤處理裡的錯誤碼就是契約，`if` 擋下來丟錯的就是約束規則。在 `testing.md` 標明「無上游文件，依程式碼推導」。
 
 ### Step 2：建測試基礎設施
 
-只建對照表用得到的層，不要預先把 E2E 搭好卻沒有任何 E2E 要寫。冒煙層例外：有畫面就建（Step 1 第 6 項）。
+只建對照表用得到的層，不要預先把 E2E 搭好卻沒有任何 E2E 要寫。冒煙層例外：有畫面就建（Step 1 的「啟動」）。
 
 1. **指令**：分層拆開，而且每一條都能單獨跑、能指定單一檔案。
-   - `test`：跑全部（CI、`/git:push` 推之前、`/impl:verify` 用這條）
-   - `test:affected`：只跑受這次改動影響的測試（`/impl:feature`、`/impl:fix` 每次驗收的「既有測試不能壞」用這條）。依工具選：Vitest `vitest run --changed origin/main`、Jest `jest --findRelatedTests $(git diff --name-only origin/main)`、pytest `pytest --testmon`、monorepo `turbo run test --filter=...[origin/main]` / `nx affected -t test`、Go 只跑改到的 package。找不到任何受影響的測試時要回報，不要默默綠
+   - `test`：跑全部（CI、`/impl:verify`、`/git:push` 在改版本號時用這條）
+   - `test:affected`：只跑受這次改動影響的測試（`/impl:feature`、`/impl:fix` 每次驗收的「既有測試不能壞」用這條）。各工具的指令見 `references/layers.md`。找不到任何受影響的測試時要回報，不要默默綠
    - `test:unit`、`test:integration`、`test:e2e`：依對照表需要才建
    - `test:smoke`：有畫面就建；不併進 `test`（要建置、要模擬器，會拖慢每個 task 的驗收）
    - 既有的 `test` 指令已經有人在用 → 保持它的語意（通常就是全部），新增的只加不改
@@ -121,7 +116,7 @@ Step 0 偵測後決定走哪一條，在報告裡寫明判定結果與依據：
 ### Step 5：驗證
 
 1. 每一條測試指令實跑。
-2. 全套連跑兩次，第二次打亂順序（Vitest `--sequence.shuffle`、pytest `-p random_order`、`go test -shuffle=on`，工具不支援就跑兩次）。兩次都要綠（核心規則 9）。不穩定的測試找出原因修掉（通常是共用資料、時間、順序依賴）；修不掉就刪掉並記進差距清單，不要留下。
+2. 全套連跑兩次，第二次打亂順序（旗標見 `references/layers.md`，工具不支援就跑兩次）。兩次都要綠（核心規則 9）。不穩定的測試找出原因修掉（通常是共用資料、時間、順序依賴）；修不掉就刪掉並記進差距清單，不要留下。
 3. `typecheck`、`lint` 不能因為新增的測試檔變紅。
 
 ### Step 6：收尾
@@ -141,19 +136,11 @@ Step 0 偵測後決定走哪一條，在報告裡寫明判定結果與依據：
 
 | 症狀 | 為什麼是錯的 |
 |---|---|
-| 基準有紅的，先修掉再開始 | 修 bug 不是本 skill 的工作，而且之後分不清哪條紅是誰造成的（核心規則 1） |
-| 為了好測，把 handler 裡的邏輯抽出來 | 在沒有保護網的情況下改產品程式碼，正是要避免的盲改（核心規則 2） |
-| 補測試時發現 bug，把斷言寫成現況讓它綠 | bug 被測試鎖死，之後修它的人會以為自己改壞了東西（核心規則 4） |
-| DB 唯一約束用 mock 的 repository 測 | 測到的是 mock，不是約束；上線照樣重複寫入（核心規則 6） |
-| 測試連到 `.env` 裡的開發共用資料庫 | 測試會清資料（核心規則 7） |
-| 模式 C 一口氣把整個專案補到 80% 覆蓋率 | 補的多半是好寫的測試，不是會壞的地方；風險區塊反而沒補到（核心規則 8） |
-| 新測試跑一次綠就收工 | 不穩定的測試會在無人看守時冒充成 bug（核心規則 9） |
-| 把既有的 mock 測試改成接真的 DB | 改了別人的測試；新增一條整合測試，舊的留著（核心規則 3） |
 | E2E 什麼都測 | 慢、不穩定、壞了難定位；E2E 只走關鍵流程 |
-| 沒有畫面規格所以不建任何 UI 層的測試 | 全部測試都綠，App 打開就崩——原生模組沒編進 binary、啟動丟例外，只有冒煙層抓得到（Step 1 第 6 項） |
+| 沒有畫面規格所以不建任何 UI 層的測試 | 全部測試都綠，App 打開就崩——原生模組沒編進 binary、啟動丟例外，只有冒煙層抓得到（Step 1 的「啟動」） |
 | Expo 專案的冒煙跑在 Expo Go 上 | Expo Go 不是會出貨的 binary：有自訂原生模組時假紅、沒有時假綠 |
 
 ## 參考
 
-- `references/layers.md`：規則類型 → 測試層的預設對照、mock 邊界、測試資料庫的三種隔離方式與選法、各技術棧的測試工具
+- `references/layers.md`：規則類型 → 測試層的預設對照、mock 邊界、測試資料庫的三種隔離方式與選法、各技術棧的測試工具、`test:affected` 與打亂順序的指令、冒煙測試做法、不穩定測試的常見原因
 - `references/template.md`：`docs/architecture/testing.md` 的輸出模板

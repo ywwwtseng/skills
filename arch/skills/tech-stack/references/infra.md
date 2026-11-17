@@ -26,7 +26,7 @@
 | 指定 AWS | ECS Fargate + RDS | Lambda（若純 API 且冷啟動可接受） | 自建 EC2 集群 |
 | 指定 GCP | Cloud Run + Cloud SQL | GKE Autopilot | — |
 | 預算極低、可接受自己運維 | VPS + Docker Compose（Hetzner 約 €4 / 月） | Fly.io | 任何 managed K8s |
-| 預算極低、不想運維、純靜態或 edge 可跑 | Cloudflare Pages / Workers（免費層） | Vercel Hobby | — |
+| 預算極低、不想運維、純靜態或 edge 可跑 | Cloudflare Workers（免費層） | Vercel Hobby | — |
 | 預算極低、需要容器（Bun / WebSocket / worker） | Fly.io（約 $5 / 月，標注非免費） | Render 免費層（會休眠，WebSocket 不穩） | — |
 | 必須地端 / 自架 | VPS 或內部 VM + Docker Compose | K3s（若多服務） | 完整 Kubernetes |
 | 企業級、多服務、大型規模 | Kubernetes（EKS / GKE） | ECS | — |

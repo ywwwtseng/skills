@@ -30,7 +30,7 @@ API 層與整合層通常共用同一套測試資料庫與 setup，差別只在�
 | BR 副作用 | 寄信、推播、webhook、事件 | 整合（替換外部邊界、斷言有被呼叫） | |
 | contract | 每個錯誤碼 | **API** | 客戶端看到的是 HTTP 狀態 + 錯誤碼 + envelope，要從 HTTP 驗 |
 | contract | 冪等鍵 | API | 同一個鍵送兩次 |
-| screens | 關鍵流程（happy path + 一個錯誤路徑） | E2E | |
+| screens | 關鍵流程（通常是每個 feature 的 happy path + 一個錯誤路徑） | E2E | 刻意少：慢，而且最容易不穩定 |
 | screens | 其他狀態（空、錯誤、載入、權限不足） | 元件測試 | E2E 太慢，逐一覆蓋會讓整套跑不動 |
 | tech-stack | 有 Web 或 App：啟動得起來 | **冒煙** | 原生模組沒編進 binary、打包失敗、啟動時缺環境變數，其他層全綠也照樣白屏 |
 
@@ -96,6 +96,18 @@ API 層與整合層通常共用同一套測試資料庫與 setup，差別只在�
 - **Expo 一律用 dev build 跑，不用 Expo Go**：Expo Go 裡沒有專案自己的原生模組，冒煙會在它身上假紅；反過來，專案沒有原生模組時 Expo Go 會假綠，等於沒驗到真正會出貨的 binary。
 - 新增或升級原生依賴後，啟動段要先重建 binary 再跑（原生依賴的判斷：套件目錄下有 `ios/`、`android/`、`*.podspec`、`expo-module.config.json` 或 `app.plugin.js` 其中之一）。
 - CI 預設只跑打包段；啟動段需要 macOS runner，有才加，沒有就在 `testing.md` 寫明「啟動段只在本機由 `/impl:verify` 跑」。
+
+## 受影響的測試與打亂順序
+
+`test:affected` 依工具選：
+
+| 工具 | 指令 |
+|---|---|
+| Vitest | `vitest run --changed origin/main` |
+| Jest | `jest --findRelatedTests $(git diff --name-only origin/main)` |
+| pytest | `pytest --testmon` |
+| monorepo | `turbo run test --filter=...[origin/main]` / `nx affected -t test` |
+| Go | 只跑改到的 package |
 
 打亂順序的旗標：Vitest `--sequence.shuffle`、Jest `--randomize`、pytest `-p random_order`（需 `pytest-random-order`）、`go test -shuffle=on`。
 

@@ -17,11 +17,11 @@
 | E2E | `pnpm test:e2e` | |
 | 冒煙 | `pnpm test:smoke` | |
 
-`/impl:feature`、`/impl:fix` 每次驗收的「既有測試不能壞」跑「受影響」那一條；「全部」留給 `/git:push` 推之前、`/impl:verify` 與 CI。`test:smoke` 不含在「全部」裡（要建置、要模擬器），由 `/impl:verify`、`/git:push` 與 UI task 的驗收另外跑。
+`/impl:feature`、`/impl:fix` 每次驗收的「既有測試不能壞」跑「受影響」那一條；「全部」留給 `/impl:verify`、CI 與改版本號的交付（`/git:push` 平常只跑單元測試與跟 diff 相關的 E2E）。`test:smoke` 不含在「全部」裡（要建置、要模擬器），由 `/impl:verify`、`/git:push` 與 UI task 的驗收另外跑。
 
-### 交付前全套會抓的改動
+### 受影響追不到的改動
 
-改動碰到下列任一項時，「受影響」追不到（它靠 import 關係找測試）。每個 task 仍**不**改跑「全部」（全部只在交付前跑一次），而是加跑最可能波及的測試檔，並在 plan 備註寫明動到什麼，交付前的全套紅了時從這些 task 找起：
+改動碰到下列任一項時，「受影響」追不到（它靠 import 關係找測試）。每個 task 仍**不**改跑「全部」，而是加跑最可能波及的測試檔，並在 plan 備註寫明動到什麼——交付閘門平常也不跑全部，這裡沒加跑的就沒人抓：
 
 - migration、ORM schema
 - 測試的 setup / fixture / factory：`<路徑>`
@@ -83,7 +83,7 @@
 
 | # | 位置 | 現況行為 | 預期（BR-ID 或理由） | 狀態 |
 |---|---|---|---|---|
-| S-001 | `src/domain/order.ts:88` | 已出貨仍可取消 | BR-order-021 | 交 `/impl:fix` |
+| S-001 | `src/domain/order.ts:88` | 已出貨仍可取消 | order/BR-ORD-021 | 交 `/impl:fix` |
 
 這裡的每一條都**沒有**對應的測試留在 repo 裡（避免把 bug 鎖死或留下紅測試）；由 `/impl:fix` 寫 regression test。
 

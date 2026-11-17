@@ -1,6 +1,6 @@
 ---
 name: tech-stack
-description: 透過多輪問答協助使用者為新專案選型 frontend、mobile app、backend、database、infra 與專案架構模式（monorepo 等），並輸出 docs/architecture/tech-stack.md 決策文件。當使用者要開新專案不知道用什麼技術、想比較技術方案、或明確要求技術選型時使用。
+description: 用多輪問答為新專案選型 frontend、mobile、backend、database、infra 與架構模式，輸出 docs/architecture/tech-stack.md。當使用者開新專案不知道用什麼技術、想比較技術方案、或要求技術選型時使用。
 ---
 
 # Tech Stack
@@ -40,16 +40,9 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 
 ## 引用下游細節的寫法
 
-決策文件常常需要引用下游的具體東西來支撐理由（「選 PostgreSQL 是因為用到 `NULLS NOT DISTINCT` 與部分唯一索引」）。這是對的——沒有具體例子的理由沒有說服力。但要分清楚兩種引用：
+決策文件可以引用下游的具體東西來支撐理由，但**優先引用能力**（「用到部分唯一索引、`NULLS NOT DISTINCT`」——schema 重構也不會變），少寫**識別名**（「掃 `idx_ai_invocations_deadline`」——改個索引名就過期）。非寫識別名不可時（排程要掃哪個索引、cron 對應哪張表），在該段落標一句「以 `docs/db/schema.md` 為準」。
 
-| 引用什麼 | 穩不穩 | 例 |
-|---|---|---|
-| **能力**（做得到什麼） | 穩定。schema 重構也不會變 | 「用到部分唯一索引、`NULLS NOT DISTINCT`」 |
-| **識別名**（叫什麼名字） | **易碎**。改個索引名就過期 | 「掃 `idx_ai_invocations_deadline`」 |
-
-**優先引用能力。** 非要寫識別名不可時（排程要掃哪個索引、cron 對應哪張表），在該段落標一句「以 `docs/db/schema.md` 為準」，讓讀的人知道真相在下游、這裡只是摘要。
-
-決策文件在鏈上是上游，但引用的是下游的細節——下游改了不會有人回頭更新這裡，於是它會安靜地過期，而且通常要到有人照著它去實作才發現。`/db:schema` 與 `/db:migrate` 的收尾各有一步回頭掃這種過期引用，但源頭的寫法才是根本解。
+下游改了不會有人回頭更新這份上游文件，它會安靜地過期；`/db:schema` 與 `/db:migrate` 的收尾會回頭掃過期引用，但源頭的寫法才是根本解。
 
 ## 流程
 
@@ -111,79 +104,7 @@ description: 透過多輪問答協助使用者為新專案選型 frontend、mobi
 
 寫入 `docs/architecture/tech-stack.md`。若檔案已存在，先用 `AskUserQuestion` 確認「覆蓋 / 另存為 `docs/architecture/tech-stack-YYYY-MM-DD.md`」。
 
-文件格式：
-
-```markdown
-# Tech Stack Decision — <專案名>
-
-> 產生日期：YYYY-MM-DD ｜ 模式：完整 / 快速 ｜ 規模：<檔位> ｜ 平台：<Web / Web + App / …>
-
-## 摘要
-<一段話說明整體方向與主要取捨>
-
-| 層級 | 選擇 | 一句理由 |
-|---|---|---|
-| 架構 | … | … |
-| Frontend | … | … |
-| UI 風格 | <介面 → 風格，例：console → tonal-ui；web、mobile → calm-ui> | … |（有 Web 或 App 時）
-| Mobile | … | … |（有 App 時）
-| Backend | … | … |
-| Database | … | … |
-| Infra | … | … |
-
-## 需求回顧
-<把問答結果整理成 constraints 清單，每條一行；有衝突的答案寫明取捨>
-
-## 專案架構
-- **Repo 結構**：Monorepo / 單一應用 / Polyrepo，附目錄骨架（只列到第二層）
-- **服務拓撲**：單體 / 模組化單體 / 微服務，說明由哪個規模檔位推得
-- **共用套件**：types / api-client / validation / ui 哪些抽出
-- **理由與風險**
-
-## 各層選型
-
-### Frontend
-- **選擇**：…
-- **理由**：…（對應需求回顧的哪幾條）
-- **替代方案**：…（何種情況下改選）
-- **風險 / 注意事項**：…（含 AI agent 友善度的降權項目，若有）
-
-### UI 風格（有 Web 或 App 時才有此段）
-- **對照**（每個有畫面的介面一列）：
-
-  | 介面 | 路徑 | 風格 | token 落點 | 理由 |
-  |---|---|---|---|---|
-  | Console（後台） | `apps/console` | `/ui:tonal-ui` | `apps/console/src/styles/tokens.css` | … |
-  | Web | `apps/web` | `/ui:calm-ui` | `apps/web/src/styles/tokens.css` | … |
-  | Mobile | `apps/mobile` | `/ui:calm-ui` | `apps/mobile/src/theme.ts` | … |
-
-  風格選項：`/ui:tonal-ui`（console・後台・內部系統）/ `/ui:calm-ui`（消費級 AI 產品）/ 既有設計系統（附位置）/ 未決。同一套風格的多個介面可以共用一份 token 套件（例 `packages/ui-tokens`）
-- **注意**：同一個介面內兩套視覺語言互斥、不混用；不同介面可以不同套。畫面規格另由 `/ui:screens` 產出，與視覺語言不重疊
-
-### Mobile（有 App 時才有此段）
-（同格式，另加 **與 Web 共用**：哪些程式碼 / 型別 / API client 可共用；以及 **本機開發平台**：預設 iOS 模擬器 + 實際的開發指令）
-
-### Backend
-（同格式）
-
-### Database
-（同格式）
-
-### Infra
-（同格式，含 CI/CD、監控、object storage、預估月費）
-
-## 約束與慣例
-<給後續開發遵守的硬規則，每條一行：ORM、auth 方式、上傳方式、API 版本化、不要做的事>
-<有 UI 時，第一條固定是 UI 風格對照：**UI 風格（依介面，同一個介面內不混用）：`apps/console` → tonal-ui；`apps/web`、`apps/mobile` → calm-ui。寫某個介面的畫面前先載入它對應的 skill，顏色・字級・間距・圓角只用該介面的 token**>
-<有 App 時，加一條：**行動端本機開發預設開 iOS 模擬器**，並附該技術棧的開發指令（見 `references/mobile.md`）>
-<選 Expo 時，再加一條：**用 dev build 不用 Expo Go；新增或升級原生依賴後先 `npx expo run:ios` 重建 binary 再開**（理由見 `references/mobile.md`）>
-
-## 整體架構
-<mermaid 圖：web / mobile client → backend → db / redis，標注部署位置；有 App 時標注推播與 app store>
-
-## 未決事項與下一步
-- [ ] …
-```
+文件格式照 `references/template.md`（寫文件前讀）。
 
 **架構模式與當前目錄的關係**（寫在「專案架構」）：
 

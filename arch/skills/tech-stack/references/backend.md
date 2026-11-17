@@ -45,11 +45,11 @@
 
 | Runtime | 執行方式 | 限制 |
 |---|---|---|
-| Node.js 23.6+ | `node app.ts`（內建 type stripping；22.x 需 `--experimental-strip-types`） | 不能用 `enum`、`namespace`、decorator、constructor 參數屬性等會產生 runtime code 的語法；NestJS 因依賴 decorator 不適用 |
+| Node.js 24 LTS | `node app.ts`（內建 type stripping；22.x 舊版需 `--experimental-strip-types`） | 不能用 `enum`、`namespace`、decorator、constructor 參數屬性等會產生 runtime code 的語法；NestJS 因依賴 decorator 不適用 |
 | Bun | `bun run app.ts` | 無語法限制 |
 | Cloudflare Workers | `wrangler dev` / `wrangler deploy`（內部以 esbuild 打包，不需自己設 build） | 無 Node `fs` / 長時間 CPU（免費層 10 ms、付費 30 s CPU time）；Node 相容 API 需開 `nodejs_compat` flag；不能開 TCP 直連傳統 DB，須經 Hyperdrive 或 HTTP driver |
 
-預設：無雲偏好 → Node 23+ 直接跑；指定 Cloudflare → Workers；使用者選 Bun → Bun。文件「Infra」段的 CI 只需 `tsc --noEmit` + test，沒有 build job。
+預設：無雲偏好 → Node 24 LTS 直接跑；指定 Cloudflare → Workers；使用者選 Bun → Bun。文件「Infra」段的 CI 只需 `tsc --noEmit` + test，沒有 build job。
 
 ## 額外判斷
 

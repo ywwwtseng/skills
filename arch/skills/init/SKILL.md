@@ -1,6 +1,6 @@
 ---
 name: init
-description: 讀 docs/architecture/tech-stack.md 的技術選型決策，把專案實際建起來：repo 骨架、官方 scaffold 指令、lint / format / test / tsconfig、.env.example、CLAUDE.md 約束段落，最後跑一次驗證確認能 build。當使用者說「初始化專案」「建專案骨架」「照 tech-stack 把專案建起來」「scaffold 專案」，或剛跑完 /arch:tech-stack 要開工時使用。
+description: 照 docs/architecture/tech-stack.md 把專案建起來：骨架、scaffold、lint / format / test 設定、.env.example、CLAUDE.md 約束，並確認能 build。當使用者說「初始化專案」「建專案骨架」「scaffold 專案」，或剛跑完 /arch:tech-stack 要開工時使用。
 ---
 
 # Init
