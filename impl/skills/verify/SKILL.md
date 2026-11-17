@@ -1,6 +1,6 @@
 ---
 name: verify
-description: 在開 PR 之前把一個 feature 的實作從頭核對一遍——plan.md 的 task 是否真的做完、每條 business rule 是否真的有測試在驗它、schema 的不變量落點是否真的落地、全套驗證指令是否真的綠、有沒有為了讓測試過而動手腳或悄悄擴張範圍——輸出 docs/impl/<feature>/verification.md，並把每個缺口寫成新 task 接回 plan.md。當使用者說「驗收這個 feature」「做完了嗎」「檢查有沒有漏」「開 PR 前確認一下」「跑一次品質閘門」，或 /impl:feature 報告全部 task done 時使用。本 skill 只稽核與回報，不改任何產品程式碼與測試；修補交給 /impl:feature 或 /impl:fix。
+description: 開 PR 前把一個 feature 從頭核對：task 是否真的做完、每條規則是否有測試、不變量是否落地、驗證是否全綠、有沒有動手腳或擴張範圍，輸出 verification.md 並把缺口寫回 plan.md。當使用者說「驗收這個 feature」「做完了嗎」「檢查有沒有漏」「開 PR 前確認一下」「跑一次品質閘門」，或 /impl:feature 報告全部 task done 時使用。只稽核與回報，不改程式碼與測試。
 ---
 
 # Impl Verify
@@ -20,7 +20,7 @@ description: 在開 PR 之前把一個 feature 的實作從頭核對一遍——
 ## 核心規則
 
 1. **只稽核，不修。** 看到一行就能補的測試、一個明顯的 typo、一個少掉的斷言，都不要順手改。順手改會讓稽核者與被稽核者變成同一個人，這份報告就失去意義了。寫進報告，轉成 task。
-2. **每個結論都要有證據。** 「BR-order-012 有覆蓋」不算結論，「BR-order-012 → `src/domain/order.test.ts:47` 斷言 `status` 從 `paid` 轉 `shipped` 會成功、`:58` 斷言從 `cancelled` 轉 `shipped` 會丟 `InvalidTransition`」才算。找不到證據就是 `未覆蓋`，不要因為「應該有做吧」就放過。
+2. **每個結論都要有證據。** 「order/BR-ORD-012 有覆蓋」不算結論，「order/BR-ORD-012 → `src/domain/order.test.ts:47` 斷言 `status` 從 `paid` 轉 `shipped` 會成功、`:58` 斷言從 `cancelled` 轉 `shipped` 會丟 `InvalidTransition`」才算。找不到證據就是 `未覆蓋`，不要因為「應該有做吧」就放過。
 3. **指令要真的跑過。** 驗證結果一律來自這次實際執行的輸出，不採信 plan.md 上寫的「已通過」，也不採信上一輪的記憶。貼出指令與結果摘要。
 4. **verdict 只有三種，而且要敢給 `fail`。** `pass` / `pass with findings` / `fail`。有任何一條 BR 完全沒實作、任何驗證指令是紅的、或發現測試被動過手腳 → `fail`。無人看守的流程裡，一個軟掉的閘門等於沒有閘門。
 5. **缺口要變成可執行的 task，不能只是抱怨。** 每個 `fail` / `findings` 都要在 `plan.md` 末尾接一個新 task（往後接號、不插隊、不重編），帶來源、動到、驗收——這樣 `/loop /impl:feature` 會自動去補。只寫在報告裡的缺口，無人看守時等於不存在。
@@ -51,7 +51,7 @@ description: 在開 PR 之前把一個 feature 的實作從頭核對一遍——
 
 逐條走 `docs/domain/business-rules/<feature>.md` 的 BR，**一條都不能跳**。對每一條：
 
-1. 在測試檔裡找 BR-ID（`grep -rn "BR-order-012"`）。`/impl:feature` 要求斷言帶 BR-ID，所以找不到 ID 是第一個警訊。
+1. 在測試檔裡找 BR-ID（`grep -rn "BR-ORD-012"`）。`/impl:feature` 要求斷言帶 BR-ID，所以找不到 ID 是第一個警訊。
 2. 找到了就**打開來看斷言內容**，比對 BR 寫的「輸入 → 預期結果」，包含它列出的邊界與例外分支。ID 出現在註解裡但斷言只驗了 happy path，算 `部分覆蓋`。
    有 `docs/architecture/testing.md` 時再比對**測試層**：該規則類型在分層對照裡該落在整合 / API 層，實際只有 mock 掉資料庫或繞過 HTTP 的單元測試，也算 `部分覆蓋`，證據欄寫明「層級不符」。
 3. 找不到 ID 就用規則的語意去找（相關函式名、錯誤型別）。找得到實作但沒有測試 → `有實作無測試`。
@@ -137,7 +137,7 @@ plan 的規則覆蓋表寫「未覆蓋 — <原因>」的，確認那個原因�
 4. findings 依嚴重度排序，每個帶證據路徑
 5. 新增到 plan 的 task ID 與標題
 6. 下一步：
-   - `pass` → `/git:pr` 開 PR
+   - `pass` → 由 `/impl:ship` 調度時 `/git:pr` 開 PR；單獨執行時 `/git:push` 直推 base branch
    - `pass with findings` → 可以開 draft PR，或先跑 `/impl:feature` 補新增的 task
    - `fail` → `/impl:feature` 補 task（缺工作）或 `/impl:fix`（有缺陷），修完重跑 `/impl:verify`
 
@@ -162,8 +162,8 @@ plan 的規則覆蓋表寫「未覆蓋 — <原因>」的，確認那個原因�
 
 | BR-ID | 規則摘要 | 狀態 | 證據 |
 |---|---|---|---|
-| BR-order-012 | <摘要> | 完整覆蓋 | `src/domain/order.test.ts:47,58` |
-| BR-order-018 | <摘要> | 未覆蓋 | 測試與程式碼都找不到 |
+| order/BR-ORD-012 | <摘要> | 完整覆蓋 | `src/domain/order.test.ts:47,58` |
+| order/BR-ORD-018 | <摘要> | 未覆蓋 | 測試與程式碼都找不到 |
 
 共 N 條：完整覆蓋 M｜部分覆蓋 X｜有實作無測試 Y｜未覆蓋 Z
 
@@ -206,15 +206,3 @@ plan 的規則覆蓋表寫「未覆蓋 — <原因>」的，確認那個原因�
 | Task | 標題 | 對應 finding |
 |---|---|---|
 ````
-
-## 常見失敗模式
-
-| 症狀 | 為什麼是錯的 |
-|---|---|
-| 看到測試全綠就給 `pass` | 綠只證明寫出來的測試過了，不證明規則有被測（Step 2 才是重點） |
-| 稽核時順手把缺的測試補上 | 寫的人與驗的人變成同一個，報告失去意義（核心規則 1） |
-| 缺口只寫在報告裡，沒進 plan | 無人看守時沒有人會讀報告，缺口等於不存在（核心規則 5） |
-| 「BR-012 應該有覆蓋」沒附行號 | 沒有證據的結論下次還要再查一遍（核心規則 2） |
-| 只抽查幾條 BR 就下結論 | 沒被抽到的那條就是會上線的那條；規則要逐條走完 |
-| 發現測試被改成實際輸出，記成 low | 那是整份實作最嚴重的問題，直接 `fail`（Step 5） |
-| 採信 plan.md 上的「已通過」 | 那是上一輪寫的，不是這一輪跑的（核心規則 3） |

@@ -1,6 +1,6 @@
 ---
 name: plan
-description: 把一個 feature 的 business rules、domain model 與 db schema 切成可獨立驗證、可續跑的實作 task 清單，輸出 docs/impl/<feature>/plan.md——每個 task 帶追溯 ID、會動到的檔案、前置依賴、驗收指令與狀態，檔案本身自帶執行協議，讓被壓縮或跨 session 的 agent 只讀這一份檔案就能接手。當使用者說「規劃實作」「把 feature 切成 task」「排實作順序」「開始寫 code 前先列步驟」「要讓 agent 自己 long-running 跑完」時使用。本 skill 不寫任何產品程式碼；實作由 /impl:feature 依 plan.md 逐個 task 執行。
+description: 把一個 feature 的規則、模型與 schema 切成可獨立驗證、可續跑的 task 清單（docs/impl/<feature>/plan.md）。當使用者說「規劃實作」「把 feature 切成 task」「排實作順序」「寫 code 前先列步驟」「讓 agent 自己 long-running 跑完」時使用。不寫產品程式碼；實作交給 /impl:feature。
 ---
 
 # Impl Plan
@@ -67,7 +67,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 |---|---|
 | ID | `T-001` 起，三位數，永不重編（續跑時新增的往後接） |
 | 標題 | 一句話，動詞開頭，說明產出什麼 |
-| 來源 | 追溯：`BR-order-012`、`order.md#Order.status`、`schema.md#orders`、`contract.md#POST /orders/{id}/cancel`（核心規則 7） |
+| 來源 | 追溯：`order/BR-ORD-012`、`order.md#Order.status`、`schema.md#orders`、`contract.md#POST /orders/{id}/cancel`（核心規則 7） |
 | 動到 | 預估會建立 / 修改的檔案路徑（≤ 5，核心規則 4）。是預估，執行時不符要在備註更正 |
 | 前置 | 依賴的 task ID，無則寫「無」 |
 | 驗收 | 一條可以現在就跑的指令 + 一句「看到什麼算過」 |
@@ -89,7 +89,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 - 行動端的 UI task → **驗收指令寫成開 iOS 模擬器的那一條**（`npx expo start --dev-client --ios`、`flutter run -d ios`……，以 `CLAUDE.md` 或 `docs/architecture/tech-stack.md` 的「約束與慣例」為準），並加跑 `test:smoke`（`docs/architecture/testing.md` 有這條時）。不要寫成 `npx expo start` 讓執行的 agent 自己選平台——它會選到沒裝模擬器的那一個然後卡住。Android 專屬的行為（返回鍵、權限對話框差異）才另外開一個 task 標明要用 Android 驗。
 - **會新增或升級原生依賴的 task**（例如裝 Google 登入、IAP、原生推播 SDK；判斷方式照 `docs/architecture/tech-stack.md` 的約束與慣例，沒寫的話：套件目錄下有 `ios/`、`android/`、`*.podspec`、`expo-module.config.json` 或 `app.plugin.js` 其中之一，就是原生依賴）→ 驗收第一步是重建 binary（Expo：`npx expo run:ios`），再在模擬器啟動、看到首頁。JS 測試與 typecheck 對這類錯誤全綠，只有真的開 App 才會崩。
 - 專案的開發指令還是 Expo Go（沒有 `expo-dev-client`，`dev` 是 `expo start --ios`），而這個 feature 會引入原生依賴 → **排一個前置 task 切到 dev build**：裝 `expo-dev-client`、改 `dev` / `ios` scripts、更新 `CLAUDE.md` 的開發指令，驗收是 `npx expo run:ios` 後 App 開得起來。放在引入原生依賴的那個 task 之前。
-- **每個 task 的驗收都隱含包含「受影響的既有測試不能壞」**，這條寫在執行協議裡，不用每個 task 重複。全套測試不在每個 task 跑，留給交付前（`/git:push` 或 `/impl:verify`）。
+- **每個 task 的驗收都隱含包含「受影響的既有測試不能壞」**，這條寫在執行協議裡，不用每個 task 重複。全部測試不在每個 task 跑：`/impl:verify` 跑全部，交付閘門的範圍由 `/git:push` 決定（改版本號才跑全部，其他只跑單元測試與跟 diff 相關的 e2e）。
 
 ### Step 4：排序
 
@@ -129,7 +129,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 3. 覆蓋率：feature 的 BR 共 N 條，被 task 覆蓋 M 條，未覆蓋 K 條（逐條列出原因）
 4. 列出最值得確認的 3 個切法假設
 5. 列出「上游回饋」（規則 / 模型 / schema 的矛盾或缺口，若有），建議跑 `/domain:feedback` 處理
-6. 下一步：`/impl:feature` 從 `T-001` 開始執行；要讓它自己連續跑，用 `/loop`（不給 interval，讓它自己抓節奏），每個 task 結束由 `/git:commit` 建立還原點；全部 task 做完由 `/git:push` 跑全套後直推 base branch；在 `/impl:ship` 裡則由 ship 接著跑 `/impl:verify` 與 `/git:pr --merge`
+6. 下一步：`/impl:feature` 從 `T-001` 開始執行；要讓它自己連續跑，用 `/loop`（不給 interval，讓它自己抓節奏），每個 task 結束由 `/git:commit` 建立還原點；全部 task 做完由 `/git:push` 過驗證閘門後直推 base branch；在 `/impl:ship` 裡則由 ship 接著跑 `/impl:verify` 與 `/git:pr --merge`
 
 ## 與 /impl:feature 的協議
 
@@ -138,7 +138,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 1. **接手**：讀 plan.md → 找執行序上第一個非 `done` 的 task。有 `blocked` 擋在前面且未解，先處理它，不要跳過去做後面的。狀態是 `doing` 表示上一輪被中斷：先看 `git status` 有沒有未提交的產出，據此判斷接續還是重來；判斷不出來就問使用者，不要自行丟棄。
 2. **開工**：把狀態改成 `doing` 並存檔，再開始寫程式。這樣中途被中斷，下一個 session 知道這個 task 做到一半。
 3. **只做這一個 task**。看到順手可以改的其他東西，寫進備註或新增 task，不要順手改——順手改會讓這次 commit 不可回溯。
-4. **驗收**：跑該 task 的驗收指令，**外加**受影響的既有測試（驗證指令表的「受影響測試」；不存在、報錯或找不到任何測試時改跑日常測試指令）、typecheck、lint 不能壞。**每個 task 都不跑全部測試**——即使動到 migration、ORM schema、測試 setup / fixture / factory、設定檔或共用模組，也只加跑最可能波及的測試檔，並在備註寫「動到共用的 X」；全部測試只在交付前跑一次（`/git:push` 推之前、`/git:pr` 開 PR 前、`/impl:verify`）。沒過就修；修不掉改成 `blocked`，在備註寫「卡在哪、試過什麼、需要什麼才能解」，然後停下來問使用者，不要硬幹也不要跳下一個。
+4. **驗收**：跑該 task 的驗收指令，**外加**受影響的既有測試（驗證指令表的「受影響測試」；不存在、報錯或找不到任何測試時改跑日常測試指令）、typecheck、lint 不能壞。**每個 task 都不跑全部測試**——即使動到 migration、ORM schema、測試 setup / fixture / factory、設定檔或共用模組，也只加跑最可能波及的測試檔，並在備註寫「動到共用的 X」——交付閘門平常也不跑全部測試（改版本號才跑），這裡沒加跑的就沒人抓；全部測試只在 `/impl:verify` 與改版本號的交付跑。沒過就修；修不掉改成 `blocked`，在備註寫「卡在哪、試過什麼、需要什麼才能解」，然後停下來問使用者，不要硬幹也不要跳下一個。
 5. **標記**：驗收過了才改成 `done`。「動到」與預估不符時在備註更正，這是給後續 task 的情報。
 6. **commit**：呼叫 `/git:commit`，commit message 的 scope 或 body 帶上 task ID（`feat(order): 加入狀態轉換 (T-003)`）。程式碼與 plan.md 的狀態更新放在**同一個 commit**，狀態與產出要一起前進。commit 完才算這個 task 結束，才可以開始下一個。每個 task 不 push；全部 `done` 後才交付：單獨執行時呼叫 `/git:push` 直推 base branch，由 `/impl:ship` 調度時交回 ship（它走 PR）。
 7. **不改 plan 以外的規劃決策**：發現整個切法錯了，停下來說明並建議重跑 `/impl:plan`，不要邊做邊改執行序。
@@ -198,7 +198,7 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 - **來源**：<BR-ID / 模型元素 / schema table>
 - **動到**：`<path>`、`<path>`
 - **前置**：無
-- **驗收**：`pnpm test src/domain/order.test.ts`　→ 新增的 3 個案例（BR-order-012 的三條輸入 → 預期結果）全綠，受影響的既有測試不變紅
+- **驗收**：`pnpm test src/domain/order.test.ts`　→ 新增的 3 個案例（order/BR-ORD-012 的三條輸入 → 預期結果）全綠，受影響的既有測試不變紅
 - **狀態**：todo
 - **備註**：
 
@@ -210,8 +210,8 @@ description: 把一個 feature 的 business rules、domain model 與 db schema �
 
 | BR-ID | 規則摘要 | 由哪個 task 覆蓋 |
 |---|---|---|
-| BR-order-012 | <摘要> | T-001、T-003 |
-| BR-order-018 | <摘要> | **未覆蓋** — <原因> |
+| order/BR-ORD-012 | <摘要> | T-001、T-003 |
+| order/BR-ORD-018 | <摘要> | **未覆蓋** — <原因> |
 
 ## 風險與假設
 

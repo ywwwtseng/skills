@@ -1,6 +1,6 @@
 ---
 name: ship
-description: 一人開發的無人看守總調度：維護 docs/impl/backlog.md 這份 feature 佇列，然後一輪一輪把佇列上的 feature 從規則跑到進 main——判斷當前 feature 走到哪一階段（規劃 / 實作 / 稽核 / 開 PR / 合併），只呼叫該階段的那一個 skill，做完回寫佇列狀態，合併後切回 base branch 再取下一個。每輪開始前先清掉待處理的上游回饋。第一輪開始前會先跑一次起飛前檢查（remote、gh、上游文件、專案骨架、測試分層、資料表、各介面 UI 風格與 token），缺什麼就停下來說明而不是硬跑。當使用者說「一路做下去」「把 backlog 跑完」「今晚自己跑」「做完一個接下一個」「無人看守開發」「跑之前還要準備什麼」時使用。本 skill 不自己寫程式、不自己開 PR，只決定下一步該叫誰；不部署、不碰 production。只在使用者明確下 /impl:ship（通常是 /loop /impl:ship）時執行。
+description: 無人看守的總調度：維護 docs/impl/backlog.md 的 feature 佇列，每輪判斷當前 feature 在哪一階段、只呼叫那一個 skill、回寫狀態，第一輪前先跑起飛前檢查。只在使用者明確下 /impl:ship（通常是 /loop /impl:ship）時執行。
 disable-model-invocation: true
 ---
 
@@ -165,17 +165,3 @@ disable-model-invocation: true
 5. **合併後一定要回到 base branch 並 pull**，確認乾淨後才開始下一個 feature。
 6. **卡住就停**，把下游回報的原因原樣寫進備註，不要自己想辦法繞過去。
 7. **不自己決定專案要做什麼**：規則文件沒進佇列就問，不要自己排。
-
-## 常見失敗模式
-
-| 症狀 | 為什麼是錯的 |
-|---|---|
-| 沒跑起飛前檢查就開始建佇列 | 缺 remote / 缺契約 / 資料表沒建，都要到做完最多工之後才發作（核心規則 9） |
-| 一輪裡把 plan → feature → verify → pr 全跑完 | 中途 context 就耗盡了，而且留下說不清楚做到哪的狀態（核心規則 1） |
-| 憑 backlog 上寫的階段決定下一步 | 那是上一輪寫的；檔案實況才是真的（Step 3） |
-| verdict 是 `pass with findings` 就合併 | 那些 findings 已經被寫成 task 了，合併等於把它們留在 main（核心規則 3） |
-| PR 合併後沒切回 base 就開始下一個 feature | 下一個 feature 的 commit 疊在舊分支上，被捲進舊 PR（Step 3 末） |
-| 合併後沒在 base 上跑冒煙就取下一個 feature | 每個 feature 各自驗過，疊在一起才壞的啟動錯誤會一路帶到最後，使用者打開 App 才發現（Step 4） |
-| 帶著 `high` 的待處理回饋繼續做新 feature | 規則已經錯進程式碼了，做越多錯越多（核心規則 5） |
-| 看到新的規則文件就自己排進佇列開始做 | 專案要做什麼不是 agent 決定的（核心規則 7） |
-| `blocked` 時只寫「卡住了」 | 回來的人不知道要做什麼決定，等於沒有回報（核心規則 8） |
