@@ -1,6 +1,6 @@
 ---
 name: schema
-description: 把 docs/domain/model/ 的概念層 domain model 轉成可直接寫 migration 的資料庫 schema，輸出單一份 docs/db/schema.md——table / collection、欄位與型別、主鍵外鍵、唯一約束、CHECK、索引、列舉落地方式、每條不變量的執行落點、遷移順序，每個 table 與欄位都追溯回模型元素與規則 ID。當使用者說「建 DB schema」「把 model 轉成資料表」「設計 table / 欄位 / 索引」「要開始寫 migration」「資料庫怎麼存」時使用。若使用者要釐清的是領域概念（有哪些 entity / value object）而不是儲存方式，用 /domain:model。
+description: 把概念層 domain model 轉成可直接寫 migration 的資料庫 schema（docs/db/schema.md）：table、欄位型別、鍵、約束、索引、不變量落點。當使用者說「建 DB schema」「把 model 轉成資料表」「設計 table / 欄位 / 索引」「資料庫怎麼存」時使用。要釐清的是領域概念而不是儲存方式，用 /domain:model。
 ---
 
 # DB Schema
@@ -24,7 +24,7 @@ description: 把 docs/domain/model/ 的概念層 domain model 轉成可直接寫
 5. **既有 schema 優先。** `docs/db/schema.md`、migration 目錄（`migrations/`、`prisma/schema.prisma`、`drizzle/`）、線上 DDL 若存在，它們就是現況：沿用既有 table 名與欄位名、只做增量，變動記進「變更紀錄」。會造成資料遺失或需要停機的變更（改型別、刪欄位、加 NOT NULL 到既有表、改主鍵）另列進「破壞性變更」段，寫明回填步驟，不混在一般變更裡。
 6. **識別名一旦被別的文件引用，改名就是對外的改動。** table、欄位、索引、約束的名字會被 `docs/architecture/tech-stack.md`（排程掃哪個索引、選型理由）、`docs/api/contract.md`、程式碼與 migration 引用。改名或移除時，Step 7 要回頭掃一次那些引用——下游改了不會有人回頭更新上游，過期的引用會一直安靜地躺著，直到有人照著它實作才發現。
 7. **不改模型。** schema 設計過程發現模型有矛盾或缺口（狀態機少一個轉換、關聯基數不合理），寫進「模型回饋」段並在摘要中提出，不要自己在 schema 裡改掉定義。
-8. **提問必須用 `AskUserQuestion`，一次只問一題。** 只問「不同答案會產生不同 table 結構」的問題（值物件內嵌還是獨立表、狀態歷史要不要存、多租戶怎麼隔離）。型別寬度、索引名稱這類改一行就好的事不要問，標「假設」直接寫。
+8. **提問必須用 `AskUserQuestion`，一次只問一題。** 只問結構性歧義；挑題條件與每題寫法見 Step 5。
 9. **每個索引都要有理由。** 理由只能來自：唯一性不變量、命令或 policy 的查詢路徑、外鍵、模型寫明的排序 / 篩選需求。想不出具體查詢就不要建索引；反過來，模型裡每個會用識別碼以外條件查詢的命令，都要檢查有沒有對應索引。
 
 ## 流程
@@ -38,37 +38,37 @@ description: 把 docs/domain/model/ 的概念層 domain model 轉成可直接寫
 
 ### Step 1：決定落地結構
 
-讀 `references/mapping.md`，依序決定：
+讀 `references/mapping.md`（總表、「值物件的三種落法」「狀態機的落地」），逐一決定每個模型元素的落點：
 
-1. **聚合 → table 邊界**：聚合不是 table。聚合根是一張表；聚合內的實體各自一張表，以外鍵指回聚合根；聚合內的值物件依下一條決定。聚合邊界的意義在 schema 層是「同一個交易內寫入」，記進該表的「交易邊界」欄。
-2. **值物件 → 內嵌欄位 / 獨立表 / JSON**：單一值（金額、期間）攤平成該表的多個欄位並加前綴（`total_amount`、`total_currency`）；集合型（訂單項目）開獨立表；結構不固定、且不會被單獨查詢或約束的才用 JSON，並寫明不能對它下 CHECK 與索引的後果。
-3. **列舉 → 原生 enum / 文字 + CHECK / 對照表**：依引擎能力與「值會不會由使用者新增」決定，見 `references/dialects.md`。同一份 schema 只用一種做法。
+1. **聚合 → table 邊界**：聚合是交易邊界、不是 table；哪些表在同一個交易內寫入，記進該表的「交易邊界」欄。
+2. **值物件 → 內嵌欄位 / 獨立表 / JSON**。
+3. **列舉 → 原生 enum / 文字 + CHECK / 對照表**：引擎能力見 `references/dialects.md`。同一份 schema 只用一種做法。
 4. **繼承 / 變體**：模型若有同一概念的多種型態，決定單表 + 型別欄位、每型態一表、或共用表 + 擴充表，寫明理由與取捨。
-5. **狀態機 → 現值欄位（+ 可選的歷史表）**：現值一律一個欄位。模型的狀態轉換若帶有「誰在什麼時候做的」而且規則需要回查，才加歷史表；這題若無法從模型判斷，用 `AskUserQuestion` 問。
+5. **狀態機 → 現值欄位（+ 可選的歷史表）**：要不要歷史表無法從模型判斷時，用 `AskUserQuestion` 問。
 
 ### Step 2：欄位與型別
 
-逐表列欄位，依 `references/mapping.md` 的概念型別表與 `references/dialects.md` 的引擎型別表轉換：
+逐表列欄位，概念型別照 `references/mapping.md` 的型別表轉成 `references/dialects.md` 的引擎型別：
 
-- 模型的「可選〈型別〉」→ NULL 可空；模型寫明「沒有值代表什麼」就一併寫進欄位說明。模型沒標可選的一律 NOT NULL。
-- 模型的「衍生屬性」→ 決定存（凍結值、加速查詢）或不存（查詢時算）。存就寫明由誰維護、何時重算；模型若寫「成立時凍結」一律存。
-- 金額、數量、時間一律照 `references/conventions.md` 的統一做法（單位、精度、時區），不逐表各自決定。
-- 每張表補上慣例欄位（主鍵、建立 / 更新時間、樂觀鎖版本、租戶欄位），這些標「儲存衍生」。
+- 模型沒標「可選」的一律 NOT NULL；可選的把模型寫的「沒有值代表什麼」寫進欄位說明。
+- 衍生屬性存或不存照 mapping.md 總表；存就寫明由誰維護、何時重算。
+- 金額、數量、時間與慣例欄位（主鍵、建立 / 更新時間、樂觀鎖版本、租戶欄位，標「儲存衍生」）照 `references/conventions.md` 的統一做法，不逐表各自決定。
 
 ### Step 3：鍵、關聯與索引
 
-1. **主鍵**：依 `references/conventions.md` 的策略統一（預設 UUIDv7 / ULID，必要時自增）；值物件表與 join table 可用複合主鍵。
-2. **關聯 → 外鍵**：`1 → 0..*` 在「多」的那一側放外鍵欄位；`0..1 → 1` 依擁有權決定；`*..*` 開 join table。每條外鍵寫明 `ON DELETE`（沿用模型關聯的「對方消失時」：保留識別碼 → `SET NULL` 或不建外鍵、禁止刪除 → `RESTRICT`、一併刪除 → `CASCADE`）。跨聚合的關聯是否建實體外鍵要明確決定並寫理由（同庫通常建；跨服務 / 跨庫不建，改由應用層守）。
-3. **唯一約束**：模型每條唯一性不變量對應一個 UNIQUE（含範圍：全域或某父實體內 → 複合唯一）。帶條件的唯一（「進行中的訂單才唯一」）用部分索引，引擎不支援時寫明改用應用層 + 交易隔離級別。
-4. **CHECK**：範圍、列舉、長度、欄位間關係（`start_at < end_at`）能寫成 CHECK 的都寫。
-5. **索引**：逐條寫「索引 → 支援哪個命令 / policy / 查詢」，格式見 `references/conventions.md` 的索引段。外鍵欄位預設建索引（MySQL 自動建，PostgreSQL 要自己建）。
+依 `references/mapping.md` 的「關聯 → 鍵」「不變量 → 約束」與 `references/conventions.md` 的主鍵、索引段，產出：
+
+1. **主鍵**：全 schema 統一一種策略。
+2. **外鍵**：每條關聯的外鍵位置、NULL 可空性與 `ON DELETE`；跨聚合的關聯是否建實體外鍵要明確決定並寫理由。
+3. **唯一約束與 CHECK**：模型每條唯一性不變量對應一個 UNIQUE（帶條件的用部分索引，引擎不支援時寫明改由應用層守）；能寫成 CHECK 的都寫。
+4. **索引**：逐條寫「索引 → 支援哪個命令 / policy / 查詢」（核心規則 9）。
 
 ### Step 4：不變量落點與生命週期
 
-1. 把 Step 0 整理的 INV / POL 逐條填進落點表：ID、陳述摘要、落點（DB / 應用層 / 兩者）、實作方式（NOT NULL、UNIQUE、CHECK、部分索引、交易內檢查、樂觀鎖…）、檢查時機、違反時的行為。一條都不能缺（核心規則 3）。
-2. **並行**：列出哪些命令會競爭同一列（狀態轉換、扣庫存、上限檢查），指定樂觀鎖（version 欄）或悲觀鎖（`SELECT FOR UPDATE`），寫明交易隔離級別的要求。
-3. **生命週期**：刪除策略（硬刪 / 軟刪 / 封存）依模型關聯的「解除時機」決定，全 schema 統一；有軟刪就檢查所有唯一約束是否要排除已刪除列。
-4. **事件與副作用**：模型的領域事件若有 policy 需要可靠送達，加 outbox 表（標「儲存衍生」）；只是記錄則不建表。
+1. 把 Step 0 整理的 INV / POL 逐條填進落點表（欄位見 `references/template.md`，落點怎麼選見 mapping.md「不變量 → 約束」）。一條都不能缺（核心規則 3）。
+2. **並行**：列出哪些命令會競爭同一列（狀態轉換、扣庫存、上限檢查），照 conventions.md「並行控制」指定樂觀鎖或悲觀鎖，寫明交易隔離級別的要求。
+3. **生命週期**：刪除策略照 conventions.md「軟刪除與封存」，全 schema 統一。
+4. **事件與副作用**：要不要 outbox 表照 mapping.md 總表的「領域事件」列。
 
 ### Step 5：釐清（有結構性歧義才做）
 
@@ -77,6 +77,8 @@ description: 把 docs/domain/model/ 的概念層 domain model 轉成可直接寫
 - 不同選擇會產生**不同的 table 結構**（多一張表、主鍵不同、欄位攤平還是 JSON），不只是型別寬度或索引差異
 - 從模型、既有 schema、引擎能力**推不出**明顯較合理的一邊
 - 選錯後要**改資料**才能補救（不是加一個欄位就好）
+
+常見值得問的：值物件內嵌還是獨立表、狀態歷史要不要存、多租戶怎麼隔離。型別寬度、索引名稱這類改一行就好的事不問，標「假設」直接寫。
 
 依補救成本排序，一題一題用 `AskUserQuestion` 問。每題：`question` 說明是哪個模型元素造成的歧義；`options` 2–4 個，第一個標「(Recommended)」；`description` 格式為「schema：〈table 會長怎樣〉／影響：〈查詢、約束、之後要改時的代價〉」。
 
@@ -111,21 +113,13 @@ options:
 
 **不要自己去改別人的文件**（核心規則 7 的同一個理由：每份文件只有一個作者）。這次沒有改名就跳過這步。
 
-在對話中：
-
-1. 列出寫入 / 修改的檔案與這次動了什麼
-2. 摘要 schema 規模：table 數、欄位數、外鍵數、唯一約束數、索引數、CHECK 數
-3. 不變量落點統計：DB 擋 N 條 / 應用層 M 條 / 未落地 K 條
-4. 列出最值得確認的 3 個設計假設，以及破壞性變更（若有）
-5. 列出「模型回饋」（模型的矛盾或缺口，若有），建議回 `/domain:model` 處理
-5.5. **過期引用**：哪些文件還在引用被改掉的識別名（檔案 + 行號 + 結論是否受影響）
-6. 下一步：`/db:migrate` 依本文件產生 migration 與 ORM schema 並套用到本機驗證；模型改了就重跑 `/db:schema` 增量更新，不要直接改 migration 反推
+在對話中照 `references/template.md` 的「對話中的摘要格式」回報（含「過期引用」那一行）。
 
 ## 判斷準則
 
 - `references/mapping.md`：模型元素 → schema 元素的對應細則、概念型別 → 欄位型別、關聯 → 鍵、不變量 → 約束、常見錯誤（Step 1–4 必讀）
 - `references/conventions.md`：命名、主鍵、時間、金額、軟刪除、多租戶、並行、索引與遷移的統一慣例（Step 2–4 必讀）
-- `references/dialects.md`：PostgreSQL / MySQL / SQLite（D1・Turso）/ MongoDB 的型別表與能力差異、ORM 注意事項（Step 0 決定引擎後必讀對應段）
+- `references/dialects.md`：PostgreSQL / MySQL / SQLite（D1・Turso）/ MongoDB 的型別表與能力差異（Step 0 決定引擎後必讀對應段）
 - `references/template.md`：`docs/db/schema.md` 的輸出模板與對話摘要格式（Step 6、7 必讀）
 
 設計前**務必讀取對應 reference**，不要憑印象轉換型別或決定落地方式。

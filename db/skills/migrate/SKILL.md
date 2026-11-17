@@ -1,6 +1,6 @@
 ---
 name: migrate
-description: 把 docs/db/schema.md 的設計變成真的 migration 檔並安全套用——先 introspect 現況算出與目標的 diff（不憑印象重建整份 schema）、把變更分成安全 / 需回填 / 破壞性三類、一個 migration 一件事且都寫得出 down、同步 ORM schema 且不因 ORM 做不到就放掉約束、只對本機或開發資料庫套用並用 up → 比對 → down → up 驗證可回滾，破壞性變更拆成 expand-migrate-contract 並只產檔不自動跑。當使用者說「寫 migration」「把 schema 建起來」「套用資料庫變更」「加個欄位到資料庫」「改型別 / 刪欄位 / 加唯一約束」時使用。設計本身要改回 /db:schema；本 skill 不碰 production、不改 schema.md、不寫業務程式碼。
+description: 把 docs/db/schema.md 變成可回滾的 migration 並套用到本機或開發資料庫：先比對現況算 diff，破壞性變更只產檔不自動跑。當使用者說「寫 migration」「把 schema 建起來」「套用資料庫變更」「加個欄位到資料庫」「改型別 / 刪欄位 / 加唯一約束」時使用。設計要改回 /db:schema；不碰 production、不寫業務程式碼。
 ---
 
 # DB Migrate
@@ -22,7 +22,7 @@ schema.md 回答「資料庫該長什麼樣」；本 skill 回答「從現在這
 1. **只對本機或開發資料庫執行。** 動手前先確認連線字串（`DATABASE_URL`、`.env`、wrangler 設定）指向本機或標明是 dev 的資料庫。指向 production、staging、任何雲端主機名，或**判斷不出來**，一律停下來問，不要「先試試看」。production 的套用永遠是人按下去的，本 skill 只交出 runbook。
 2. **schema.md 是唯一來源。** 文件裡沒有的 table、欄位、約束，不准出現在 migration。實作需要但文件沒有的，回 `/db:schema` 補設計，不要在 migration 裡自己加一個欄位——那個欄位不會有人知道它為什麼存在。
 3. **先算 diff，再寫 migration。** 目標是 schema.md，現況是**資料庫實際的樣子**（introspect，或既有 migration 全部跑完後的結果），migration 寫的是兩者的差。不要憑 schema.md 重新產生整份 CREATE TABLE——既有資料庫不是空的。
-4. **一個 migration 一件事，而且寫得出 down。** 每個檔案只做一種變更（一張表、一組相關欄位、一條約束）。down 寫不出來的（刪欄位、改型別後資料已經轉換）標成**不可逆**，單獨一個檔案，並在檔頭寫明「回復方式 = 還原備份」，不要跟可逆的變更混在同一個檔案裡。
+4. **一個 migration 一件事，而且寫得出 down。** 每個檔案只做一種變更（一張表、一組相關欄位、一條約束）——加表、改欄位、刪舊欄位混在一起，出事時回不到中間狀態，只能整批回滾。down 寫不出來的（刪欄位、改型別後資料已經轉換）標成**不可逆**，單獨一個檔案，並在檔頭寫明「回復方式 = 還原備份」，不要跟可逆的變更混在同一個檔案裡。
 5. **破壞性變更拆成 expand → migrate → contract，contract 不自動跑。** 加 NOT NULL、改型別、改主鍵、刪欄位、加唯一約束，一律拆成多步（見 `references/destructive.md`）。expand（相容的新增）可以套用；contract（移除舊的）**只產出檔案，不執行**，因為它的前置條件是「不再讀寫舊欄位的程式碼已經部署完」，而那件事不在本 skill 的視野裡。停下來寫清楚前置條件。
 6. **會動到資料的 migration，跑之前先備份。** 回填、型別轉換、刪除，套用前先 dump 一份（本機也是）。備份路徑寫進報告。
 7. **套用不等於成功，要驗證。** 跑完 up 之後：introspect 比對實際 schema 與 schema.md（table、欄位型別、NULL 可空性、外鍵、唯一約束、CHECK、索引一項一項核），然後跑 **down → up** 確認可回滾且可重放。有測試資料的資料庫也要試一次。
@@ -105,9 +105,7 @@ contract 階段的檔案產出但不執行（核心規則 5），並寫一份 ru
 
 ### Step 8：收尾
 
-**先做過期引用檢查**：這次的 migration 如果改了名字或移除了東西（改欄位名、改索引名、刪欄位、改列舉值），`grep -rn "<舊名>" docs/ --include="*.md"` 掃一次，找出還在引用舊名的文件（最常見的是 `docs/architecture/tech-stack.md` 的排程與選型理由、`docs/api/contract.md` 的欄位表）。逐一列出檔案與行號，標明結論有沒有受影響。**不要自己改別人的文件**（核心規則 9）。
-
-`docs/db/schema.md` 與實際 DDL 的差異在 Step 5 已經核過；這一步核的是**文件之間**的引用。
+**先做過期引用檢查**：這次的 migration 改了名字或移除了東西（欄位名、索引名、刪欄位、列舉值）時，`grep -rn "<舊名>" docs/ --include="*.md"` 掃一次，列出還在引用舊名的文件、行號與結論有沒有受影響，做法同 `/db:schema` 的收尾步驟。這一步核的是**文件之間**的引用（schema.md 與實際 DDL 的差異在 Step 5 已經核過）；**不要自己改別人的文件**（核心規則 9）。
 
 在對話中：
 
@@ -117,24 +115,10 @@ contract 階段的檔案產出但不執行（核心規則 5），並寫一份 ru
 4. 驗證結果：introspect 比對過沒有、down → up 測過沒有、測試與 typecheck 結果
 5. **沒有套用的破壞性變更**與它們的 runbook 摘要
 6. 上游回饋（若有），建議跑 `/domain:feedback` 或重跑 `/db:schema`
-6.5. **過期引用**：哪些文件還在引用被改掉的識別名（檔案 + 行號 + 結論是否受影響）
-7. 下一步：`/git:commit` 提交 migration 與 ORM 變更；production 的套用由人依 runbook 執行
+7. **過期引用**：哪些文件還在引用被改掉的識別名（檔案 + 行號 + 結論是否受影響）
+8. 下一步：`/git:commit` 提交 migration 與 ORM 變更；production 的套用由人依 runbook 執行
 
 ## 判斷準則
 
 - `references/tools.md`：Drizzle / Prisma / Alembic / goose / wrangler d1 的檔案慣例、產生與套用指令、introspect 指令、各自會漏掉什麼（Step 0、2、4、5 必讀對應段）
 - `references/destructive.md`：加 NOT NULL、改型別、改主鍵、刪欄位、改名、加唯一約束、拆併表的 expand-migrate-contract 配方，含各引擎的差異與 SQLite 無 `ALTER COLUMN` 的走法（Step 2、3、7 必讀）
-
-## 常見失敗模式
-
-| 症狀 | 為什麼是錯的 |
-|---|---|
-| 照 schema.md 直接產一份完整 CREATE TABLE | 既有資料庫不是空的；migration 寫的是 diff（核心規則 3） |
-| 沒確認連線就跑 migrate | 那條連線可能指向 production，而這是唯一無法復原的錯誤（核心規則 1） |
-| 一個 migration 裡加表、改欄位、刪舊欄位一起做 | 出事時回不到中間狀態，只能整批回滾（核心規則 4） |
-| 直接把欄位改成 NOT NULL | 既有列有 NULL 就整個失敗；沒失敗代表你在空資料庫上測的（`references/destructive.md`） |
-| contract 階段跟 expand 一起跑掉 | 舊版程式碼還在讀那個欄位，線上立刻噴錯（核心規則 5） |
-| 用了 ORM 產生的 migration 沒打開看 | CHECK 與部分索引被默默放掉，落點表就變成謊言（核心規則 8） |
-| 跑完 up 沒跑 down 就說完成 | 出事時才發現回不去（核心規則 7） |
-| 只在空資料庫上驗證 | 回填錯誤與約束衝突全部被掩蓋（Step 5.5） |
-| 寫 migration 時覺得設計不好，順手改了欄位 | schema.md 與資料庫分岔，而且沒有人知道（核心規則 9） |

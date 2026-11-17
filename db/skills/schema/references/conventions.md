@@ -78,6 +78,5 @@ table 與欄位名取自模型的英文識別名（`Order` → `orders`、`unitP
 
 - 文件列出遷移順序：建表依外鍵相依由父到子，刪除反向。
 - 破壞性變更（改型別、改主鍵、刪欄位、既有表加 NOT NULL、加唯一約束）另列一段，每條寫：影響的表、是否需要回填、是否需要停機、回滾方式。
-- 加 NOT NULL 的標準三步：先加可空欄位 → 回填 → 再加約束。
-- 大表加索引寫明用非阻塞方式（PostgreSQL `CREATE INDEX CONCURRENTLY`）。
+- 每種破壞性變更怎麼拆步（加 NOT NULL 的三步、大表非阻塞建索引）不在這裡重寫，見 migrate skill 的配方（同一個 db plugin 內，從本檔所在資料夾算起的 `../../migrate/references/destructive.md`）。
 - 本 skill 不產 migration 檔；這段是給 `/db:migrate` 照著走的順序清單。

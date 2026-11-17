@@ -180,5 +180,6 @@ erDiagram
 3. …
 破壞性變更：<有的話逐條列出，無則「無」>
 模型回饋：<有的話列出，建議回 /domain:model 處理>
-下一步：/db:migrate 依本文件產生 migration 與 ORM schema；模型再變動就重跑 /db:schema 做增量更新。
+過期引用：<哪些文件還在引用被改掉的識別名（檔案 + 行號 + 結論是否受影響）；這次沒有改名就寫「無」>
+下一步：/db:migrate 依本文件產生 migration 與 ORM schema 並套用到本機驗證；模型再變動就重跑 /db:schema 做增量更新，不要直接改 migration 反推。
 ```

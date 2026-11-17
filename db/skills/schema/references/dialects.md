@@ -57,11 +57,6 @@ Step 0 決定引擎與版本後，只讀對應段落；全份 schema 的型別�
 
 ## ORM 注意事項
 
-| ORM | 注意 |
-|---|---|
-| Drizzle | schema 即 TypeScript；本文件的表名、欄位名可直接對應。部分索引、CHECK 需用 `sql` 模板 |
-| Prisma | `@map` / `@@map` 對應 snake_case；CHECK 與部分索引要用 migration 手寫 SQL；MongoDB 支援子集功能 |
-| SQLAlchemy / Alembic | 約束命名慣例用 `naming_convention` 設定，和本文件的命名段對齊 |
-| sqlc / goose | SQL 為主，本文件可直接當 DDL 藍本 |
+各 ORM 表達不出哪些約束（CHECK、部分索引）、怎麼用原生 SQL 補，見 migrate skill 的工具說明（同一個 db plugin 內，從本檔所在資料夾算起的 `../../migrate/references/tools.md`，各工具的「會漏掉」）。snake_case 的映射見 `conventions.md` 的命名段；Prisma 對 MongoDB 只支援子集功能。
 
 ORM 的能力不決定 schema 設計；做不到的部分寫進遷移段用原生 SQL 補，不要為了遷就 ORM 放掉約束。
