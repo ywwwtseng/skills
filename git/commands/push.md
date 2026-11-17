@@ -1,7 +1,7 @@
 ---
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git branch --show-current:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(git remote:*), Bash(git fetch:*), Bash(git rebase origin/:*), Bash(git rebase --abort:*), Bash(git push origin HEAD:*), Bash(gh auth status:*), Bash(gh run list:*), Bash(gh run watch:*), Bash(gh run view:*), Bash(gitleaks:*), Bash(pnpm typecheck:*), Bash(pnpm run typecheck:*), Bash(pnpm lint:*), Bash(pnpm run lint:*), Bash(pnpm test:*), Bash(pnpm run test:*), Bash(pnpm build:*), Bash(pnpm run build:*), Bash(npm typecheck:*), Bash(npm run typecheck:*), Bash(npm lint:*), Bash(npm run lint:*), Bash(npm test:*), Bash(npm run test:*), Bash(npm build:*), Bash(npm run build:*), Bash(yarn typecheck:*), Bash(yarn run typecheck:*), Bash(yarn lint:*), Bash(yarn run lint:*), Bash(yarn test:*), Bash(yarn run test:*), Bash(yarn build:*), Bash(yarn run build:*), Bash(bun typecheck:*), Bash(bun run typecheck:*), Bash(bun lint:*), Bash(bun run lint:*), Bash(bun test:*), Bash(bun run test:*), Bash(bun build:*), Bash(bun run build:*), Bash(cargo check:*), Bash(cargo clippy:*), Bash(cargo test:*), Bash(cargo build:*), Bash(uv run pytest:*), Bash(uv run mypy:*), Bash(uv run ruff:*), Bash(make typecheck:*), Bash(make lint:*), Bash(make test:*), Bash(make build:*), Read, Grep, Glob
 argument-hint: [base-branch]
-description: Push local commits straight to the default branch after a full validation gate — the everyday delivery path when work is not running under /impl:ship
+description: Push local commits straight to the default branch after a validation gate (the full suite when the version changes, the related tests otherwise) — the everyday delivery path when work is not running under /impl:ship
 ---
 
 ## Context
@@ -22,7 +22,7 @@ Remotes:
 
 Push the local commits on the default branch straight to `origin`, with no branch and no pull request.
 
-This is the everyday delivery path. Only `/impl:ship` delivers through `/git:pr --merge`; everything else — free-form changes, a standalone `/impl:fix`, `/impl:feature`, or `/impl:refactor` — ends here. Since no pull request and no pre-merge CI stand between these commits and the default branch, **this command's gate is the only gate**, so it always runs the full suite.
+This is the everyday delivery path. Only `/impl:ship` delivers through `/git:pr --merge`; everything else — free-form changes, a standalone `/impl:fix`, `/impl:feature`, or `/impl:refactor` — ends here. Since no pull request and no pre-merge CI stand between these commits and the default branch, **this command's gate is the only gate**: it runs the full suite whenever the version changes, and the tests related to the change otherwise (step 3).
 
 Arguments (`$ARGUMENTS`): a branch name to use as the base branch instead of the repository default.
 
@@ -51,15 +51,29 @@ git fetch origin <base>
 
 Nothing that is already on the remote may disappear: commits and files pushed from another computer or by someone else must all be in the history that goes out. Before moving on, confirm `git merge-base --is-ancestor origin/<base> HEAD` succeeds; if it does not, stop and report instead of pushing. Never skip this step and run `git push` by hand, even when the local branch looks like it is simply ahead — only the fetch shows what the remote really has.
 
-### 3. Gate: run the full suite
+### 3. Gate: run the validation
 
 Take the commands from `docs/architecture/testing.md`, otherwise the plan's validation table, otherwise `docs/architecture/tech-stack.md`, otherwise `package.json` scripts or the CI workflow. Run them on the rebased commits:
 
 1. Type check
 2. Lint
-3. **All tests** (`test`, not `test:affected` — the work before this point only ran the affected tests)
+3. **Tests** — the full suite or the related ones, by the rule below
 4. Build
 5. `test:smoke` when the project has a UI and `testing.md` defines it
+
+#### Full or scoped: decided by the version
+
+The end-to-end suite is the slow part, so its scope follows what is going out:
+
+- **A version change → the full suite.** If any outgoing commit changes the project's release version — the `version` field of `package.json` (or `pyproject.toml`, `Cargo.toml`, `app.json`／`app.config.*`, `build.gradle`, `Info.plist`…), or a version tag is being pushed with these commits — run every test, end-to-end included (`test`／the 「全部」 command in `docs/architecture/testing.md`). A release is what reaches users, so that is where cross-module breakage must be caught.
+- **Anything else → the related tests only.** Run the unit tests in full (they are fast), the build, and only the end-to-end specs related to the outgoing diff:
+  1. `test:affected` (or the 「相關」 command in `testing.md`) when the project defines one.
+  2. Otherwise pick them yourself from `git diff origin/<base>...HEAD --name-only`: every changed spec file; every spec that imports a changed module or helper; every spec that visits a changed page or calls a changed route (match the route path, the page's URL, and the component or view name); and, for a shared module (layout, auth, db client, fixtures, a component used across pages), every spec that depends on it — when in doubt, include the spec.
+  3. A change with no runtime effect (docs only, comments, a test-only refactor of one spec) runs just the specs it touched, or none.
+
+  List the specs you chose and why in the report, so the user can see what was and was not covered.
+
+Check for a version change with `git diff origin/<base>...HEAD -- package.json` (and the other manifests the project has) and look at the `version` line itself — a dependency bump in the same file is not a version change.
 
 Anything red → stop and report the failing command and its output. Do not push. Do not fix it here; hand it to `/impl:fix`.
 
@@ -100,7 +114,7 @@ If the repository has CI and `gh` is authenticated, find the run for the pushed 
 
 - The base branch and the commits pushed, oldest first
 - Whether step 2 rebased onto new remote commits
-- The gate commands run and their results
+- Whether the gate ran the full suite or the related tests (and why: the version change, or its absence), the commands run and their results — for a scoped run, the specs chosen
 - The secrets check: gitleaks result, or that it was not installed
 - CI status on the base branch
 - Anything that stopped the push, and which skill should handle it

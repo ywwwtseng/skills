@@ -143,7 +143,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | 怎麼下 | 走哪一套 |
 |---|---|
 | `/loop /impl:ship` | 完整流程：plan → feature → verify → `/git:pr --merge`。唯一開分支、開 PR 的路線；`/impl:ship` 只能手動下，不會被自動觸發 |
-| 其他一切（沒下指令的改動、單獨的 `/impl:fix`、`/impl:feature`、`/impl:refactor`） | 直推：改 → `test:affected` + typecheck → `/git:commit` → `/git:push`（跑全套後直推 base branch） |
+| 其他一切（沒下指令的改動、單獨的 `/impl:fix`、`/impl:feature`、`/impl:refactor`） | 直推：改 → `test:affected` + typecheck → `/git:commit` → `/git:push`（改版本號跑全套、其他跑相關測試後直推 base branch） |
 
 沒下指令的改動要照直推走，靠的是全域 `~/.claude/CLAUDE.md` 的 `## 交付流程` 段（所有專案共用一份，`/arch:init` 不再寫進專案；個別專案要走 PR 就在自己的 `CLAUDE.md` 覆寫）：
 
@@ -154,7 +154,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 
 - 只有 `/impl:ship`（通常是 `/loop /impl:ship`）走完整流程：plan → feature → verify → PR → merge。
 - 其他一律直推 base branch：沒下指令的改動、單獨跑的 `/impl:fix`、`/impl:feature`、`/impl:refactor`。
-  改 → 跑受影響的測試（`test:affected`，沒有就跑日常測試指令）+ typecheck → `/git:commit` → `/git:push`（跑全套後 push）。全套只在交付前跑一次，每個 task 不跑。
+  改 → 跑受影響的測試（`test:affected`，沒有就跑日常測試指令）+ typecheck → `/git:commit` → `/git:push`（改版本號才跑全套，其他只跑相關的 e2e，然後 push）。全套只在改版本號的交付前跑，每個 task 不跑。
   不開分支、不開 PR、不寫 plan、不跑 verify。這段就是對 commit 與 push 的授權，不用每次再問。
 - 例外：沒下指令的改動會碰到 business rules、DB schema / migration、API 契約時，先停下來說明，
   建議改走 `/domain:business-rules`、`/db:migrate` 或 `/api:contract`，不要直推。
@@ -194,7 +194,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | motion | find-animation-opportunities | `/motion:find-animation-opportunities`（也會自動載入） | 找還沒動但該動的地方，每個候選都要過頻率 / 目的 / 時長 / 功能四關，最多 5–7 條，並列出刻意不建議的地方；不改原始碼 |
 | motion | animation-vocabulary | `/motion:animation-vocabulary`（也會自動載入） | 把「popover 從按鈕長出來那種」這類模糊描述對應到正確的動效術語 |
 | git | commit | `/git:commit` | 檢視 `git status` / `git diff`，把待提交內容切成多個邏輯變更，逐一 stage（絕不 `git add -A` / `.` / `-u`，排除 `node_modules`、`dist`、`.env`、secrets）並建立 Conventional Commit 格式的 commit，直到沒有可提交的檔案，不 push |
-| git | push | `/git:push [base]` | 不走 `/impl:ship` 時的交付出口：確認在 base branch 上且工作區乾淨、`fetch` 後落後就 `rebase origin/<base>`（只重排沒推出去的 commit，衝突就 abort 停下）、跑全套閘門（typecheck / lint / 全部測試 / build，有畫面加 `test:smoke`——直推沒有 PR 與合併前 CI，這是唯一的閘門，所以不用 `test:affected`）、檢查外送 diff 的 secrets 與 build 產物、`git push origin HEAD:<base>`（不 force，被 branch protection 擋就建議 `/git:pr`），推完用 `gh run watch` 看 base 上的 CI，紅了建議 `/impl:fix` 不自動 revert |
+| git | push | `/git:push [base]` | 不走 `/impl:ship` 時的交付出口：確認在 base branch 上且工作區乾淨、`fetch` 後落後就 `rebase origin/<base>`（只重排沒推出去的 commit，衝突就 abort 停下）、跑驗證閘門（typecheck / lint / 測試 / build，有畫面加 `test:smoke`；外送 commit 有改版本號（`package.json` 的 `version` 等）才跑全部 e2e，其他改動跑全部單元測試加上跟 diff 相關的 e2e——有 `test:affected` 就用它，沒有就挑改到的 spec 和引用改到的模組、頁面、路由的 spec，並在回報列出挑了哪些）、檢查外送 diff 的 secrets 與 build 產物、`git push origin HEAD:<base>`（不 force，被 branch protection 擋就建議 `/git:pr`），推完用 `gh run watch` 看 base 上的 CI，紅了建議 `/impl:fix` 不自動 revert |
 | git | pr | `/git:pr [--merge] [base]` | **只給 `/impl:ship` 用**的交付出口，其他情況用 `/git:push`；把 feature 的 commit 變成可審查的 PR：commit 留在預設分支時先安全搬到 `feat/<feature>`（先建分支確認 commit 都在，再把本地 base 指回 `origin/<base>`，全程不 reset / rebase / cherry-pick）、跑驗證閘門（有 `verification.md` 就採信其 verdict，`fail` 直接停；沒有就實跑 typecheck / lint / test / build）、檢查外送 diff 有沒有 secrets 與 build 產物、`push -u` 後用 `gh` 開 PR，body 帶 task 表 / BR 覆蓋表 / 驗收結果 / 待處理 / 審查重點；plan 還有未完成 task 或有 findings 就開 draft；加 `--merge`（一人開發的無人看守模式，`/impl:verify` 是唯一閘門）時，在「非 draft + verdict 為 `pass` + CI 綠 + 無衝突 + 無 CHANGES_REQUESTED」全部成立下用 `--rebase --delete-branch` 合併（保留每個 task 的還原點，不 squash），再 `switch` 回 base 並 `pull --ff-only`，讓下一個 feature 從乾淨起點開始；沒有 `--merge` 就只開 PR，不 force push、不推預設分支 |
 | security | audit | `/security:audit`（僅手動執行，不會自動載入） | 依序跑五類掃描再由 Claude 分析：Secrets（Gitleaks，掃 git 全部歷史與工作目錄，一律 `--redact`）→ Dependencies（依 lockfile 選 npm / pnpm / yarn / bun audit，非 JS 專案用 Trivy fs）→ Source Code（Semgrep，`--metrics=off`、不用 `--config auto`）→ IaC（Trivy config，含 Terraform 與 tfvars）→ Docker（Trivy image，只掃本機已有的 image，不自動 build）→ Review（統一嚴重度、合併重複、**每條 HIGH 以上都打開原始碼確認**、誤報移到「已排除」，判「上游已有保護」時必須指出那道檢查的檔案行號並讀過實作，講不出利用路徑的（缺 header、一般性 DoS 等）寫進「其他觀察」而不列 finding、依框架列出全部對外入口後依風險深讀，照九類清單人工檢查掃描器看不到的問題（IDOR / mass assignment / RLS、JWT 與 session、跨檔案注入、SSRF / open redirect / CSRF / CORS / webhook 驗簽、檔案上傳、前端算的金額 / 負數 / 狀態跳步 / race condition、資料外洩、可預測的 token），再從六個攻擊者角度找信任缺口（失敗路徑、模組間隱含的信任、解析不一致、資訊洩漏、自稱的身分、驗過的物件與實際使用的不同），有 LLM 功能時加查模型輸出當不可信輸入、prompt 不是權限邊界、prompt injection、agent 權限、RAG 分租戶、無上限呼叫，有 business rules 時拿權限與約束規則當正確答案，報告寫明入口總數與深讀數），輸出 CRITICAL / HIGH / MEDIUM / LOW 計數、掃描涵蓋表（沒跑的標 `skipped`，絕不寫成「未發現問題」）與逐條 finding（File / Source / Fix；程式碼類 HIGH 以上另附 CWE、根因、證據鏈、對照、反證、證據缺口、升降條件與回歸測試寫法，可直接交給 `/impl:fix`）；原始報告放 repo 外的暫存目錄；只讀不改，不跑 `npm audit fix`、不 commit |
 | security | fix | `/security:fix`（僅手動執行，不會自動載入） | 照 `/security:audit` 的報告逐條修復：依「建議處理順序」一次拿一條，**動手前用 `AskUserQuestion` 問**（`修` / `跳過` / `之後再說` / `誤報`，Other 輸入「停」結束；指令後可事先帶處理方式，例如 `/security:fix 1 修 2 跳過`），選「修」就先寫報告裡的回歸測試並確認它失敗、做最小修改、確認測試通過且既有測試與 typecheck 沒壞，然後**直接 commit**（一條一個 `fix(security): …` commit，只 stage 這一條動到的檔案，報告檔不進 commit）並接著問下一條；驗收沒過就還原這一條的改動、標 `修復失敗`。套件漏洞升到報告寫的版本（major 先講明）、工作目錄的 secret 改讀環境變數、git 歷史裡的 secret 只記錄使用者是否已到服務商撤銷換發（不改寫歷史）、IaC 只改檔不套用。每條處理完立刻寫回報告檔：最前面的「處理紀錄」表（狀態 / commit / 回歸測試 / 日期）與每條底下的「處理」區塊，中斷後再跑會從沒處理完的接著做；沒有人能回答時不修任何東西。不 push（收尾建議 `/git:push`，再跑一次 `/security:audit` 驗證）；紀錄格式在 `security/skills/fix/references/record.md` |
