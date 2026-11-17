@@ -199,7 +199,7 @@ token 可以落在 CSS variables、Tailwind `@theme`、React Native StyleSheet �
 - **Tailwind v4**：`references/tokens.css` 的 `@theme` 區塊直接貼進全域 CSS（`@import "tailwindcss";`
   後面），只用 theme 裡的名字（`bg-shell`、`bg-surface`、`text-ink-2`、`rounded-lg`），
   不要用 `bg-[#f7f7f7]` 這種任意值。
-- **CSS / CSS Modules**：用檔案下半部的 `:root` 版本。
+- **CSS / CSS Modules**：把 `@theme {` 改成 `:root {` 整塊貼上（變數名不變），再加檔案最後的 `--radius-pill` 與 `--shadow-float`。
 - **React Native / 行動 app**：token 變成 `theme.ts` 常數；畫面底 `shell`、卡片白色色塊、
   `borderWidth: 0`、無陰影；浮層才用 `shadowOpacity`／`elevation`；膠囊按鈕照舊；safe area、
   44pt 點擊區與圖層見 `../../shared/interaction.md`。

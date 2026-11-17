@@ -1,9 +1,8 @@
 /*
  * Tonal UI 的 design token。規則與用途見 ../SKILL.md；這裡只放值。
  *
- * 上半部：Tailwind v4 的 @theme（接在 @import "tailwindcss"; 後面）＋元素基底。
- * 下半部：同一組值的 :root 版本，給沒有 Tailwind 的專案。
- * 改值時兩邊一起改。
+ * 值只有一份：Tailwind v4 的 @theme（接在 @import "tailwindcss"; 後面）＋元素基底。
+ * 沒有 Tailwind 的專案怎麼用，見檔案最後。
  *
  * 動它之前先讀 SKILL.md 的「顏色怎麼選」：殼與面板是中性灰白，主色是 ink，
  * 橘色只給連結、eyebrow 與唯一的強調色塊。
@@ -159,64 +158,11 @@
 }
 
 /* ==================================================================
- * 沒有 Tailwind 的專案：同一組值的 :root 版本
+ * 沒有 Tailwind 的專案：不另外抄一份值。把上面的 `@theme {` 改成 `:root {` 整塊貼上
+ * （變數名照舊：--color-*、--text-*、--radius-*、--z-index-*…），@layer base 照用，
+ * 再補下面兩個 Tailwind 內建、所以 @theme 裡沒有定義的值。
  * ================================================================== */
 :root {
-  --color-shell: #f7f7f7;
-  --color-background: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-muted: #fafafa;
-  --color-accent-soft: #fae6d9;
-  --color-accent-soft-solid: #fcf0e8;
-  --color-fill: rgb(0 0 0 / 0.05);
-  --color-fill-strong: rgb(0 0 0 / 0.08);
-  --color-fill-solid: #f2f2f2;
-  --color-ink: #171717;
-  --color-ink-2: #5a5a5a;
-  --color-ink-3: #858585;
-  --color-border: #ebebeb;
-  --color-border-muted: #f2f2f2;
-  --color-border-hover: #c9c9c9;
-  --color-action: #fa5d29;
-  --color-link: #ce4118;
-  --color-link-soft: #fff8f4;
-  --color-peach: #ff9667;
-  --color-success: #127a37;
-  --color-success-soft: #dcf5e3;
-  --color-danger: #c4241a;
-  --color-danger-soft: #fde4e1;
-  --color-danger-strong: #a01d14;
-  --color-warning: #9a5806;
-  --color-warning-soft: #fdefc8;
-  --color-avatar-1: #2f63c8;
-  --color-avatar-2: #1d7f52;
-  --color-avatar-3: #b8501a;
-  --color-avatar-4: #7446c2;
-  --color-avatar-5: #b8345f;
-  --color-avatar-6: #0f7480;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 12px;
-  --radius-pill: 999px;
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.03), 0 2px 8px -2px rgb(0 0 0 / 0.04);
-  --shadow-float: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --font-size-2xs: 10.5px;
-  --font-size-xs: 11.5px;
-  --font-size-sm: 12.5px;
-  --font-size-base: 13.5px;
-  --font-size-md: 14.5px;
-  --font-size-lg: 15px;
-  --font-size-xl: 17px;
-  --font-size-2xl: 19px;
-  --font-size-3xl: 27px;
-  --font-size-5xl: 44px;
-  --z-side-sticky: 40;
-  --z-header: 60;
-  --z-dock: 120;
-  --z-modal: 150;
-  --z-popover: 170;
-  --z-toast: 200;
-  --font-sans: "Geist", "Inter", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
-  --font-mono: "Geist Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
-  /* --touch-target-min 與 --safe-* 見上方，兩種專案共用 */
+  --radius-pill: 999px; /* 按鈕、chip、徽章、頭像（Tailwind 的 rounded-full） */
+  --shadow-float: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* 浮層（Tailwind 的 shadow-lg） */
 }

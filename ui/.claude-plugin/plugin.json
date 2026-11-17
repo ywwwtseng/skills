@@ -1,7 +1,7 @@
 {
   "name": "ui",
   "description": "UI：screens 寫畫面規格、preview 接資料前先看畫面並迭代到確認；視覺語言二選一——tonal-ui（後台與內部系統）、calm-ui（使用者端 Web 與行動 App）。",
-  "version": "0.21.1",
+  "version": "0.21.2",
   "author": {
     "name": "ywwwtseng"
   },
