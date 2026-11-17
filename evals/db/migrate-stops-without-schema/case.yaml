@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: migrate-stops-without-schema
+description: 沒有 docs/db/schema.md 時，要求寫 migration 會停下並建議 /db:schema，不憑一句話產生 migration
+tags: [migrate, precondition]
+context:
+  scaffold_script: scaffold.sh

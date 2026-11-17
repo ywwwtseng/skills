@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: init-needs-tech-stack
+description: 沒有 docs/architecture/tech-stack.md 時，/arch:init 不憑空建骨架：不產生 package.json 與原始碼，並指出需要技術選型
+tags: [init, precondition]
+context:
+  scaffold_script: scaffold.sh

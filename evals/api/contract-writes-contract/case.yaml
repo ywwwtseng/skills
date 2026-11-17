@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: contract-writes-contract
+description: 有 domain model 時，/api:contract 產出 docs/api/contract.md：有取消訂單的端點、錯誤碼表含 ORDER_ALREADY_SHIPPED 並追溯到規則，讀了 mapping.md，而且不寫實作
+tags: [contract]
+context:
+  scaffold_script: scaffold.sh

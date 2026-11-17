@@ -228,7 +228,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 
 ## 測試 skill 的行為
 
-`domain`、`impl`、`security` 有用 `claude plugin eval` 寫的行為測試，放在 repo 根目錄的 `evals/<plugin>/`。每個情境會在空白環境開一個 Claude Code session，只載入受測的 plugin 與它宣告的依賴（寫在每個情境 `prompt.md` 的 `plugins:`），送出一句使用者會講的話，再檢查 Claude 做了什麼（產生了哪些檔案、檔案內容、有沒有呼叫對的 skill、有沒有停下來）。同一個情境預設跑 3 次，並對照不裝 plugin 的結果，差距（`Δ`）就是 plugin 的貢獻。
+`domain`、`impl`、`security`、`ui`、`arch`、`db`、`api` 有用 `claude plugin eval` 寫的行為測試，放在 repo 根目錄的 `evals/<plugin>/`。每個情境會在空白環境開一個 Claude Code session，只載入受測的 plugin 與它宣告的依賴（寫在每個情境 `prompt.md` 的 `plugins:`），送出一句使用者會講的話，再檢查 Claude 做了什麼（產生了哪些檔案、檔案內容、有沒有呼叫對的 skill、有沒有停下來）。同一個情境預設跑 3 次，並對照不裝 plugin 的結果，差距（`Δ`）就是 plugin 的貢獻。
 
 | Plugin | 情境 | 檢查什麼 |
 |---|---|---|
@@ -240,8 +240,17 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | impl | `ship-preflight-stops` | 沒有 origin、沒有 tech-stack 時 `/impl:ship` 在起飛前檢查就停，不建 backlog、不排 plan、不寫程式碼 |
 | impl | `guard-asks-before-schema` | 沒下指令要改 `prisma/schema.prisma` 與一般程式檔：schema 沒被改（無人看守時確認視同拒絕）、一般程式檔照常寫入、回覆建議 `/db:migrate` |
 | security | `fix-waits-for-consent` | 沒有人回答確認問題時，`/security:fix` 不改任何程式碼、不新增測試，兩條 finding 都記成 `待處理` |
+| ui | `tonal-fires-for-console` | 後台介面的新畫面觸發 tonal-ui、不觸發 calm-ui，寫元件前有讀 `component-recipes.md` |
+| ui | `calm-fires-for-consumer-app` | 使用者端介面的新畫面觸發 calm-ui、不觸發 tonal-ui，寫畫面前有讀 `layout.md` |
+| ui | `ui-ignores-unrelated` | 跟畫面無關的程式碼請求不會觸發 ui 的 skill（防 description 過度觸發） |
+| arch | `init-needs-tech-stack` | 沒有 `tech-stack.md` 時 `/arch:init` 不憑空建骨架：不產生 `package.json` 與原始碼，並指出需要技術選型 |
+| db | `schema-writes-schema` | 有 domain model 時產出 `docs/db/schema.md`：有 `orders` 表、不變量落點含 `INV-ORD-001`、有讀 `mapping.md`，而且不產生 migration 檔 |
+| db | `migrate-stops-without-schema` | 沒有 `docs/db/schema.md` 時要求寫 migration 會停下、建議 `/db:schema`，不憑一句話產生 migration |
+| api | `contract-writes-contract` | 有 domain model 時產出 `docs/api/contract.md`：有取消訂單的端點、錯誤碼含 `ORDER_ALREADY_SHIPPED` 並追溯到規則、有讀 `mapping.md`，而且不寫實作 |
 
-**什麼時候跑**：改了 `domain`、`impl` 或 `security` 的 SKILL.md、references、hook 之後，升版本號之前跑一次；換新模型之後也值得跑一次。
+**什麼時候跑**：改了有情境的 plugin（`domain`、`impl`、`security`、`ui`、`arch`、`db`、`api`）的 SKILL.md、references、hook 之後，升版本號之前跑一次；換新模型之後也值得跑一次。「有讀 reference」那幾項是在防細則搬進 references 之後模型不去讀。
+
+`git` 沒有情境：`/git:commit`、`/git:push` 一開頭就要跑 git，而 macOS 的 `/usr/bin/git` 轉接程式要在系統暫存目錄寫快取，eval 的沙盒只准寫工作目錄，指令在呼叫模型之前就失敗（改 PATH 也沒用，情境檔不能設 PATH，沙盒也關不掉）。
 
 在 **repo 根目錄**執行（需要 Claude Code v2.1.269 以上）：
 
@@ -254,7 +263,7 @@ claude plugin eval . --eval-dir evals/domain --allow-tools Write Edit --scaffold
 
 - `--allow-tools Write Edit`：讓 Claude 可以寫檔，不給的話它只能讀
 - `--scaffold`：執行情境裡的 `scaffold.sh`，先建好測試用的規則文件與 git repo（腳本都是本 repo 自己寫的）
-- 每次執行都是真的模型呼叫，算在你的用量裡。兩個 plugin 完整跑一輪（各 3 次＋不裝 plugin 的對照）約 $3.5；改單一情境時用 `--case <名稱> --runs 1 --ablation none`，一次約 $0.05–0.25
+- 每次執行都是真的模型呼叫，算在你的用量裡。印出來的金額是照 API 定價換算的估計值，用訂閱登入時扣的是方案的用量額度。全部 15 個情境各跑 1 次、不含對照（`--runs 1 --ablation none`）約 $4；完整一輪（各 3 次＋不裝 plugin 的對照）大約是它的 6 倍。改單一情境時加 `--case <名稱>`，一次約 $0.05–0.7
 - 結果寫在 `evals/results/` 或 `evals/<plugin>/results/`（已加入 `.gitignore`），`report.html` 可看每次執行的細節
 
 **怎麼讀結果**：`WITH` 是裝 plugin 的分數，要維持 1.00。「應該停下來」的情境（`plan-stops-unreviewed`、`ship-preflight-stops`）不裝 plugin 也會拿到不少分，因為 Claude 什麼都不做也符合「沒寫檔案」，`Δ` 小是正常的；這類情境是防止日後改 skill 時把「該停」改壞。`br-ignores-unrelated` 的 `Δ` 本來就是 0。

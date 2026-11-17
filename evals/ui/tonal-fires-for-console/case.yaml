@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: tonal-fires-for-console
+description: 後台介面的新畫面觸發 tonal-ui（不是 calm-ui），並在寫元件前讀 component-recipes.md
+tags: [trigger, tonal-ui]
+context:
+  scaffold_script: scaffold.sh

@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: schema-writes-schema
+description: 有 domain model 時，/db:schema 產出 docs/db/schema.md：有 orders 表、不變量落點表含 INV-ORD-001，讀了 mapping.md，而且不產生 migration 檔
+tags: [schema]
+context:
+  scaffold_script: scaffold.sh

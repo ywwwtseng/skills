@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: calm-fires-for-consumer-app
+description: 使用者端介面的新畫面觸發 calm-ui（不是 tonal-ui），並在寫畫面前讀 layout.md
+tags: [trigger, calm-ui]
+context:
+  scaffold_script: scaffold.sh
