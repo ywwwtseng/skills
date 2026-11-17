@@ -1,4 +1,4 @@
 ---
 type: file_exists
-path: src/user.ts
+path: src/slug.ts
 ---
