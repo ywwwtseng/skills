@@ -87,7 +87,7 @@ If `gitleaks` is installed, scan the outgoing commits: `gitleaks git --log-opts=
 
 Stop and report the specific files if the diff contains:
 
-- `.env`, `.env.*`, credentials, private keys, tokens, or certificates with private material
+- `.env`, `.env.*` (template files such as `.env.example` are fine once their diff shows no real secret), credentials, private keys, tokens, or certificates with private material
 - `node_modules/`, `dist/`, `.next/`, `.turbo/`, or other build artifacts
 - Debug leftovers: `console.log` added for tracing, commented-out blocks, `TODO: remove`
 

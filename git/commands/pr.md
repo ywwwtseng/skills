@@ -79,22 +79,15 @@ A pull request must never be opened on red code.
 1. Look for `docs/impl/<feature>/verification.md`. If it exists and is newer than the last commit, use its verdict as the evidence.
    - Verdict `fail` → stop. Report the failing findings and tell the user to address them (`/impl:feature` for missing tasks, `/impl:fix` for defects) before opening the pull request.
    - Verdict `pass with findings` → continue, and carry the findings into the pull request body.
-2. If there is no usable verification report, run the project's validation commands yourself — take them from the plan's validation table, otherwise from `docs/architecture/tech-stack.md`, otherwise from `package.json` scripts or the CI workflow. Run type check, lint, the tests, and build. The tests follow the same rule as `/git:push`: **the full suite** (the 「全部」 command in `docs/architecture/testing.md`, e.g. `pnpm test`) when an outgoing commit changes the project's release version (the `version` field of `package.json` or the equivalent manifest) or a version tag goes out with them; otherwise the unit tests in full plus **only the end-to-end specs related to the diff** — `test:affected` when the project defines it, else the changed specs and every spec that imports a changed module, visits a changed page or calls a changed route (include a spec when in doubt). Say in the pull request body which it was, and for a scoped run list the specs.
+2. If there is no usable verification report, run the gate yourself. The rule is the one `/git:push` uses: read step 3 (「Gate: run the validation」) of `${CLAUDE_PLUGIN_ROOT}/commands/push.md` and follow it — where the commands come from, and full suite or related tests only (in short: every test when an outgoing commit changes the release version, otherwise the unit tests plus the end-to-end specs related to the diff). Say in the pull request body which it was, and for a scoped run list the specs.
    - Anything red → stop and report the failing command and its output. Do not open the pull request. Do not "fix" it here.
    - Recommend running `/impl:verify` first, since a green test run does not prove the business rules are covered.
 
 ### 4. Review the outgoing diff
 
-Run `git diff origin/<base>...HEAD --stat` for the file list, then read the full `git diff origin/<base>...HEAD` before pushing. Pushing is publication — what goes out is hard to take back. The file list alone does not show a key hard-coded inside an ordinary source file.
+Same review as step 4 (「Review the outgoing diff」) of `${CLAUDE_PLUGIN_ROOT}/commands/push.md`: read the full `git diff origin/<base>...HEAD`, scan the outgoing commits with `gitleaks` when it is installed (say so in the report when it is not), and stop on the items listed there — secrets and real env files, build artifacts, debug leftovers. Pushing is publication; the file list alone does not show a key hard-coded inside an ordinary source file.
 
-If `gitleaks` is installed, also scan the outgoing commits: `gitleaks git --log-opts="origin/<base>..HEAD"` (gitleaks before 8.19: `gitleaks detect --log-opts="origin/<base>..HEAD"`). Any finding → stop and report it. If it is not installed, say so in the report; reading the diff is then the only check.
-
-Stop and report if the diff contains:
-
-- `.env`, `.env.*`, credentials, private keys, tokens, or certificates with private material
-- `node_modules/`, `dist/`, `.next/`, `.turbo/`, or other build artifacts
-- Files clearly unrelated to this feature
-- Debug leftovers: `console.log` added for tracing, commented-out blocks, `TODO: remove`
+A pull request adds one more reason to stop: files clearly unrelated to this feature.
 
 Report the specific files and stop rather than editing them — correcting the history is the user's call.
 

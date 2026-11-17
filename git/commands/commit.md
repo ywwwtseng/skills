@@ -58,7 +58,7 @@ Stage only the files belonging to the logical change being committed in this rou
   - `.next/`
   - `.turbo/`
   - `.env`
-  - `.env.*`
+  - `.env.*` — except template files (`.env.example`, `.env.*.example`): commit those with the change that adds the variable, after reading their diff to confirm no real key, password or bucket name was filled in
   - credentials
   - private keys
   - certificates containing private material
