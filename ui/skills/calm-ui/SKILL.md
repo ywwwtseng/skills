@@ -6,7 +6,7 @@ description: Calm UI——使用者端 Web 與行動 App 的視覺與互動語�
 # Calm UI：智慧來自行為，不是裝飾
 
 給消費級的 AI 產品用的視覺與互動語言——AI 助理、agent 產品、服務中心、生產力與任務型 app。
-所有數值在 `references/tokens.css`（可直接貼），版面與排版（頁面結構、欄寬、字級用途、對齊、間距節奏、斷點）在 `references/layout.md`，五種畫面的版型與文案在 `references/patterns.md`，跟 tonal-ui 共用的互動規則（按鈕順序、操作回饋、safe area、點擊區、圖層）在 `../../shared/interaction.md`。
+所有數值在 `references/tokens.css`（可直接貼），版面與排版（頁面結構、欄寬、字級用途、對齊、間距節奏、斷點）在 `references/layout.md`，設定類畫面在 `references/settings.md`，登入按鈕、選項面板、滑動動作、編輯模式、內嵌網頁在 `references/interactions.md`，五種畫面的版型與文案在 `references/patterns.md`，跟 tonal-ui 共用的互動規則（按鈕順序、操作回饋、safe area、點擊區、圖層）在 `../../shared/interaction.md`。
 **寫任何畫面之前先讀 `layout.md`**——token 只決定東西長什麼樣，排版亂是因為沒有規則決定東西放在哪、之間隔多遠。
 
 **同一個介面內跟 `/ui:tonal-ui` 二選一。** 那套是 console・後台與內部系統的淺色語言（白卡片、灰底、色塊分層）；
@@ -129,7 +129,7 @@ Agent 偵測 → Agent 摘要 → 使用者決定 → Agent 執行 → Agent 回
 動作 →
 ```
 
-而不是四張卡片疊在一起。卡片只在**資訊真的屬於一組**、或**需要獨立的互動狀態**時才用——設定頁的組就是這種情況（`layout.md` 的「設定與設定列」），它也只是一塊沒有框線的 `--color-surface` 底色。
+而不是四張卡片疊在一起。卡片只在**資訊真的屬於一組**、或**需要獨立的互動狀態**時才用——設定頁的組就是這種情況（`references/settings.md`），它也只是一塊沒有框線的 `--color-surface` 底色。
 
 ## 圖示
 
@@ -141,7 +141,7 @@ Agent 偵測 → Agent 摘要 → 使用者決定 → Agent 執行 → Agent 回
 
 **只有圖示、沒有文字的按鈕一律是正圓**，浮動在內容上的有淡底、頁首標題旁的沒有；規格在 `layout.md` 的「尺寸」。
 
-**唯一的例外是第三方登入按鈕**（Sign in with Apple／Google）：品牌標誌照提供者的規範，Google 的 G 保留官方四色，按鈕也照提供者的樣式做（膠囊、文字左邊放標誌），不受「圖示單色」與「一個畫面最多一顆 primary」限制。規格在 `layout.md` 的「第三方登入按鈕」。
+**唯一的例外是第三方登入按鈕**（Sign in with Apple／Google）：品牌標誌照提供者的規範，Google 的 G 保留官方四色，按鈕也照提供者的樣式做（膠囊、文字左邊放標誌），不受「圖示單色」與「一個畫面最多一顆 primary」限制。規格在 `references/interactions.md` 的「第三方登入按鈕」。
 
 ## 五種畫面與 Agent 狀態
 
@@ -172,7 +172,7 @@ Agent 偵測 → Agent 摘要 → 使用者決定 → Agent 執行 → Agent 回
 
 **不要把桌面儀表板縮小塞進手機。**
 
-行動端的互動慣例在 `layout.md`，做到就先讀那一節：列的滑動動作、選項面板、編輯模式、內嵌網頁、覆蓋層（toast 的位置）、操作回饋。
+行動端的互動慣例做到就先讀那一節：列的滑動動作、選項面板、編輯模式、內嵌網頁在 `references/interactions.md`；覆蓋層（toast 的位置）與操作回饋在 `layout.md`。
 
 ## 動手的順序
 

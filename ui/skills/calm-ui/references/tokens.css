@@ -118,7 +118,7 @@
   --settings-row-height: 52px;
 
   /* ── 形狀 ───────────────────────────────────────────────────
-     圓角克制。全圓角只給 chip、帶文字的小按鈕、只有圖示的正圓按鈕（layout.md「尺寸」）與第三方登入按鈕（layout.md「第三方登入按鈕」） */
+     圓角克制。全圓角只給 chip、帶文字的小按鈕、只有圖示的正圓按鈕（layout.md「尺寸」）與第三方登入按鈕（interactions.md「第三方登入按鈕」） */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
