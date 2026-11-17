@@ -35,14 +35,14 @@
 
 ### POST /orders/{id}/cancel
 
-- **來源**：`order.md#Order.cancel`（命令）、`BR-order-031`
+- **來源**：`order.md#Order.cancel`（命令）、`order/BR-ORD-031`
 - **權限**：訂單擁有者，或具備 `order:manage` 的管理者
 - **冪等**：需要 `Idempotency-Key`
 - **request**
 
   | 欄位 | 型別 | 必填 | 來源 | 說明 |
   |---|---|---|---|---|
-  | reason | string | 是 | `BR-order-033` | 1–200 字 |
+  | reason | string | 是 | `order/BR-ORD-033` | 1–200 字 |
 
 - **response 200**
 
@@ -58,7 +58,7 @@
 
 | 錯誤碼 | status | 何時發生 | 客戶端該怎麼處理 | 來源 |
 |---|---|---|---|---|
-| `ORDER_CANCEL_WINDOW_EXPIRED` | 409 | 付款後超過 7 天 | 顯示訊息，隱藏取消按鈕 | `BR-order-031` |
+| `ORDER_CANCEL_WINDOW_EXPIRED` | 409 | 付款後超過 7 天 | 顯示訊息，隱藏取消按鈕 | `order/BR-ORD-031` |
 | `ORDER_NOT_CANCELLABLE` | 409 | 目前狀態不允許取消 | 重新取資料後更新畫面 | `order.md#Order.status` |
 
 ### 錯誤 envelope
@@ -76,8 +76,8 @@
 
 | BR-ID | 失敗情境 | 錯誤碼 |
 |---|---|---|
-| BR-order-031 | 超過可取消期限 | `ORDER_CANCEL_WINDOW_EXPIRED` |
-| BR-order-034 | <摘要> | **未覆蓋** — <原因> |
+| order/BR-ORD-031 | 超過可取消期限 | `ORDER_CANCEL_WINDOW_EXPIRED` |
+| order/BR-ORD-034 | <摘要> | **未覆蓋** — <原因> |
 
 ## 事件與推播
 
@@ -117,9 +117,10 @@
 
 ## 對話摘要格式
 
-1. 寫入的檔案與這次動了什麼
-2. 規模：端點數、錯誤碼數、事件數
-3. 覆蓋：模型命令 N 落地 M；BR 失敗情境 N 條對應 M 個錯誤碼（未覆蓋逐條列原因）
-4. 破壞性變更與對舊版客戶端的影響
-5. 最值得確認的 3 個假設
-6. 下一步：`/impl:plan`；伺服器端 feature 先於客戶端 feature
+1. 寫入 / 修改的檔案與這次動了什麼
+2. 規模：端點數、錯誤碼數、事件 / 推播數
+3. 覆蓋統計：模型命令 N 個落地 M 個、BR 失敗情境 N 條對應 M 個錯誤碼（未覆蓋的逐條列出原因）
+4. **破壞性變更**（若有）與對舊版客戶端的影響
+5. 最值得確認的 3 個契約假設
+6. 上游回饋（若有），建議跑 `/domain:feedback`
+7. 下一步：`/impl:plan` 讀本文件排 task。**多客戶端專案的順序固定是伺服器端先、客戶端後**——契約先實作出來並進 main，客戶端的 feature 才開始，否則客戶端會對著一份還沒實現的文件寫程式
