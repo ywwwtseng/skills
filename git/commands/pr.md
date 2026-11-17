@@ -1,7 +1,7 @@
 ---
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git branch --show-current:*), Bash(git branch -f:*), Bash(git branch --list:*), Bash(git switch:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(git remote:*), Bash(git fetch:*), Bash(git pull --ff-only:*), Bash(git push -u origin:*), Bash(gh auth status:*), Bash(gh pr view:*), Bash(gh pr create:*), Bash(gh pr edit:*), Bash(gh pr checks:*), Bash(gh pr merge:*), Bash(gitleaks:*), Bash(pnpm typecheck:*), Bash(pnpm run typecheck:*), Bash(pnpm lint:*), Bash(pnpm run lint:*), Bash(pnpm test:*), Bash(pnpm run test:*), Bash(pnpm build:*), Bash(pnpm run build:*), Bash(npm typecheck:*), Bash(npm run typecheck:*), Bash(npm lint:*), Bash(npm run lint:*), Bash(npm test:*), Bash(npm run test:*), Bash(npm build:*), Bash(npm run build:*), Bash(yarn typecheck:*), Bash(yarn run typecheck:*), Bash(yarn lint:*), Bash(yarn run lint:*), Bash(yarn test:*), Bash(yarn run test:*), Bash(yarn build:*), Bash(yarn run build:*), Bash(bun typecheck:*), Bash(bun run typecheck:*), Bash(bun lint:*), Bash(bun run lint:*), Bash(bun test:*), Bash(bun run test:*), Bash(bun build:*), Bash(bun run build:*), Bash(cargo check:*), Bash(cargo clippy:*), Bash(cargo test:*), Bash(cargo build:*), Bash(uv run pytest:*), Bash(uv run mypy:*), Bash(uv run ruff:*), Bash(make typecheck:*), Bash(make lint:*), Bash(make test:*), Bash(make build:*), Read, Grep, Glob, Write, AskUserQuestion
 argument-hint: [--merge] [base-branch]
-description: Move the current feature branch's commits to a reviewable pull request, with traceability back to the plan and business rules; with --merge, land it and return to the base branch
+description: Open a pull request for the current feature's commits with traceability to the plan and rules; --merge lands it and returns to the base branch
 ---
 
 ## Context
@@ -22,7 +22,7 @@ Remotes:
 
 Take the commits produced by this feature's implementation and turn them into one reviewable pull request.
 
-This is the exit of the pipeline: `/domain:business-rules` → `/domain:model` → `/db:schema` → `/impl:plan` → `/impl:feature` → `/git:commit` → **`/git:pr`**. Every earlier step refuses to push, so nothing leaves the machine until this command runs.
+This is the exit of the pipeline: `/domain:business-rules` → `/domain:model` → `/db:schema` → `/impl:plan` → `/impl:feature` → `/git:commit` → **`/git:pr`**.
 
 This is the delivery path for `/impl:ship` only. Outside it, work is pushed straight to the default branch with `/git:push`; use this command by hand only when the user explicitly asks for a pull request.
 
@@ -79,7 +79,7 @@ A pull request must never be opened on red code.
 1. Look for `docs/impl/<feature>/verification.md`. If it exists and is newer than the last commit, use its verdict as the evidence.
    - Verdict `fail` → stop. Report the failing findings and tell the user to address them (`/impl:feature` for missing tasks, `/impl:fix` for defects) before opening the pull request.
    - Verdict `pass with findings` → continue, and carry the findings into the pull request body.
-2. If there is no usable verification report, run the project's validation commands yourself — take them from the plan's validation table, otherwise from `docs/architecture/tech-stack.md`, otherwise from `package.json` scripts or the CI workflow. Run type check, lint, the tests, and build. The tests follow the same rule as `/git:push`: **the full suite** (the 「全部」 command in `docs/architecture/testing.md`, e.g. `pnpm test:full`) when an outgoing commit changes the project's release version (the `version` field of `package.json` or the equivalent manifest) or a version tag goes out with them; otherwise the unit tests in full plus **only the end-to-end specs related to the diff** — `test:affected` when the project defines it, else the changed specs and every spec that imports a changed module, visits a changed page or calls a changed route (include a spec when in doubt). Say in the pull request body which it was, and for a scoped run list the specs.
+2. If there is no usable verification report, run the project's validation commands yourself — take them from the plan's validation table, otherwise from `docs/architecture/tech-stack.md`, otherwise from `package.json` scripts or the CI workflow. Run type check, lint, the tests, and build. The tests follow the same rule as `/git:push`: **the full suite** (the 「全部」 command in `docs/architecture/testing.md`, e.g. `pnpm test`) when an outgoing commit changes the project's release version (the `version` field of `package.json` or the equivalent manifest) or a version tag goes out with them; otherwise the unit tests in full plus **only the end-to-end specs related to the diff** — `test:affected` when the project defines it, else the changed specs and every spec that imports a changed module, visits a changed page or calls a changed route (include a spec when in doubt). Say in the pull request body which it was, and for a scoped run list the specs.
    - Anything red → stop and report the failing command and its output. Do not open the pull request. Do not "fix" it here.
    - Recommend running `/impl:verify` first, since a green test run does not prove the business rules are covered.
 
@@ -150,8 +150,8 @@ Fill every section from files, not from memory. Omit a section only when the sou
 
 | BR-ID | 規則摘要 | 測試 |
 |---|---|---|
-| BR-order-012 | <summary> | `src/domain/order.test.ts` |
-| BR-order-018 | <summary> | **未覆蓋** — <reason> |
+| order/BR-ORD-012 | <summary> | `src/domain/order.test.ts` |
+| order/BR-ORD-018 | <summary> | **未覆蓋** — <reason> |
 
 ## 驗收
 

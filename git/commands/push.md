@@ -1,7 +1,7 @@
 ---
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git branch --show-current:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(git remote:*), Bash(git fetch:*), Bash(git rebase origin/:*), Bash(git rebase --abort:*), Bash(git push origin HEAD:*), Bash(gh auth status:*), Bash(gh run list:*), Bash(gh run watch:*), Bash(gh run view:*), Bash(gitleaks:*), Bash(pnpm typecheck:*), Bash(pnpm run typecheck:*), Bash(pnpm lint:*), Bash(pnpm run lint:*), Bash(pnpm test:*), Bash(pnpm run test:*), Bash(pnpm build:*), Bash(pnpm run build:*), Bash(npm typecheck:*), Bash(npm run typecheck:*), Bash(npm lint:*), Bash(npm run lint:*), Bash(npm test:*), Bash(npm run test:*), Bash(npm build:*), Bash(npm run build:*), Bash(yarn typecheck:*), Bash(yarn run typecheck:*), Bash(yarn lint:*), Bash(yarn run lint:*), Bash(yarn test:*), Bash(yarn run test:*), Bash(yarn build:*), Bash(yarn run build:*), Bash(bun typecheck:*), Bash(bun run typecheck:*), Bash(bun lint:*), Bash(bun run lint:*), Bash(bun test:*), Bash(bun run test:*), Bash(bun build:*), Bash(bun run build:*), Bash(cargo check:*), Bash(cargo clippy:*), Bash(cargo test:*), Bash(cargo build:*), Bash(uv run pytest:*), Bash(uv run mypy:*), Bash(uv run ruff:*), Bash(make typecheck:*), Bash(make lint:*), Bash(make test:*), Bash(make build:*), Read, Grep, Glob
 argument-hint: [base-branch]
-description: Push local commits straight to the default branch after a validation gate (the full suite when the version changes, the related tests otherwise) — the everyday delivery path when work is not running under /impl:ship
+description: Push local commits straight to the default branch after a validation gate — the everyday delivery path outside /impl:ship
 ---
 
 ## Context

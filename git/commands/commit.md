@@ -88,7 +88,7 @@ If the staged diff contains unrelated or unsafe changes, do not commit them. Cor
 
 ### 5. Create the commit
 
-Write a concise 1–2 sentence commit message focused on WHY the change was made.
+Write a concise 1–2 sentence commit message focused on WHY the change was made. When the calling skill asks for a body (`/impl:fix` records the root cause, `/impl:refactor` what was restructured), add that body below the subject.
 
 Use Conventional Commits format:
 
@@ -115,7 +115,7 @@ Commit message rules:
 - Do not combine unrelated changes into one commit.
 - Focus the description on WHY the change was made rather than merely listing implementation details.
 - Keep the description concise.
-- Do not mention Claude or AI in the commit message.
+- Do not mention Claude or AI in the subject or body; the `Co-Authored-By` trailer is the only place.
 - Do not use vague messages such as:
   - `update code`
   - `fix stuff`
@@ -145,7 +145,7 @@ Create the commit using this exact structure:
 git commit -m "$(cat <<'EOF'
 <type>(<optional scope>): <description>
 
-Co-Authored-By: Claude
+Co-Authored-By: <the model actually running this session> <noreply@anthropic.com>
 EOF
 )"
 ```
