@@ -10,71 +10,71 @@
     {
       "name": "domain",
       "source": "./domain",
-      "description": "領域建模：business-rules 從問題與功能描述推導可驗證的 business rules（docs/domain/business-rules/<主題>.md）；model 把規則累積成概念層 domain model，依聚合分檔輸出 docs/domain/model/<聚合>.md；feedback 收齊實作階段累積的上游回饋，分類後路由回對應 skill 修正，並追 BR → model → schema → task 的漣漪；review 逐條審查一份規則文件（含 AI 另外寫好的），一次只拿一條給使用者裁定，附判斷（出處 / 邊界 / 衝突 / 牽動），裁定後把整份文件的連帶修改一次改完；br-review-gate hook 在規則文件還沒 /domain:review 審過時擋下對原始碼的寫入（含 Bash 寫檔）（可用影響範圍限縮）",
-      "version": "0.10.0",
+      "description": "領域建模：business-rules 推導規則、model 建概念層模型、review 逐條裁定規則、feedback 處理實作回報的上游回饋；br-review-gate hook 在規則未審查時擋下對原始碼的寫入。",
+      "version": "0.11.0",
       "category": "productivity"
     },
     {
       "name": "arch",
       "source": "./arch",
-      "description": "架構決策：/arch:tech-stack 透過多輪問答為新專案選型 frontend / mobile / backend / database / infra 與架構模式，輸出 docs/architecture/tech-stack.md；/arch:init 依該文件初始化專案骨架與工具鏈；/arch:test-strategy 決定規則類型 → 測試層的對照並建好測試資料庫與分層指令，輸出 docs/architecture/testing.md，開發中的專案（含零測試）先盤點現況、依風險補特徵測試",
-      "version": "0.13.0",
+      "description": "架構決策：tech-stack 技術選型、init 依選型建專案骨架與工具鏈、test-strategy 定測試分層並建測試環境。",
+      "version": "0.14.0",
       "category": "productivity"
     },
     {
       "name": "db",
       "source": "./db",
-      "description": "資料庫設計：schema 把 docs/domain/model/ 的概念層 domain model 轉成可實作的資料庫 schema，輸出 docs/db/schema.md（table、欄位型別、鍵、索引、約束、不變量落點、遷移順序）；migrate 依該文件算出與現況的 diff、產生可回滾的 migration 與 ORM schema、只對本機或開發資料庫套用並驗證，破壞性變更拆成 expand-migrate-contract 並只產檔不執行",
-      "version": "0.3.1",
+      "description": "資料庫設計：schema 把 domain model 轉成 docs/db/schema.md、migrate 產生可回滾的 migration 並套用到本機。",
+      "version": "0.4.0",
       "category": "productivity"
     },
     {
       "name": "api",
       "source": "./api",
-      "description": "介面契約：contract 把 docs/domain/model/ 的命令、查詢與領域事件轉成客戶端可依賴的 API 契約，輸出 docs/api/contract.md（端點、request / response、錯誤碼、認證授權、冪等與重試、相容性與棄用），每個欄位與錯誤碼都追溯回模型元素與規則 ID",
-      "version": "0.1.0",
+      "description": "介面契約：contract 把 domain model 的命令、查詢與事件轉成 docs/api/contract.md。",
+      "version": "0.2.0",
       "category": "productivity"
     },
     {
       "name": "impl",
       "source": "./impl",
-      "description": "實作執行：ship 是外層總調度，維護 docs/impl/backlog.md 的 feature 佇列並一輪推進一步（判斷階段 → 呼叫一個 skill → 回寫狀態）；plan 把一個 feature 的規則 / 模型 / schema 切成可獨立驗證、可續跑的 task 清單；feature 依該清單逐個 task 實作、驗收、回寫狀態並各自 commit；verify 在開 PR 前逐條核對規則覆蓋、不變量落點、測試誠信與範圍；fix 是 plan 之外的修復迴路，先分流是實作問題還是規則缺漏，再用 regression test 釘住 bug 並修 root cause；refactor 收齊被禁止順手改的技術債（plan 備註、verify 的 low findings、fix 發現但沒修的），在測試保護下做行為不變的改善，不准改測試；direct-push-guard hook 在沒下指令卻要改 DB schema / migration、API 契約、規則文件（或跑 migration 產生器）時跳出確認",
-      "version": "0.17.0",
+      "description": "實作執行：ship 無人看守總調度、plan 切 task、feature 逐個 task 實作、verify 開 PR 前稽核、fix 修缺陷、refactor 清技術債；direct-push-guard hook 在沒下指令卻要改 schema、契約或規則文件時要求確認。",
+      "version": "0.18.0",
       "category": "productivity"
     },
     {
       "name": "ui",
       "source": "./ui",
-      "description": "UI：screens 把規則、模型與契約轉成畫面規格（畫面地圖、顯示什麼、可觸發哪些命令、每種狀態下看到什麼、每個錯誤碼的畫面行為），依畫面分檔輸出 docs/ui/screens/；preview 在接資料前把畫面做成只吃 props 的正式元件、每個狀態截圖給使用者看並迭代到確認，確認稿鎖進 docs/ui/preview/ 當之後的視覺驗收依據，tweak 對已實作畫面做改前 / 改後調整，可選擇搭配 Figma MCP；視覺語言二選一——tonal-ui 給後台與內部系統（淺色、中性深色主色、膠囊按鈕、框線盡量少用、用底色色塊分層），calm-ui 給消費級 AI-native 產品（深色優先、極少裝飾、智慧用行為表達而不是發光球與漸層，含 Agent Feed / 對話 / 任務 / 狀態 / 通知的版型）",
-      "version": "0.20.0",
+      "description": "UI：screens 寫畫面規格、preview 接資料前先看畫面並迭代到確認；視覺語言二選一——tonal-ui（後台與內部系統）、calm-ui（使用者端 Web 與行動 App）。",
+      "version": "0.21.0",
       "category": "design"
     },
     {
       "name": "motion",
       "source": "./motion",
-      "description": "動效：取自 Emil Kowalski 的 animation skills（MIT）——animate 依序決定要不要動、目的、工具、屬性、曲線與時長、中斷與退場後寫出 web 動畫；animate-expo 是 React Native / Expo 版（Reanimated、Gesture Handler、haptics）；animation-performance 找掉幀原因；review-animations 用嚴格標準審查動畫程式碼（只手動執行）；improve-animations 稽核整個 codebase 的動效並寫成可交辦的修正計畫；find-animation-opportunities 找該動與不該動的地方；animation-vocabulary 把模糊描述對應到動效術語。只管動效，視覺風格交給 /ui:tonal-ui 或 /ui:calm-ui",
-      "version": "0.1.0",
+      "description": "動效（取自 Emil Kowalski 的 animation skills，MIT）：animate、animate-expo 做動畫，animation-performance 找掉幀原因，review-animations、improve-animations、find-animation-opportunities 審查與稽核，animation-vocabulary 查術語。視覺風格交給 /ui:tonal-ui 或 /ui:calm-ui。",
+      "version": "0.1.1",
       "category": "design"
     },
     {
       "name": "git",
       "source": "./git",
-      "description": "git 工作流：commit 檢視變更、把待提交內容切成多個邏輯變更，逐一建立 Conventional Commit 格式的 commit 直到沒有可提交的檔案，不推送；push 是日常交付出口，在 base branch 上跑驗證閘門（改版本號才跑全部 e2e，其他只跑相關 e2e）、檢查外送 diff 後直推，再看 base 上的 CI；pr 只給 /impl:ship 用，把 feature 的 commit 移到分支、跑驗證閘門、push 並開帶追溯表的 pull request，加 --merge 時在 CI 綠且 verdict 為 pass 後以 rebase 合併並切回 base branch",
-      "version": "0.9.0",
+      "description": "git 工作流：commit 切成多個 Conventional Commit、push 驗證後直推 base branch（日常交付）、pr 開 PR 並可合併（只給 /impl:ship 用）。",
+      "version": "0.10.0",
       "category": "productivity"
     },
     {
       "name": "security",
       "source": "./security",
-      "description": "資安掃描：audit 依序跑 Gitleaks（secrets，含 git 歷史）→ npm / pnpm / yarn / bun audit（套件漏洞）→ Semgrep（原始碼）→ Trivy config（Terraform 等 IaC）→ Trivy image（Docker），再由 Claude 讀程式碼排除誤報、合併重複、統一嚴重度並補查授權與注入，輸出 CRITICAL / HIGH / MEDIUM / LOW 計數與逐條 finding；只掃描與回報，不修改任何檔案；fix 照 audit 報告逐條修復：每條動手前先問、修完直接 commit、處理結果寫回報告",
-      "version": "0.4.0",
+      "description": "資安：audit 跑掃描器並由 Claude 分析出分級報告（只讀）、fix 照報告逐條問、修、commit 並記錄。",
+      "version": "0.5.0",
       "category": "security"
     },
     {
       "name": "docs",
       "source": "./docs",
-      "description": "文件整理：tidy 替 docs/ 瘦身但不改寫任何規則的語意——已合併 feature 的 plan.md 把做完的 task 收成一行（保留來源與 commit，漣漪仍追得到）、verification.md 與舊 audit 報告移到 docs/archive/、被整段貼到下游文件的規則內文改成引用 ID、找出懸空引用與孤兒元素等過時內容列成清單一次問完；做完、搬走、改引用是機械性的直接做，過時與否由人裁定，上游文件的內容變更交回各自的 skill",
-      "version": "0.2.0",
+      "description": "文件整理：tidy 替 docs/ 瘦身但不改規則語意（收合做完的、歸檔、複製內文改回引用、過時內容列清單問）。",
+      "version": "0.3.0",
       "category": "productivity"
     }
   ]
