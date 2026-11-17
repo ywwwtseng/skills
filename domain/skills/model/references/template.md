@@ -285,5 +285,5 @@ classDiagram
 1. <元素>：… （<slug>/BR-XXX-nnn）
 2. …
 3. …
-下一步：依模型建 type / class 與測試；資料庫 schema 用 /db:schema 依本模型產出。
+下一步：資料庫用 /db:schema、對外介面用 /api:contract、有畫面的專案再用 /ui:screens（三者都以本模型為依據，分別回答「狀態怎麼存」「外界怎麼呼叫」「使用者看到什麼」，都不反向修改模型）。
 ```
