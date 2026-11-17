@@ -49,7 +49,7 @@
 # 訂單詳情
 
 > 介面：`apps/mobile`（`/ui:calm-ui`）
-> 來源：`order.md#Order`、`BR-order-031`　|　端點：`GET /orders/{id}`
+> 來源：`order.md#Order`、`order/BR-ORD-031`　|　端點：`GET /orders/{id}`
 > 進入點：訂單列表、推播、深連結 `app://orders/{id}`
 
 ## 用途

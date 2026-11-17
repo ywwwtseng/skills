@@ -1,6 +1,6 @@
 ---
 name: tonal-ui
-description: Tonal UI——後台與內部系統的淺色視覺語言：中性黑白灰色票與偏小偏密的字級、膠囊按鈕、中性深色主色（ink）、顏色只給有語意的東西；框線盡量少用，區塊靠色塊分開（頂端列、側邊導覽、內容區共用一片淺灰殼、不畫分隔線，白色面板浮在上面）。含完整的 design token（顏色／字級／圓角／陰影／斷點，Tailwind v4 `@theme` 與 `:root` 兩版）、元件規則、文案與資訊密度、safe area 與點擊區，以及交件前檢查清單。當使用者要做**後台或內部系統**的新畫面、新元件、改版既有 UI、做 design review、或把這套風格搬到另一個技術棧（CSS / Tailwind / React Native）時使用。同一個介面內跟 /ui:calm-ui 二選一、不可混用：console・後台與內部系統用本 skill（淺色、色塊分層），使用者端 Web 與行動 App 用 calm-ui（深色、極少裝飾）；同一個專案的不同介面可以各用一套。
+description: Tonal UI——後台與內部系統的淺色視覺語言：中性色票、偏小偏密的字級、膠囊按鈕、顏色只給有語意的東西、區塊靠色塊分開而不是框線；含 design token、元件規則與交件前檢查清單。當使用者要做後台或內部系統的新畫面、新元件、改版、design review，或把這套風格搬到另一個技術棧時使用。同一個介面跟 /ui:calm-ui 二選一（使用者端 Web 與行動 App 用 calm-ui）。
 ---
 
 # Tonal UI：色塊分層、框線少用、顏色只給語意
@@ -24,7 +24,8 @@ token 可以落在 CSS variables、Tailwind `@theme`、React Native StyleSheet �
 **這個介面查到的是另一套，就停下來說明，不要改用這一套做。** 混用會得到一個既不像工具也不像產品的東西，而且下一個 session 會再混一次。
 
 新做一個畫面、加一個元件、或把既有畫面改成這套風格時照這份做。所有數值在
-`references/tokens.css`（可直接貼），常見元件的寫法在 `references/component-recipes.md`。
+`references/tokens.css`（可直接貼），元件的規則與寫法在 `references/component-recipes.md`，
+跟 calm-ui 共用的互動規則（按鈕順序、操作回饋、safe area、點擊區、圖層）在 `../../shared/interaction.md`。
 
 ## 一句話
 
@@ -65,6 +66,8 @@ token 可以落在 CSS variables、Tailwind `@theme`、React Native StyleSheet �
 - 頁首只留：標題（`text-3xl`）+ 右上角動作，**不配副標**。**頁面唯一的主要動作**放右上，
   實心深色按鈕。
 - 面板裡要再分一欄（左邊清單、右邊內容）時，清單那欄鋪 `surface-muted`，不畫分隔線。
+- **不要麵包屑。** 最上層頁面什麼都不放（側邊導覽已經標著現在在哪），深一層放一顆返回鍵
+  （箭頭 + 上一層的名字，sticky 在內容區頂端）。
 
 ## 顏色怎麼選
 
@@ -132,85 +135,18 @@ token 可以落在 CSS variables、Tailwind `@theme`、React Native StyleSheet �
 
 ## 元件規則
 
-寫法見 `references/component-recipes.md`，這裡只列必須遵守的判斷。
+每種元件的規則與寫法都在 `references/component-recipes.md`。**做或改下列任何一種之前，先讀它對應的那一節**：
+按鈕、後台殼（頂端列、側邊導覽）、卡片與數字面板、表格、整列可點、寬報表、輸入框、自製下拉、
+選項卡／Chip／分頁、Note、徽章與計數、ⓘ 說明、Modal 與破壞性確認、Toast 與處理中、操作回饋、空狀態、icon。
 
-- **按鈕**：收成一個 `buttonVariants({ variant, size })`，variant 只有 `default`（實心 ink）、
-  `sec`（灰色填色 `fill-solid`，hover 深一階，**不畫框**）、`ghost`（透明）、`danger`（實心紅）；
-  size `sm`／`default`／`lg`。膠囊形。**呼叫端不准自己拼樣式**。一個畫面或一個 modal 的實心主要按鈕
-  **最多一顆**；清單那一列裡的動作一律 `ghost`，不然每列都排著色塊會很吵。會導頁的用連結元件
-  （`<a>`／`<Link>` 套同一個 `buttonVariants`），不要用按鈕加 onClick。
-- **按鈕的相對位置：越重要越靠右。** 同一排的按鈕由左到右是「取消／返回 → 次要 → 主要」，
-  主要（或 danger）永遠在最右邊；頁首、卡片標題列、Modal 動作列、表單底部、工具列都一樣。
-  理由：視線由左往右讀，最後停在右邊；使用者到哪個畫面都在同一個位置找「下一步」，不用重新找。
-  - 表單送出列靠右對齊，`取消`（sec）在左、`儲存`（實心）在右。
-  - 返回、上一步、破壞性但不是本頁目的的動作（刪除這筆、登出）放左邊或另外一組，不跟主要動作擠在右邊。
-  - 手機上按鈕改成全寬直排時，主要動作在**最下面**（離拇指最近），取消在它上面；並排時照樣主要在右。
-  - 只有一顆按鈕時也靠右，不要因為只有一顆就靠左或置中（空狀態置中除外）。
-- **卡片／面板**：白色色塊、圓角 12、內距 26（手機 20）、**不畫框**、沒有陰影——靠跟 `shell`
-  底色的色差分開。`accent` 變體是 `accent-soft` 色塊 + `shadow-card`。
-- **數字面板（Tile）**：卡片樣式，上面 2xs 大寫灰標籤、中間 3xl 數值；下面的 xs 灰字只在有額外資訊時才放（比較基準、期間），不重講標籤。
-  一頁最重要的那個數字用 accent 版本。**數字面板放在頁面最上方**。
-- **表格**：放在白色面板裡，自己不畫外框；表頭 11px 大寫灰字，鋪在 `surface-muted` 色帶上
-  （不畫底線，sticky 表頭照樣是色帶）；列線只用最淡的 `border-muted`；hover 列換底色；最小寬 540，
-  寬表格在面板內橫向捲動，不讓整頁橫捲。合計列 = 上方一條 ink 線 + `accent-soft` 底 + 粗體；
-  子列 = 小一號灰字、第一欄縮排。空狀態置中「目前沒有資料」+ 一行灰字。
-- **整列可點**：整列是一個項目（點進去看詳細）時，連結掛在名稱上，用一層看不見的 `::after`
-  撐滿整列（stretched link），不要在 `<tr>` 上掛 onClick——鍵盤、右鍵開新分頁、螢幕報讀才跟一般
-  連結一樣。名稱**不寫成連結色**：整列都能點時，橘字反而讓人以為只有那幾個字可以點。
-  **純資料的表格不要套**，不然使用者會以為整列可以點。
-- **很寬的報表**（十幾二十欄）：區塊右上給一顆「放大檢視」，開**全螢幕**的試算表檢視——欄字母
-  A、B、C…、列號、格線，表頭與前幾欄、合計列凍結；有匯出時欄位順序與匯出檔一致，
-  讓欄字母兩邊對得上。
-- **輸入框**：白底細框（`border`）、圓角 6、`text-md`、內距 10×13；hover 框變深；focus 框變 `ink-3` +
-  一圈 3px 的 8% 黑光暈（不用 outline，不推動版面）；disabled 灰底灰字。
-- **下拉選單不用原生 `<select>`**：用自製的 combobox（觸發鈕跟輸入框長一樣），選單 portal 到
-  body、空間不夠就往上翻，鍵盤照 WAI-ARIA select-only combobox。
-- **選項卡（RadioCard）**：未選 = `surface-muted` 色塊；選中 = `accent-soft` 色塊。都不畫框。
-- **Chip（分段切換）**：未選 = `fill` 灰色塊灰字；選中 = 實心 ink 白字。
-- **分頁（tabs）**：一條 `fill` 灰底圓角 12 的軌道，項目圓角 6；選中的項目是白色 + `shadow-card`
-  浮起來，其他是灰字。沒有底線。項目只寫名稱，不配小字副標。分頁取代「只為了切換對象的下拉選單」。
-- **側邊導覽**：`shell` 底、**不畫右框**；群組標題 2xs 大寫灰；項目圓角 6、icon + 文字；
-  選中 `bg-ink/8` 粗體深字，其他灰字 hover `bg-ink/4`；需要處理的數量用紅色計數徽章靠右。
-  窄螢幕變成橫向捲動的一列，不藏進漢堡選單。
-- **頂端列**：`shell` 底、**不畫底線**；左 logo + 系統名稱；右上**只放頭像**（外加通知鈴，同尺寸的圓），
-  點開選單：第一格是「我是誰」（名稱一行不換行 + 身分小字），下面是動作（設定、登出）。頭像旁不加箭頭 icon。
-- **層級與導覽字串**：**不要麵包屑**。最上層頁面什麼都不放（側邊導覽已經標著現在在哪），
-  深一層放一顆返回鍵（箭頭 + 上一層的名字，sticky 在內容區頂端）。
-- **Note（行內提示）**：**沒有框**，只有底色 + 圓角 12，左上一個淡化的符號（i、!、✓）。
-  info 用不透明淺灰；warn 粉紅底、amb 黃底、ok 綠底、teal 淡橘底；必須馬上處理的用實心紅底白字。
-  說明貼在它要解釋的那個東西**附近**，不是頁面最上方。
-- **狀態徽章（Badge）**：膠囊、xs、無框，soft 底 + 同色系文字；可加一顆 currentColor 小圓點。
-  **壓在白底上的小元件不能也是白的**，不然會消失。
-- **ⓘ 說明（InfoTip）**：放在標題**旁邊**、不要塞進標題裡（否則會變成標題的可讀名稱）；桌機 hover／
-  focus 顯示、手機點擊；面板 portal 到 body 並夾在視窗內。`label` 不要跟附近按鈕同名。
-- **Modal**：背景 `ink` 38% + 3px 模糊；面板白、圓角 12、`shadow-lg`、**不畫框**，右上圓形 ✕（`fill` 灰底）；
-  ✕、點背景、Esc 都能關。動作列靠右：次要（sec）在左、主要（實心）在右。寬內容（報表）可開全螢幕版。
-- **破壞性確認**：不可復原的動作（刪除、重置、清空、撤銷權限）一律跳 Modal 確認，**不在原地展開**
-  輸入框或按鈕列——展開會推動版面，確認區跟頁面上的其他按鈕混在一起，看不出哪顆才是真的執行。
-  標題寫動作與對象（「重置 esign？」）；內文列出會失去什麼，「無法復原」放最後一句，不收進 ⓘ。
-  影響範圍大（跨專案、整個環境、沒有備份）再加**輸入確認**：輸入對象名稱或固定字才啟用確認鈕，
-  開啟時游標在輸入框、Enter 送出。動作列 `取消`（sec）在左、`確定〇〇`（danger）在右，
-  是 Modal 裡唯一的實心按鈕。執行中停用按鈕、Modal 關不掉；失敗留在 Modal 裡顯示錯誤。
-  有前置條件不能執行時（例：AI 正在跑），觸發按鈕直接停用並在旁邊說明，不要等打開 Modal 才講。
-  寫法見 `references/component-recipes.md` 的「破壞性確認」。
-- **Toast**：右下角，浮起來所以用陰影、不畫框；錯誤／警告換 soft 底色。
-- **操作回饋**：使用者做的每一個操作都要看得到結果，**沒有反應等於壞掉**，使用者會再按一次。
-  照結果出現在哪裡選一種，不要疊兩種：
-  - **就地**（結果就在按的地方）：複製 → 圖示換成 ✓、旁邊或 tooltip 寫「已複製」，約 1.5 秒後恢復，
-    不跳 toast；開關、星號、勾選 → 立刻換狀態（樂觀更新），失敗再退回並跳錯誤 toast。
-  - **Toast**（結果不在眼前）：從選單項目觸發的動作（選單會收起，就地看不到）、背景完成的儲存、
-    寄出邀請、刪除一列（能復原就在 toast 放「復原」，比確認 Modal 更好用）。
-  - **畫面本身**：導頁、Modal 關閉後列表出現新的一列——看得到變化就不用再加 toast。
-  - **等待中**：送出後超過約 300ms 才有結果的，按鈕立刻停用；要等外部系統的照下方「處理中」。
-  - **失敗一定要講**：錯誤留在原地或跳錯誤 toast，附重試；複製失敗（沒有剪貼簿權限）就說「複製失敗」
-    並把文字選取起來讓使用者手動複製。不准靜默失敗。
-  - 所有按鈕都要有按下的狀態（`active:` 深一階或 `scale-[0.97]`），回饋從手指按下的那一刻開始。
-  - 就地回饋的文字用 `aria-live="polite"` 唸出來；原生 app 的複製、開關加輕觸覺回饋。
-  寫法見 `references/component-recipes.md` 的「操作回饋」。
-- **處理中**：送出後要等外部系統完成、中途離開會出事的動作，跳一個擋住畫面的「處理中」modal，
-  提醒不要離開頁面，並攔住關閉分頁。
-- **空狀態**：置中一行次要色文字，需要的話底下一顆按鈕。
-- **icon**：heroicons v2 outline，**inline SVG**，不為了幾個圖示裝一套 icon 套件；只有設計要求的一兩處才用 solid。
+每個畫面都用得到、不用翻就該記得的：
+
+- **按鈕只用 `buttonVariants`**，呼叫端不自己拼樣式。一個畫面或一個 modal 的實心主要按鈕**最多一顆**；
+  清單列裡的動作一律 `ghost`。
+- **不用原生 `<select>`**，用自製的 combobox。
+- **不可復原的動作跳 Modal 確認**，不在原地展開輸入框或按鈕列。
+- **按鈕順序與操作回饋**照 `../../shared/interaction.md`（兩套 UI 共用）。本套的落點：toast 在右下角；
+  送出後要等外部系統、中途離開會出事的，跳擋住畫面的「處理中」modal。
 
 ## 文案與資訊密度
 
@@ -230,34 +166,9 @@ token 可以落在 CSS variables、Tailwind `@theme`、React Native StyleSheet �
 
 ## Safe area、點擊區與圖層
 
-後台也會在手機上打開，也可能被搬到 React Native；只要會跑在行動裝置上，每個畫面都要過這三件事。畫面看起來對、實際卻按不到或被系統 UI 蓋住，是最常見、也最難從截圖看出來的問題。
-
-### Safe area
-
-- **靠近上緣或下緣的東西，位置一律是「safe area inset + 版面間距」**，不能只寫固定的 `top` / `bottom`。`top: 24px` 在有動態島、瀏海的 iPhone 上會落進狀態列。
-- **用平台的 safe area 機制，不要依機型寫死數字**：
-  - Web：viewport 要有 `viewport-fit=cover`，再用 `env(safe-area-inset-*)`（見 `references/tokens.css` 的 `--safe-*`）。少了 `viewport-fit=cover`，`env()` 永遠是 0
-  - React Native / Expo：`react-native-safe-area-context` 的 `SafeAreaView` 或 `useSafeAreaInsets()`；不要用 RN 內建、只支援 iOS 的 `SafeAreaView`
-  - iOS 原生：`safeAreaLayoutGuide`；SwiftUI 的 `ignoresSafeArea()` 只給背景
-  - Android：edge-to-edge 之後用 `WindowInsets` 處理狀態列與手勢列
-- **上方**：頂列內容、返回鈕、關閉鈕、頁首動作都在 inset-top 之下。頂列的底色可以延伸到狀態列底下，內容不行。
-- **下方**：tab bar、常駐輸入框、全寬送出按鈕、底部面板的按鈕列都在 inset-bottom（home indicator）之上。tab bar 的高度是 token 高度 + inset-bottom，底色延伸到螢幕底。
-- **左右**：橫向時 inset-left / right 也要算，左右留白取 `max(gutter, inset)`。
-- **背景、底色、圖片可以滿版延伸進 safe area；可互動的東西與文字不行。**
-- **捲動內容的底部留白**＝底部固定元件的高度 + inset-bottom，捲到底時最後一項不能被 tab bar 或輸入框蓋住。
-- 鍵盤彈出也是一種 inset：常駐輸入框、表單送出鈕要跟著鍵盤上移，不能被蓋住。
-
-### 點擊區
-
-- **每個可互動的控制項，實際點擊區至少 44 × 44pt**（`--touch-target-min`）。`sm` 按鈕、✕、通知鈴這種視覺上比較小的，用透明內距補足（Web 用 padding 或擴大的偽元素；RN 用 `hitSlop` 或外層 `Pressable` 最小 44），不要為了點擊區把圖示放大。
-- 相鄰的點擊區不重疊；小圖示鈕並排時，中心距至少 44。
-- **點擊區不能壓到系統 UI**：狀態列、動態島、home indicator、Android 手勢列。貼邊的按鈕擴大點擊區時只往內擴，不往 safe area 裡擴。
-
-### 圖層
-
-- 重要的互動元件一律在裝飾層、背景層之上，層級從 `references/tokens.css` 的疊層 token 取，不要寫 `9999`。自製下拉的選單要蓋過開它的 modal（popover 高於 modal）。
-- **看得到但按不到，先查 z-index 與 stacking context**：`transform`、`opacity < 1`、`filter`、`backdrop-filter`、`position` + `z-index` 都會建立新的 stacking context，子元素的 z-index 出不了父層。
-- **看得到的元件上面不能蓋著透明或看不見的層**：全螢幕的漸層遮罩、關閉後沒卸載的 overlay、`opacity: 0` 但還在的面板。純裝飾層加 `pointer-events: none`（RN：`pointerEvents="none"`）；關閉的 overlay 要卸載，或同時設 `visibility: hidden` 與 `pointer-events: none`。
+後台也會在手機上打開，也可能被搬到 React Native；只要會跑在行動裝置上，每個畫面都要過
+`../../shared/interaction.md` 的「Safe area、點擊區與圖層」。本套的 `--safe-*` 與疊層 token 在
+`references/tokens.css`（popover 高於 modal）；`sm` 按鈕、✕、頭像的點擊區補法見 `references/component-recipes.md`。
 
 ## 交件前檢查清單
 
@@ -270,20 +181,16 @@ token 可以落在 CSS variables、Tailwind `@theme`、React Native StyleSheet �
 - [ ] 顏色是不是都從 token 拿的？頁面裡不該有色碼（`bg-[#…]`）。
 - [ ] 主色是 ink 嗎？橘色只出現在連結、eyebrow、唯一的強調色塊。照抄的資料（網址、ID）沒上色？
 - [ ] 新的區塊壓在什麼底色上？白底上的小元件不能也是白的。可以互動的東西有沒有深一階的 hover？
-- [ ] 每一排按鈕都是越重要越靠右？主要（或 danger）在最右、取消在它左邊？表單送出列靠右？
 - [ ] 這頁的實心主要按鈕是不是只有一顆、放在右上？按鈕有沒有用 `buttonVariants`？清單列裡的動作是 `ghost`？
 - [ ] 清單整列可點嗎（stretched link）？純資料表格沒有被做成可點的樣子？
 - [ ] 有沒有用到原生 `<select>`？
-- [ ] 每個按鈕、選單項目按下去都有回饋嗎？複製有「已複製」、開關立刻變、背景動作有 toast、失敗有講？按下有 active 狀態？
 - [ ] 不可復原的動作是跳 Modal 確認、不是在原地展開？確認鈕是 danger、在右邊、是唯一的實心按鈕？
 - [ ] 每一行副標、說明拿掉後使用者會看不懂嗎？不會就刪；需要的補充收進 ⓘ；金額、期限、警示、下一步都直接看得到？
 - [ ] 這頁在第幾層？最上層不放導覽字串，深一層才放返回鍵，不要加回麵包屑。
 - [ ] 字級、圓角、斷點都用 token，沒有寫死 px？數字欄有 `tabular-nums`？
 - [ ] 鍵盤走得完嗎？focus ring 看得見嗎（2px ink，offset 2）？Esc 能關掉浮層嗎？
 - [ ] 窄螢幕：表格在自己的面板裡橫捲，整頁沒有橫向捲軸？
-- [ ] 在有動態島的 iPhone（或模擬器）與有手勢列的 Android 上看過：頂端的按鈕都在狀態列下方、底部的按鈕都在 home indicator 上方？沒有寫死的 `top` / `bottom` 偏移？
-- [ ] 每個可點的東西點擊區 ≥ 44 × 44、彼此不重疊、不壓到系統 UI？
-- [ ] 每個看得到的按鈕都按得到？上面沒有透明層或沒卸載的 overlay？
+- [ ] 過了 `../../shared/interaction.md` 的交件前檢查嗎？（按鈕順序、操作回饋、safe area、點擊區、圖層）
 
 ## 換一個技術棧怎麼落地
 
@@ -295,5 +202,5 @@ token 可以落在 CSS variables、Tailwind `@theme`、React Native StyleSheet �
 - **CSS / CSS Modules**：用檔案下半部的 `:root` 版本。
 - **React Native / 行動 app**：token 變成 `theme.ts` 常數；畫面底 `shell`、卡片白色色塊、
   `borderWidth: 0`、無陰影；浮層才用 `shadowOpacity`／`elevation`；膠囊按鈕照舊；safe area、
-  44pt 點擊區與圖層見上方「Safe area、點擊區與圖層」。
+  44pt 點擊區與圖層見 `../../shared/interaction.md`。
 - **任何棧**：先把 token 定好再寫畫面。**先寫死顏色之後再抽 token，最後一定會漏。**

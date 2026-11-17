@@ -60,8 +60,8 @@
   --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", "Noto Sans TC", sans-serif;
   --font-size-display: 32px;  /* 首頁問候、單一畫面的主標 */
-  --font-size-title: 24px;    /* 區塊標題 */
-  --font-size-heading: 18px;  /* 項目標題 */
+  --font-size-title: 24px;    /* 頁標題，一頁只有一個 */
+  --font-size-heading: 18px;  /* 區塊標題、段標題、設定的分組標題 */
   --font-size-body: 16px;     /* 內文，行動端不要小於這個 */
   --font-size-small: 14px;    /* 說明、中繼資訊 */
   --font-size-caption: 13px;  /* 時間、狀態標記 */
@@ -95,7 +95,6 @@
        compact < 640 / medium 640–1023 / expanded ≥ 1024 / wide ≥ 1440 */
   --column-reading: 720px;   /* 所有內容頁；16px 下一行約 40 個中文字 */
   --column-form: 480px;      /* 表單、設定欄位 */
-  --content-max-width: var(--column-reading); /* 舊名，保留相容 */
 
   --sidebar-width: 260px;    /* expanded 以上常駐；以下變抽屜 */
   --sidebar-width-drawer: min(85vw, 320px);
@@ -119,7 +118,7 @@
   --settings-row-height: 52px;
 
   /* ── 形狀 ───────────────────────────────────────────────────
-     圓角克制。全圓角（膠囊）只給 chip、小按鈕與第三方登入按鈕（layout.md「第三方登入按鈕」） */
+     圓角克制。全圓角只給 chip、帶文字的小按鈕、只有圖示的正圓按鈕（layout.md「尺寸」）與第三方登入按鈕（layout.md「第三方登入按鈕」） */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -155,8 +154,8 @@
      只用這幾階。互動元件永遠在裝飾層之上；不要寫 9999 */
   --z-decoration: -1;  /* 背景、漸層、插圖，而且要 pointer-events: none */
   --z-sticky: 10;      /* 頂列、tab bar、常駐輸入框 */
-  --z-dropdown: 100;   /* 選單、下拉面板 */
   --z-overlay: 200;    /* 對話框、底部面板與它們的遮罩 */
+  --z-dropdown: 250;   /* 選單、下拉面板：要蓋過開它的對話框 */
   --z-toast: 300;
 }
 

@@ -1,9 +1,14 @@
 # 元件寫法
 
-規則在 `../SKILL.md`，token 在 `tokens.css`。這裡是容易寫錯的地方的參考做法（React + Tailwind v4），
+原則、顏色、字級、形狀在 `../SKILL.md`，token 在 `tokens.css`，按鈕順序與操作回饋的共通規則在
+`../../../shared/interaction.md`。這裡是每種元件必須遵守的規則與參考寫法（React + Tailwind v4），
 形狀本身跟框架無關——換棧時照著 class 對應的 CSS 值搬。
 
 ## 按鈕：一個 variants 函式，不給呼叫端拼樣式
+
+variant 只有 `default`（實心 ink）、`sec`（灰色填色，hover 深一階，**不畫框**）、`ghost`（透明）、`danger`（實心紅）；
+size `sm`／`default`／`lg`；膠囊形。**呼叫端不准自己拼樣式。** 一個畫面或一個 modal 的實心主要按鈕**最多一顆**；
+清單那一列裡的動作一律 `ghost`，不然每列都排著色塊會很吵。同一排的順序照共通規則：越重要越靠右。
 
 ```js
 const base = 'inline-flex items-center gap-2 whitespace-nowrap rounded-full text-md font-medium '
@@ -43,7 +48,14 @@ export const buttonVariants = ({ variant = 'default', size = 'default', block = 
 
 面板裡要再分一欄（左邊清單、右邊內容）時，清單那欄鋪 `surface-muted`，不畫分隔線。
 
+- **側邊導覽**：`shell` 底、不畫右框；群組標題 2xs 大寫灰；項目圓角 6、icon + 文字；選中 `bg-ink/8` 粗體深字，
+  其他灰字 hover `bg-ink/4`；需要處理的數量用紅色計數徽章靠右。窄螢幕變成橫向捲動的一列，不藏進漢堡選單。
+- **頂端列**：`shell` 底、不畫底線；左 logo + 系統名稱；右上只放頭像（外加通知鈴），寫法見下方「頂端列右上」。
+
 ## 卡片與數字面板
+
+卡片內距 26（手機 20）。數字面板：上面 2xs 大寫灰標籤、中間 3xl 數值；下面的 xs 灰字只在有額外資訊時才放
+（比較基準、期間），不重講標籤。一頁最重要的那個數字用 accent 版本。**數字面板放在頁面最上方。**
 
 ```js
 // 卡片：白色色塊、圓角 12、不畫框、沒陰影（靠跟 shell 底色的色差分開）。accent 才帶 shadow-card。
@@ -75,8 +87,10 @@ const card = {
 </section>
 ```
 
-合計列：`border-t border-ink bg-accent-soft font-semibold`；子列：`text-sm text-ink-2 [&>td:first-child]:pl-8`；
-hover 列：`hover:bg-surface-muted`。
+表頭 11px 大寫灰字，鋪在 `surface-muted` 色帶上（不畫底線，sticky 表頭照樣是色帶）；列線只用最淡的 `border-muted`；
+最小寬 540，寬表格在面板內橫向捲動，不讓整頁橫捲。
+合計列（上方一條 ink 線 + `accent-soft` 底 + 粗體）：`border-t border-ink bg-accent-soft font-semibold`；
+子列（小一號灰字、第一欄縮排）：`text-sm text-ink-2 [&>td:first-child]:pl-8`；hover 列：`hover:bg-surface-muted`。
 
 ## 整列可點（stretched link）
 
@@ -99,10 +113,14 @@ hover 列：`hover:bg-surface-muted`。
 </tr>
 ```
 
-名稱用 `text-ink` 不用連結色；焦點框畫在列的內側（負 offset），不推動版面。
+名稱用 `text-ink` 不用連結色——整列都能點時，橘字反而讓人以為只有那幾個字可以點；焦點框畫在列的內側（負 offset），不推動版面。
+**純資料的表格不要套**，不然使用者會以為整列可以點。
 代價：覆蓋層會蓋掉整列的文字選取。清單上有需要複製的字串（網址、ID）時要先想清楚。
 
 ## 寬報表的全螢幕試算表檢視
+
+十幾二十欄的報表：區塊右上給一顆「放大檢視」，開**全螢幕**的試算表檢視——欄字母 A、B、C…、列號、格線，
+表頭與前幾欄、合計列凍結；有匯出時欄位順序與匯出檔一致，讓欄字母兩邊對得上。
 
 ```jsx
 // 區塊標題列：左標題，右「放大檢視」(sec) + 「匯出」(實心)
@@ -144,6 +162,9 @@ const note = {
 </div>
 ```
 
+左上是一個淡化的符號（i、!、✓）。info 用不透明淺灰；warn 粉紅底、amb 黃底、ok 綠底、teal 淡橘底；
+必須馬上處理的用實心紅底白字。說明貼在它要解釋的那個東西**附近**，不是頁面最上方。
+
 ## 徽章與計數
 
 ```js
@@ -158,6 +179,7 @@ const badge = {
 'inline-flex h-4 min-w-4 items-center justify-center rounded-full px-0.75 bg-danger text-2xs font-semibold leading-none text-white tabular-nums'
 ```
 
+狀態徽章可加一顆 currentColor 小圓點。**壓在白底上的小元件不能也是白的**，不然會消失。
 有語意的顏色用 data 屬性或對照表對應，不要在元件裡 if/else 拼；值在型別上收斂成 union，
 打錯就編譯不過，不會安靜地變回灰色。
 
@@ -180,10 +202,12 @@ on ? 'bg-ink/8 font-semibold text-ink' : 'text-ink-2 hover:bg-ink/4 hover:text-i
     className={`shrink-0 rounded-md px-3.5 py-2 text-left transition-colors
       ${sel ? 'bg-surface shadow-card' : 'text-ink-2 hover:bg-surface/60 hover:text-ink'}`}>
     <b className="block text-sm">@handle</b>
-    <span className="block text-xs text-ink-3">副標</span>
   </button>
 </div>
 ```
+
+軌道是 `fill` 灰底、圓角 12，項目圓角 6；選中的項目是白色 + `shadow-card` 浮起來，其他是灰字，沒有底線。
+項目只寫名稱，不配小字副標。分頁取代「只為了切換對象的下拉選單」。
 
 ## 頂端列右上：只有頭像，點開是選單
 
@@ -212,12 +236,12 @@ const avatarInitial = (s) => ([...(s || '')][0] || '').toUpperCase();
 )}
 ```
 
-「我是誰」那格用 `surface-muted` 色塊跟動作分開，不畫分隔線。點外面、Esc 都要關。
-通知鈴做成跟頭像一樣大的圓。
+選單第一格是「我是誰」（名稱一行不換行 + 身分小字），用 `surface-muted` 色塊跟下面的動作（設定、登出）分開，
+不畫分隔線。點外面、Esc 都要關。頭像旁不加箭頭 icon；通知鈴做成跟頭像一樣大的圓。
 
 ## ⓘ 說明
 
-- 放在標題**旁邊**：`<div className="flex items-center gap-2"><h2>…</h2><InfoTip label="費用說明">…</InfoTip></div>`。
+- 放在標題**旁邊**、不要塞進標題裡（否則會變成標題的可讀名稱）：`<div className="flex items-center gap-2"><h2>…</h2><InfoTip label="費用說明">…</InfoTip></div>`。`label` 不要跟附近按鈕同名。
 - 桌機 hover／focus 開、手機點擊開；再點、點外面、Esc 關。
 - 面板 portal 到 `<body>`、`position: fixed`，左右夾在視窗內 12px，下方放不下就放上方。
 - 內容只在打開時才掛上，所以**金額、期限、警示、下一步不能放進去**。
@@ -234,11 +258,19 @@ const avatarInitial = (s) => ([...(s || '')][0] || '').toUpperCase();
 // 全螢幕版（寬報表）：背景不留 padding；面板 'flex h-dvh w-screen flex-col bg-surface'；內容區 'flex min-h-0 flex-1 flex-col'
 ```
 
+背景 `ink` 38% + 3px 模糊；面板白、圓角 12、`shadow-lg`、不畫框。✕、點背景、Esc 都能關。
 動作列靠右：次要（sec）在左、主要（實心）在右。
 
 ### 破壞性確認
 
-不可復原的動作一律走這個 Modal，不在原地展開輸入框。`confirmText` 只在影響範圍大時傳。
+不可復原的動作（刪除、重置、清空、撤銷權限）一律跳這個 Modal 確認，**不在原地展開**輸入框或按鈕列——
+展開會推動版面，確認區跟頁面上的其他按鈕混在一起，看不出哪顆才是真的執行。
+
+- 標題寫動作與對象（「重置 esign？」）；內文列出會失去什麼，「無法復原」放最後一句，不收進 ⓘ。
+- 影響範圍大（跨專案、整個環境、沒有備份）再加**輸入確認**（`confirmText`）：輸入對象名稱或固定字才啟用確認鈕，
+  開啟時游標在輸入框、Enter 送出。
+- 動作列 `取消`（sec）在左、`確定〇〇`（danger）在右，是 Modal 裡唯一的實心按鈕。
+- 執行中停用按鈕、Modal 關不掉；失敗留在 Modal 裡顯示錯誤。
 
 ```tsx
 function DangerConfirm({ open, title, children, actionLabel, confirmText, pending, error, onConfirm, onClose }) {
@@ -269,11 +301,18 @@ function DangerConfirm({ open, title, children, actionLabel, confirmText, pendin
 ```
 
 - 觸發按鈕本身維持 `sec`（或列裡的 `ghost`），不要是紅色實心——紅色實心留給 Modal 裡真正執行的那顆。
-- 前置條件不滿足（例：AI 正在跑）時觸發按鈕 `disabled`，旁邊一行次要色說明原因。
+- 前置條件不滿足（例：AI 正在跑）時觸發按鈕 `disabled`，旁邊一行次要色說明原因，不要等打開 Modal 才講。
+
+## Toast 與處理中
+
+- **Toast**：右下角，浮起來所以用陰影、不畫框；錯誤／警告換 soft 底色。
+- **處理中**：送出後要等外部系統完成、中途離開會出事的動作，跳一個擋住畫面的「處理中」modal，
+  提醒不要離開頁面，並攔住關閉分頁。
 
 ## 操作回饋
 
-每個操作都要有結果可看。照「結果出現在哪」選一種：就地、toast、畫面本身。不要就地 ✓ 又跳 toast。
+規則在 `../../../shared/interaction.md` 的「操作回饋」：照「結果出現在哪」選一種（就地、toast、畫面本身），
+不要就地 ✓ 又跳 toast。下面是本套的寫法。
 
 ### 複製：就地換成 ✓
 
@@ -314,10 +353,25 @@ try { await save(!prev); } catch { setValue(prev); toast.error('沒有儲存成�
 
 ## 自製下拉（取代原生 select）
 
-- 觸發鈕是 `<button role="combobox">`，吃跟輸入框同一套基底樣式。
+不用原生 `<select>`。鍵盤照 WAI-ARIA 的 select-only combobox。
+
+- 觸發鈕是 `<button role="combobox">`，吃跟輸入框同一套基底樣式（長得跟輸入框一樣）。
 - 介面跟原生 `<select>` 一樣（`<option>` 子元素、`value`、`onChange(e)`），可以直接替換。
 - 選單 portal 到 body、fixed 定位，下方空間不夠就翻到上方；z-index 用 popover（要蓋過 modal）。
 - 鍵盤：↑↓ Home End PageUp PageDown 移動，Enter／Space／Tab 選定，Esc 關，打字跳到開頭相符的選項。
+
+## 輸入框
+
+白底細框（`border`）、圓角 6、`text-md`、內距 10×13；hover 框變深；focus 框變 `ink-3` + 一圈 3px 的 8% 黑光暈
+（不用 outline，不推動版面）；disabled 灰底灰字。
+
+## 空狀態
+
+置中一行次要色文字（「目前沒有資料」）+ 一行灰字，需要的話底下一顆按鈕。
+
+## icon
+
+heroicons v2 outline，**inline SVG**，不為了幾個圖示裝一套 icon 套件；只有設計要求的一兩處才用 solid。
 
 ## 即時檢查的 debounce
 
