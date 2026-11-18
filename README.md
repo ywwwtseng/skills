@@ -250,7 +250,22 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 
 **什麼時候跑**：改了有情境的 plugin（`domain`、`impl`、`security`、`ui`、`arch`、`db`、`api`）的 SKILL.md、references、hook 之後，升版本號之前跑一次；換新模型之後也值得跑一次。「有讀 reference」那幾項是在防細則搬進 references 之後模型不去讀。
 
-`git` 沒有情境：`/git:commit`、`/git:push` 一開頭就要跑 git，而 macOS 的 `/usr/bin/git` 轉接程式要在系統暫存目錄寫快取，eval 的沙盒只准寫工作目錄，指令在呼叫模型之前就失敗（改 PATH 也沒用，情境檔不能設 PATH，沙盒也關不掉）。
+`git` 不用 `claude plugin eval`：`/git:commit`、`/git:push` 一開頭就要跑 git，而 macOS 的 `/usr/bin/git` 轉接程式要在系統暫存目錄寫快取，eval 的沙盒只准寫工作目錄，指令在呼叫模型之前就失敗（改 PATH 也沒用，情境檔不能設 PATH，沙盒也關不掉）。改用 `evals/git/run.sh`：在暫存資料夾建 repo（origin 是同一個資料夾裡的 bare repo），用 `claude -p` 跑真正的 command，再用 git 檢查結果。它不在沙盒裡、沒有人按核准，所以也會抓到 `allowed-tools` 跟內文對不上的問題。
+
+| 情境 | 檢查什麼 |
+|---|---|
+| `commit-env-template` | `/git:commit`：`.env.example` 與程式進 commit、`.env` 不進也沒被刪、trailer 寫出實際的模型 |
+| `push-stops-without-origin` | `/git:push`：沒有 origin 時不加 remote、不動 commit、有說明 |
+| `push-allows-env-template` | `/git:push`：外送的 commit 帶 `.env.example` 時照常推 |
+| `push-stops-on-env-file` | `/git:push`：外送的 commit 帶真正的 `.env` 時不推、不改寫 commit |
+| `push-rebases-onto-origin` | `/git:push`：origin 有別台推的 commit 時先 rebase 再推，origin 原有的 commit 還在、沒有 merge commit |
+
+```bash
+evals/git/run.sh                      # 全部（改了 git plugin 之後、升版本號之前跑）
+evals/git/run.sh commit-env-template  # 只跑指定的情境
+```
+
+每個情境是一次真的模型呼叫；失敗的會留下暫存資料夾，裡面的 `claude.out` 是那次的輸出。
 
 在 **repo 根目錄**執行（需要 Claude Code v2.1.269 以上）：
 
