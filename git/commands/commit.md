@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git diff --cached:*), Bash(git add:*), Bash(git commit:*), Bash(git log:*), Bash(git branch:*)
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git diff --cached:*), Bash(git add:*), Bash(git commit:*), Bash(git log:*), Bash(git branch:*), Bash(gitleaks:*)
 description: Commit all pending changes as a series of focused Conventional Commits
 ---
 

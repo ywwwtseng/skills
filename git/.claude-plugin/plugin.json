@@ -1,7 +1,7 @@
 {
   "name": "git",
   "description": "git 工作流：commit 切成多個 Conventional Commit、push 驗證後直推 base branch（日常交付）、pr 開 PR 並可合併（只給 /impl:ship 用）。",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "author": {
     "name": "ywwwtseng"
   },
