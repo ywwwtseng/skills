@@ -66,8 +66,8 @@
     {
       "name": "security",
       "source": "./security",
-      "description": "資安：audit 跑掃描器並由 Claude 分析出分級報告（只讀）、fix 照報告逐條問、修、commit 並記錄。",
-      "version": "0.5.0",
+      "description": "資安：audit 建威脅模型、跑掃描器、由 Claude 沿攻擊面分析並反證，出分級報告（只讀）、fix 照報告逐條問、修、commit 並記錄。",
+      "version": "0.6.0",
       "category": "security"
     },
     {

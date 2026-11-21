@@ -196,7 +196,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | git | [commit](git/commands/commit.md) | `/git:commit` | 把待提交內容切成多個 Conventional Commit，不推送；改完要提交時用 |
 | git | [push](git/commands/push.md) | `/git:push [base]` | 驗證閘門後直推 base branch；不走 `/impl:ship` 時的日常交付出口 |
 | git | [pr](git/commands/pr.md) | `/git:pr [--merge] [base]` | 把 feature 的 commit 搬到分支、開帶追溯表的 PR，`--merge` 時合併；只給 `/impl:ship` 用 |
-| security | [audit](security/skills/audit/SKILL.md) | `/security:audit`（僅手動執行，不會自動載入） | 跑五類掃描器再由 Claude 排除誤報、補人工檢查，輸出分級報告（不改檔）；要查弱點時用 |
+| security | [audit](security/skills/audit/SKILL.md) | `/security:audit`（僅手動執行，不會自動載入） | 先建威脅模型，跑五類掃描器，再由 Claude 沿攻擊面（含 CLI、本機 IPC、CI）人工檢查、HIGH 以上交給獨立 subagent 反證，輸出分級報告與待確認清單（不改檔、不執行專案程式碼）；可帶 quick / deep、路徑、`--diff <ref>`；要查弱點時用 |
 | security | [fix](security/skills/fix/SKILL.md) | `/security:fix`（僅手動執行，不會自動載入） | 照 audit 報告逐條問、修、commit 並把狀態寫回報告；audit 之後要修時用 |
 | docs | [tidy](docs/skills/tidy/SKILL.md) | `/docs:tidy`（僅手動執行，不會自動載入） | 替 docs/ 瘦身但不改規則語意（收合、歸檔、改引用）；文件長到拖慢 context 時用 |
 

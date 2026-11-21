@@ -1,6 +1,6 @@
 # 掃描工具
 
-所有輸出都寫到 `$OUT`（repo 外的暫存目錄，SKILL 核心規則 2）。指令語法依版本不同，Step 0 抓到的版本決定用哪一行；不確定時先跑 `<tool> --help`。
+所有輸出都寫到 `$OUT`（repo 外的暫存目錄，SKILL 核心規則 2）。指令語法依版本不同，Step 0 抓到的版本決定用哪一行；不確定時先跑 `<tool> --help`。這些工具只讀 repo 的檔案，不會執行專案自己的程式碼——這也是為什麼它們可以跑、`npm install` / build / 專案的測試不行（SKILL 核心規則 12）。
 
 ## 安裝
 
@@ -108,7 +108,16 @@ trivy image --scanners vuln,secret --format json --output $OUT/image.json <image
 | npm / pnpm / yarn / bun audit | `critical` | `high` | `moderate` | `low`、`info` |
 | Semgrep | 規則標 `CRITICAL`，或 `ERROR` 且 metadata 的 impact 與 likelihood 都是 HIGH，並經確認 | `ERROR`、規則標 `HIGH` | `WARNING`、規則標 `MEDIUM` | `INFO`、規則標 `LOW` |
 | Trivy（fs / config / image） | `CRITICAL` | `HIGH` | `MEDIUM` | `LOW`、`UNKNOWN`（註明是 UNKNOWN） |
-| Claude review | 不給（沒有工具佐證的 finding 最高 HIGH） | 信心 `高` 且可被利用 | 信心 `中`，或需要特定條件 | 防禦縱深建議 |
+| Claude review | 照下面的錨點，信心 `高` 才能給 | 照錨點；信心 `中` 最高 HIGH | 照錨點 | 照錨點 |
+
+Claude review（以及要讀程式碼才確認得了的 Semgrep finding）的嚴重度照**實際寫得出的結果**定，不照類別名稱，也不照 `review.md` 的預設值硬套：
+
+- **CRITICAL**：未登入的人能在伺服器上執行程式、讀寫整個資料庫、或接管任意帳號；外部 PR 能拿到發版或雲端權限
+- **HIGH**：完整繞過一道明確的安全控制、而且有實際後果——認證繞過、跨租戶讀寫、影響其他使用者的儲存型 XSS、登入後的遠端執行、未登入就能讓共用服務停擺
+- **MEDIUM**：真的越過了邊界，但影響範圍小、前提少見、或只影響一小群資源
+- **LOW**：洩漏不是機密的內部資訊，或要花很大力氣才有一點收穫
+
+HIGH 與 MEDIUM 的分界：結果是**完全擊穿**一道控制、做了有後果的事，還是只是**削弱**它？講不出具體損害，嚴重度就比感覺的低。`待確認`（`review.md`）不給嚴重度。
 
 調整規則（每次調整都要在 finding 寫理由）：
 
