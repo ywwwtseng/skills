@@ -39,7 +39,7 @@
       "name": "impl",
       "source": "./impl",
       "description": "實作執行：ship 無人看守總調度、plan 切 task、feature 逐個 task 實作、verify 開 PR 前稽核、fix 修缺陷、refactor 清技術債；direct-push-guard hook 在沒下指令卻要改 schema、契約或規則文件時要求確認。",
-      "version": "0.18.0",
+      "version": "0.19.0",
       "category": "productivity"
     },
     {
