@@ -182,6 +182,7 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | impl | [feature](impl/skills/feature/SKILL.md) | `/impl:feature` | 依 plan.md 逐個 task 實作、驗收、回寫狀態、commit；有 plan 要開始做時用 |
 | impl | [verify](impl/skills/verify/SKILL.md) | `/impl:verify` | 開 PR 前核對 task、規則覆蓋、不變量落點與測試誠信；feature 做完時用 |
 | impl | [fix](impl/skills/fix/SKILL.md) | `/impl:fix` | plan 之外的修復：先分流、用會紅的 regression test 釘住再修 root cause；有 bug 時用 |
+| impl | [review](impl/skills/review/SKILL.md) | `/impl:review` | 審 diff 看不出來的問題：沒被改到卻壞掉的呼叫端、真實資料量下才出事的寫法、沒有測試的高風險邏輯，每個發現寫清楚怎麼壞、怎麼修、不修會怎樣（只審不改）；推之前或審 PR 時用 |
 | impl | [refactor](impl/skills/refactor/SKILL.md) | `/impl:refactor` | 收齊技術債並在測試保護下做行為不變的改善（不准改測試）；要清技術債時用 |
 | ui | [screens](ui/skills/screens/SKILL.md) | `/ui:screens` | 把規則、模型、契約轉成畫面規格（每種狀態與錯誤碼看到什麼）；設計畫面與導航時用 |
 | ui | [preview](ui/skills/preview/SKILL.md) | `/ui:preview <畫面>`、`/ui:preview tweak <畫面>`（也會自動載入） | 接資料前把畫面做成只吃 props 的元件、截圖迭代到確認；想先看畫面或調整畫面時用 |
