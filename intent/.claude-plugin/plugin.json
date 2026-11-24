@@ -1,0 +1,17 @@
+{
+  "name": "intent",
+  "description": "對齊需求：requirement-discovery 判斷一則需求（含帶參數的 slash 指令）清不清楚，不清楚、選錯 skill 或會做收不回來的事就先複述理解等確認；requirement-discovery-gate hook 在帶參數的 slash 指令送出時提醒先做這道判斷。",
+  "version": "0.1.0",
+  "author": {
+    "name": "ywwwtseng"
+  },
+  "keywords": [
+    "intent",
+    "restate",
+    "clarify",
+    "confirm",
+    "requirements",
+    "slash-command",
+    "ambiguity"
+  ]
+}

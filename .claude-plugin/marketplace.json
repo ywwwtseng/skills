@@ -4,7 +4,7 @@
     "name": "ywwwtseng"
   },
   "metadata": {
-    "description": "ywwwtseng's personal Claude Code plugins: reusable skills for domain modeling, architecture decisions, database schema design, UI styling, and git workflow, and docs housekeeping."
+    "description": "ywwwtseng's personal Claude Code plugins: reusable skills for domain modeling, architecture decisions, database schema design, UI styling, git workflow, docs housekeeping, and confirming intent before acting."
   },
   "plugins": [
     {
@@ -75,6 +75,13 @@
       "source": "./docs",
       "description": "文件整理：tidy 替 docs/ 瘦身但不改規則語意（收合做完的、歸檔、複製內文改回引用、過時內容列清單問）。",
       "version": "0.3.0",
+      "category": "productivity"
+    },
+    {
+      "name": "intent",
+      "source": "./intent",
+      "description": "對齊需求：requirement-discovery 判斷一則需求（含帶參數的 slash 指令）清不清楚，不清楚、選錯 skill 或會做收不回來的事就先複述理解等確認；requirement-discovery-gate hook 在帶參數的 slash 指令送出時提醒先做這道判斷。",
+      "version": "0.1.0",
       "category": "productivity"
     }
   ]

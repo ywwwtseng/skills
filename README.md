@@ -113,6 +113,7 @@ docs/
 /plugin install git@skills
 /plugin install security@skills
 /plugin install docs@skills
+/plugin install intent@skills
 ```
 
 本機開發時可直接用路徑：
@@ -199,6 +200,8 @@ Plugin 依分類命名，skill 的呼叫名稱是 `/<plugin>:<skill>`。
 | security | [audit](security/skills/audit/SKILL.md) | `/security:audit`（僅手動執行，不會自動載入） | 先建威脅模型，跑五類掃描器，再由 Claude 沿攻擊面（含 CLI、本機 IPC、CI）人工檢查、HIGH 以上交給獨立 subagent 反證，輸出分級報告與待確認清單（不改檔、不執行專案程式碼）；可帶 quick / deep、路徑、`--diff <ref>`；要查弱點時用 |
 | security | [fix](security/skills/fix/SKILL.md) | `/security:fix`（僅手動執行，不會自動載入） | 照 audit 報告逐條問、修、commit 並把狀態寫回報告；audit 之後要修時用 |
 | docs | [tidy](docs/skills/tidy/SKILL.md) | `/docs:tidy`（僅手動執行，不會自動載入） | 替 docs/ 瘦身但不改規則語意（收合、歸檔、改引用）；文件長到拖慢 context 時用 |
+| intent | [requirement-discovery](intent/skills/requirement-discovery/SKILL.md) | `/intent:requirement-discovery <需求>`（也會自動載入） | 動手前判斷需求清不清楚：有兩種讀法、範圍沒講、選錯 skill、或會做收不回來的事，就先用四行複述理解等確認，清楚就直接做；不推導規則、不留檔案 |
+| intent | requirement-discovery-gate（hook） | 自動：每則訊息送出時執行，不用呼叫 | 訊息是**帶參數的 slash 指令**（`/impl:fix 登入怪怪的`）時，在那一輪加一段提醒：照那個 skill 做之前先載入 `/intent:requirement-discovery` 判斷要不要複述。只有指令沒帶參數（`/git:commit`）、`/loop`、`/intent:*`、Claude Code 內建的指令不提醒；判斷標準只寫在 skill 裡，hook 不做判斷。hook 出錯一律放行。程式與測試在 `intent/hooks/`（`node --test intent/hooks/*.test.mjs`） |
 
 ## 結構
 
